@@ -47,6 +47,7 @@ import SnakeLadderPage from "./pages/arcade/SnakeLadderPage.jsx";
 import LudoPage from "./pages/arcade/LudoPage.jsx";
 import IncomingChallengeModal from "./components/IncomingChallengeModal.jsx";
 import AppAnnouncementsGate from "./components/AppAnnouncementsGate.jsx";
+import InstallAppPrompt from "./components/InstallAppPrompt.jsx";
 import { api } from "./lib/api.js";
 
 // Pages that render "bare" — no TopBar, SideNav, RightRail or BottomNav —
@@ -145,6 +146,7 @@ export default function App() {
       <div className="app-bare-shell">
         <main className="app-bare-main">{routes}</main>
         <IncomingChallengeModal />
+        <InstallAppPrompt />
       </div>
     );
   }
@@ -160,6 +162,7 @@ export default function App() {
       <BottomNav />
       <IncomingChallengeModal />
       <AppAnnouncementsGate />
+      <InstallAppPrompt />
     </div>
   );
 }

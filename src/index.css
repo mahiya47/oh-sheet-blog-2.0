@@ -1875,6 +1875,12 @@ ul {
     top: 90px;
     align-self: start;
     height: fit-content;
+    /* When the rail's own content (suggestions + trending + arcade
+       champions) is taller than the space below the sticky offset, let
+       it scroll internally instead of just sitting pinned — without
+       this, anything past the bottom of the viewport was reachable only
+       by scrolling the entire feed to its end, since a sticky element
+       doesn't release until its container does. */
     max-height: calc(100vh - 100px);
     overflow-y: auto;
     scrollbar-width: thin;
@@ -5248,6 +5254,16 @@ a.app-auth-logo-badge:hover {
   flex-direction: column;
   gap: 14px;
   margin-bottom: 18px;
+}
+.app-install-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 14px 0 18px;
+  padding-left: 22px;
+}
+.app-install-steps li {
+  line-height: 1.4;
 }
 .app-whatsnew-item {
   display: flex;
