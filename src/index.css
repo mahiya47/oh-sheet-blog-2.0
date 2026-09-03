@@ -1875,6 +1875,9 @@ ul {
     top: 90px;
     align-self: start;
     height: fit-content;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+    scrollbar-width: thin;
   }
 }
 
