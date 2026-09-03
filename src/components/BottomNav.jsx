@@ -10,7 +10,17 @@ export default function BottomNav() {
 
   return (
     <nav className="app-bottomnav">
-      <NavLink to="/" end className={linkClass}>
+      <NavLink
+        to="/"
+        end
+        className={linkClass}
+        // Tapping Home while already on the feed (scrolled down, or
+        // mid-scroll) doesn't trigger a route change — NavLink alone does
+        // nothing in that case — so scroll to top explicitly too. Smooth
+        // scrolling still feels instant over a short distance and reads
+        // better than a hard jump over a long one.
+        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+      >
         <HomeIcon />
         <span>Home</span>
       </NavLink>

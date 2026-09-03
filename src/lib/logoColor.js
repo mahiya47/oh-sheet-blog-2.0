@@ -1,18 +1,9 @@
-// A random light color for the logo badge, picked once per page load —
-// reload the site and you get a different one. Also used to build the
-// favicon so the browser tab matches the badge in the top bar.
-const PALETTE = [
-  "#a3e6a1", // green
-  "#f5c945", // yellow
-  "#f6a8cd", // pink
-  "#a3d8f2", // blue
-  "#f5b97a", // orange
-  "#cdb3f2", // purple
-  "#8fe3d0", // mint
-  "#f2a6a6", // coral
-];
-
-export const logoColor = PALETTE[Math.floor(Math.random() * PALETTE.length)];
+// The logo badge's color — a fixed lavender, matching the favicon,
+// manifest theme color, and app icons. Used to be a random pick from a
+// palette (which included a yellow close enough to Snapchat's ghost to
+// get mistaken for it); a single settled color reads as this app's own
+// mark instead.
+export const logoColor = "#c4b5fd";
 
 export function buildFaviconHref(color) {
   const svg =
