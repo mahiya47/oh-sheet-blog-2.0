@@ -24,14 +24,19 @@ export function AuthProvider({ children }) {
       setUser(me);
       setCachedUser(me);
     } catch (err) {
-      // Only a real auth failure (expired/invalid/revoked token — the
-      // request() helper sets `.status` from the response) should log
-      // someone out. A network failure (offline) has no `.status` at all —
-      // treating that the same way would force a logged-out shell every
-      // time the offline-cached app is reopened with no connection,
-      // defeating the point of caching a signed-in feed for offline use.
-      // The cached user hydrated above (if any) just stays as-is.
-      if (err.status) {
+      // Only a real auth failure (expired/invalid/revoked token — 401/403
+      // from the backend, via the `.status` the request() helper sets)
+      // should log someone out. Anything else with a status — a 429 rate
+      // limit, a 500/502/503 while the server's restarting — is a
+      // transient failure, not proof the token is bad, and logging out
+      // over it would boot someone off their own account for no reason.
+      // A network failure (offline) has no `.status` at all and is
+      // skipped the same way — otherwise the offline-cached app would
+      // force a logged-out shell every time it's reopened with no
+      // connection, defeating the point of caching a signed-in feed for
+      // offline use. The cached user hydrated above (if any) just stays
+      // as-is in every one of these cases.
+      if (err.status === 401 || err.status === 403) {
         setToken(null);
         setUser(null);
         setCachedUser(null);
