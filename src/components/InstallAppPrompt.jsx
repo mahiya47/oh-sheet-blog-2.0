@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import { usePwaInstall } from "../context/PwaInstallContext.jsx";
 
 // Device-level (not per-account — installing is a browser/device thing,
-// not tied to who's logged in) "don't ask again" flag, so this only ever
-// interrupts a phone visitor once.
-const DISMISS_KEY = "ohsheet-install-prompt-dismissed";
+// not tied to who's logged in) "last seen" timestamp — this keeps coming
+// back once every 24h for as long as the app isn't installed, rather than
+// being dismissed for good after one "Got it".
+const LAST_SHOWN_KEY = "ohsheet-install-prompt-last-shown";
+const REPROMPT_AFTER_MS = 24 * 60 * 60 * 1000;
 // Give the browser's own `beforeinstallprompt` event (Android/Chrome —
 // see PwaInstallContext) a moment to fire before deciding what to show.
 // iOS Safari never fires it at all, so on iOS this delay is really just
@@ -39,13 +41,14 @@ export default function InstallAppPrompt() {
   useEffect(() => {
     if (installed) return;
     if (!isMobileDevice()) return;
-    if (localStorage.getItem(DISMISS_KEY) === "1") return;
+    const lastShown = Number(localStorage.getItem(LAST_SHOWN_KEY)) || 0;
+    if (Date.now() - lastShown < REPROMPT_AFTER_MS) return;
     const t = setTimeout(() => setVisible(true), SHOW_DELAY_MS);
     return () => clearTimeout(t);
   }, [installed]);
 
   function dismiss() {
-    localStorage.setItem(DISMISS_KEY, "1");
+    localStorage.setItem(LAST_SHOWN_KEY, String(Date.now()));
     setVisible(false);
   }
 
