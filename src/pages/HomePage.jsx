@@ -7,7 +7,7 @@ import { useAuth } from "../context/AuthContext.jsx";
 import { api } from "../lib/api.js";
 
 export default function HomePage() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
   const [posts, setPosts] = useState([]);
@@ -15,6 +15,14 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState("");
+
+  // Signed-out visitors land on /login instead of the public feed — same
+  // "wait for the auth check, then redirect" pattern as CreatePage.
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate("/login", { replace: true });
+    }
+  }, [authLoading, user, navigate]);
 
   useEffect(() => {
     let cancelled = false;
@@ -54,6 +62,8 @@ export default function HomePage() {
   function handleDeleted(id) {
     setPosts((p) => p.filter((post) => post.id !== id));
   }
+
+  if (authLoading || !user) return null;
 
   return (
     <div className="app-page">
