@@ -1,0 +1,166 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { NotificationsSkeleton } from "../components/Skeletons.jsx";
+import { useAuth } from "../context/AuthContext.jsx";
+import { useNotifications } from "../context/NotificationContext.jsx";
+import { api } from "../lib/api.js";
+import { relativeTime } from "../lib/formatTime.js";
+
+const VERBS = {
+  follow: "started following you",
+  upvote: "upvoted your sheet",
+  comment: "commented on your sheet",
+  reply: "replied to your comment",
+  tagged: "tagged you in a sheet",
+  mention: "mentioned you",
+  dm: "sent you a message",
+  report_reply: "replied to your report",
+  support_reply: "replied to your support ticket",
+};
+
+// These are sent by the admin panel but should never show the admin's own
+// name to the recipient — they're presented as coming from "System".
+const SYSTEM_TYPES = new Set(["report_reply", "support_reply"]);
+
+export default function NotificationsPage() {
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+  const { refresh } = useNotifications();
+  const [notifications, setNotifications] = useState(null);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate("/login", { state: { from: "/notifications" } });
+    }
+  }, [loading, user, navigate]);
+
+  useEffect(() => {
+    if (!user) return;
+    api
+      .getNotifications()
+      .then(setNotifications)
+      .catch((err) => setError(err.message));
+  }, [user]);
+
+  async function handleMarkAllRead() {
+    try {
+      await api.markAllNotificationsRead();
+      setNotifications((list) => list.map((n) => ({ ...n, read: true })));
+      refresh();
+    } catch (err) {
+      setError(err.message || "Couldn't mark as read");
+    }
+  }
+
+  async function handleOpen(n) {
+    if (!n.read) {
+      try {
+        await api.markNotificationRead(n.id);
+        setNotifications((list) => list.map((x) => (x.id === n.id ? { ...x, read: true } : x)));
+        refresh();
+      } catch {
+        // Not critical if this fails silently — still let them navigate.
+      }
+    }
+    if (SYSTEM_TYPES.has(n.type) || !n.actor?.username) return;
+    // A DM notification should open the conversation itself, not the
+    // sender's profile — everything else still goes to their profile.
+    if (n.type === "dm") navigate(`/messages/${n.actor.username}`);
+    else navigate(`/profile/${n.actor.username}`);
+  }
+
+  async function handleRemove(e, id) {
+    e.stopPropagation();
+    const prev = notifications;
+    setNotifications((list) => list.filter((n) => n.id !== id));
+    try {
+      await api.deleteNotification(id);
+    } catch (err) {
+      setNotifications(prev);
+      setError(err.message || "Couldn't remove notification");
+    }
+  }
+
+  if (!user) return null;
+
+  const hasUnread = !!notifications?.some((n) => !n.read);
+
+  return (
+    <div className="app-page">
+      <div className="app-notif-head">
+        <h2 className="app-section-title">Notifications</h2>
+        {hasUnread && (
+          <button type="button" className="app-notif-markall" onClick={handleMarkAllRead}>
+            Mark all read
+          </button>
+        )}
+      </div>
+
+      {error && <p className="app-auth-error">{error}</p>}
+
+      {notifications === null ? (
+        <NotificationsSkeleton />
+      ) : notifications.length === 0 ? (
+        <p className="app-empty">
+          Nothing yet — when someone follows you, upvotes, comments, replies, or tags you in a
+          sheet, it'll show up here.
+        </p>
+      ) : (
+        <ul className="app-notif-list">
+          {notifications.map((n) => {
+            const isSystem = SYSTEM_TYPES.has(n.type);
+            const name = isSystem ? "System" : n.actor?.name || n.actor?.username || "Someone";
+            return (
+              <li key={n.id} className="app-notif-item-row">
+                <button
+                  type="button"
+                  className={"app-notif-item" + (n.read ? "" : " is-unread")}
+                  onClick={() => handleOpen(n)}
+                >
+                  <span className={"app-notif-dp" + (isSystem ? " app-notif-dp-system" : "")}>
+                    {isSystem ? (
+                      <ShieldIcon />
+                    ) : n.actor?.avatarUrl ? (
+                      <img src={n.actor.avatarUrl} alt="" />
+                    ) : (
+                      name.charAt(0).toUpperCase()
+                    )}
+                  </span>
+                  <span className="app-notif-text">
+                    <strong>{name}</strong> {VERBS[n.type] || "did something"}
+                    {n.postSnippet && <span className="app-notif-snippet"> — "{n.postSnippet}"</span>}
+                    {isSystem && n.message && <span className="app-notif-snippet"> — "{n.message}"</span>}
+                  </span>
+                  <span className="app-notif-time">{relativeTime(n.createdAt)}</span>
+                </button>
+                <button
+                  type="button"
+                  className="app-notif-remove"
+                  aria-label="Remove notification"
+                  onClick={(e) => handleRemove(e, n.id)}
+                >
+                  ×
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function ShieldIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
