@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useReducer } from "react";
 import ArcadeGameHeader from "../../components/ArcadeGameHeader.jsx";
 import ScoreModal from "../../components/ScoreModal.jsx";
 import { getGameMeta, formatArcadeScore } from "../../lib/arcadeGames.js";
@@ -7,8 +7,8 @@ import { useArcadeScore } from "../../lib/useArcadeScore.js";
 const GAME = getGameMeta("tetris");
 const COLS = 10;
 const ROWS = 20;
-const CELL = 30;
 const LINE_SCORES = [0, 100, 300, 500, 800];
+const INITIAL_DROP_MS = 700;
 
 const SHAPES = {
   I: { cells: [[0, 1], [1, 1], [2, 1], [3, 1]], color: "#a3d8f2" },
@@ -38,7 +38,6 @@ function makeEmptyGrid() {
 }
 
 export default function TetrisPage() {
-  const canvasRef = useRef(null);
   const { best, submit } = useArcadeScore(GAME.slug);
   const [showBoard, setShowBoard] = useState(false);
   const [score, setScore] = useState(0);
@@ -46,7 +45,13 @@ export default function TetrisPage() {
   const [gameOver, setGameOver] = useState(false);
   const [result, setResult] = useState(null);
   const [showLb, setShowLb] = useState(false);
+  const [dropMs, setDropMs] = useState(INITIAL_DROP_MS);
 
+  // Gravity moves the board one cell at a time, not pixel-by-pixel, so a
+  // plain re-render on every change (via this bump counter) is all the
+  // "smoothness" a Tetris board needs — a DOM grid of colored cells stays
+  // crisp at any screen density, unlike a canvas bitmap stretched with CSS.
+  const [, bump] = useReducer((x) => x + 1, 0);
   const state = useRef(null);
 
   const collides = useCallback((grid, piece, ox, oy) => {
@@ -64,15 +69,15 @@ export default function TetrisPage() {
       grid: makeEmptyGrid(),
       piece: newPiece(),
       pos: { x: 3, y: -1 },
-      dropInterval: 700,
-      acc: 0,
-      lastTs: 0,
+      dropInterval: INITIAL_DROP_MS,
+      lines: 0,
       over: false,
     };
     setScore(0);
     setLines(0);
     setGameOver(false);
     setResult(null);
+    setDropMs(INITIAL_DROP_MS);
   }, []);
 
   const lockPiece = useCallback(() => {
@@ -95,11 +100,11 @@ export default function TetrisPage() {
     }
     if (cleared) {
       setScore((sc) => sc + LINE_SCORES[cleared]);
-      setLines((ln) => {
-        const next = ln + cleared;
-        s.dropInterval = Math.max(120, 700 - Math.floor(next / 5) * 50);
-        return next;
-      });
+      s.lines += cleared;
+      setLines(s.lines);
+      const nextInterval = Math.max(120, INITIAL_DROP_MS - Math.floor(s.lines / 5) * 50);
+      s.dropInterval = nextInterval;
+      setDropMs(nextInterval);
     }
 
     s.piece = newPiece();
@@ -115,6 +120,7 @@ export default function TetrisPage() {
       const s = state.current;
       if (!s || s.over) return;
       if (!collides(s.grid, s.piece, s.pos.x + dx, s.pos.y)) s.pos.x += dx;
+      bump();
     },
     [collides],
   );
@@ -154,6 +160,7 @@ export default function TetrisPage() {
       // rotating without the shift rather than refusing the rotation.
       s.piece = rotated;
     }
+    bump();
   }, [collides]);
 
   const softDrop = useCallback(() => {
@@ -161,10 +168,10 @@ export default function TetrisPage() {
     if (!s || s.over) return;
     if (!collides(s.grid, s.piece, s.pos.x, s.pos.y + 1)) {
       s.pos.y += 1;
-      s.acc = 0;
     } else {
       lockPiece();
     }
+    bump();
   }, [collides, lockPiece]);
 
   const hardDrop = useCallback(() => {
@@ -172,6 +179,7 @@ export default function TetrisPage() {
     if (!s || s.over) return;
     while (!collides(s.grid, s.piece, s.pos.x, s.pos.y + 1)) s.pos.y += 1;
     lockPiece();
+    bump();
   }, [collides, lockPiece]);
 
   useEffect(() => {
@@ -189,52 +197,45 @@ export default function TetrisPage() {
     return () => window.removeEventListener("keydown", onKey);
   }, [move, softDrop, rotate, hardDrop]);
 
+  // Resets the board the moment "Start game" is pressed.
   useEffect(() => {
     if (!showBoard) return;
     resetState();
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-    let raf;
+    bump();
+  }, [showBoard, resetState]);
 
-    function tick(ts) {
+  // Gravity — one cell per tick, re-created whenever the speed changes
+  // (every 5 lines). Reading everything through the `state` ref means this
+  // never has a stale-closure problem, unlike capturing piece/pos directly.
+  useEffect(() => {
+    if (!showBoard) return;
+    const id = setInterval(() => {
       const s = state.current;
-      if (!s.over) {
-        if (!s.lastTs) s.lastTs = ts;
-        s.acc += ts - s.lastTs;
-        s.lastTs = ts;
-        if (s.acc >= s.dropInterval) {
-          s.acc = 0;
-          if (!collides(s.grid, s.piece, s.pos.x, s.pos.y + 1)) s.pos.y += 1;
-          else lockPiece();
-        }
+      if (!s || s.over) return;
+      if (!collides(s.grid, s.piece, s.pos.x, s.pos.y + 1)) {
+        s.pos.y += 1;
+      } else {
+        lockPiece();
       }
-
-      ctx.fillStyle = "#f2e8d8";
-      ctx.fillRect(0, 0, COLS * CELL, ROWS * CELL);
-      for (let y = 0; y < ROWS; y++) {
-        for (let x = 0; x < COLS; x++) {
-          if (s.grid[y][x]) {
-            ctx.fillStyle = s.grid[y][x];
-            ctx.fillRect(x * CELL + 1, y * CELL + 1, CELL - 2, CELL - 2);
-          }
-        }
-      }
-      ctx.fillStyle = s.piece.color;
-      s.piece.cells.forEach(({ x, y }) => {
-        const gy = y + s.pos.y;
-        if (gy >= 0) ctx.fillRect((x + s.pos.x) * CELL + 1, gy * CELL + 1, CELL - 2, CELL - 2);
-      });
-
-      if (!s.over) raf = requestAnimationFrame(tick);
-    }
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showBoard]);
+      bump();
+    }, dropMs);
+    return () => clearInterval(id);
+  }, [showBoard, dropMs, collides, lockPiece]);
 
   useEffect(() => {
     if (gameOver) submit(score).then(setResult);
   }, [gameOver]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const s = state.current;
+  let displayGrid = null;
+  if (showBoard && s) {
+    displayGrid = s.grid.map((row) => row.slice());
+    s.piece.cells.forEach(({ x, y }) => {
+      const gy = y + s.pos.y;
+      const gx = x + s.pos.x;
+      if (gy >= 0 && gy < ROWS && gx >= 0 && gx < COLS) displayGrid[gy][gx] = s.piece.color;
+    });
+  }
 
   return (
     <div className="app-page app-arcade-page">
@@ -258,12 +259,18 @@ export default function TetrisPage() {
                 <span className="app-arcade-stat-pill">Best: {formatArcadeScore(best, GAME.unit)}</span>
               )}
             </div>
-            <canvas
-              ref={canvasRef}
-              width={COLS * CELL}
-              height={ROWS * CELL}
-              style={{ height: "55.2vh" }}
-            />
+            <div className="app-tetris-grid" style={{ height: "55.2vh" }}>
+              {displayGrid &&
+                displayGrid.flatMap((row, y) =>
+                  row.map((color, x) => (
+                    <div
+                      key={`${x}-${y}`}
+                      className="app-tetris-cell"
+                      style={{ background: color || "transparent" }}
+                    />
+                  )),
+                )}
+            </div>
             {gameOver && (
               <div className="app-arcade-overlay-msg">
                 <h3>Game over — {score} pts</h3>

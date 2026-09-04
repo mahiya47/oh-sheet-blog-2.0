@@ -171,16 +171,7 @@ export default function MinesweeperPage() {
                 <span className="app-arcade-stat-pill">Best: {formatArcadeScore(best, GAME.unit)}</span>
               )}
             </div>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: `repeat(${COLS}, 28px)`,
-                gap: "2px",
-                background: "var(--app-border)",
-                padding: "2px",
-                borderRadius: "8px",
-              }}
-            >
+            <div className="app-mine-grid" style={{ gridTemplateColumns: `repeat(${COLS}, 28px)` }}>
               {(cells || Array.from({ length: ROWS * COLS }, () => ({ revealed: false, flagged: false }))).map(
                 (cell, i) => (
                   <button
@@ -189,17 +180,12 @@ export default function MinesweeperPage() {
                     onClick={() => handleReveal(i)}
                     onContextMenu={(e) => handleFlag(e, i)}
                     disabled={status !== "playing"}
-                    style={{
-                      width: 28,
-                      height: 28,
-                      fontSize: "0.75rem",
-                      fontWeight: 800,
-                      border: "none",
-                      borderRadius: 3,
-                      cursor: status === "playing" ? "pointer" : "default",
-                      background: cell.revealed ? "var(--app-bg)" : "var(--app-surface)",
-                      color: NUMBER_COLORS[cell.adjacent] || "var(--app-ink)",
-                    }}
+                    className={
+                      "app-mine-cell" +
+                      (cell.revealed ? " is-revealed" : "") +
+                      (cell.revealed && cell.mine ? " is-mine" : "")
+                    }
+                    style={{ color: NUMBER_COLORS[cell.adjacent] || "var(--app-ink)" }}
                   >
                     {cell.revealed ? (cell.mine ? "💣" : cell.adjacent || "") : cell.flagged ? "🚩" : ""}
                   </button>
@@ -209,7 +195,7 @@ export default function MinesweeperPage() {
 
             <button
               type="button"
-              className="app-arcade-btn"
+              className={"app-arcade-btn app-mine-flagmode-btn" + (flagMode ? " is-on" : "")}
               onClick={() => setFlagMode((v) => !v)}
               disabled={status !== "playing"}
             >

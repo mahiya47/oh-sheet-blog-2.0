@@ -4139,6 +4139,68 @@ a.app-auth-logo-badge:hover {
   box-shadow: none;
 }
 
+/* ---- Tetris board (DOM grid, not canvas -- stays crisp on any screen
+   density, matching the old app look instead of a blurry stretched
+   canvas bitmap). ---- */
+.app-tetris-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  grid-template-rows: repeat(20, 1fr);
+  gap: 1px;
+  width: auto;
+  aspect-ratio: 10 / 20;
+  background: var(--app-border);
+  border: 2px solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+.app-tetris-cell {
+  background: var(--app-bg);
+  border-radius: 1px;
+}
+
+/* ---- Minesweeper (classic 3D-beveled look, ported from the old app) ---- */
+.app-mine-grid {
+  display: grid;
+  gap: 1px;
+  background: #808080;
+  border: 3px solid;
+  border-color: #808080 #ffffff #ffffff #808080;
+  border-radius: 3px;
+  padding: 4px;
+}
+.app-mine-cell {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  background: #c0c0c0;
+  border: none;
+  box-shadow: inset 3px 3px 0 #ffffff, inset -3px -3px 0 #808080;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.app-mine-cell:active:not(:disabled) {
+  box-shadow: inset 1px 1px 0 #808080;
+}
+.app-mine-cell.is-revealed {
+  background: #a8a8a8;
+  box-shadow: inset 1px 1px 0 #808080;
+  cursor: default;
+}
+.app-mine-cell.is-mine {
+  background: #f44336;
+}
+.app-mine-flagmode-btn.is-on {
+  background: var(--app-green);
+  color: #fff;
+}
+
 @media (min-width: 760px) {
   .app-arcade-grid {
     grid-template-columns: repeat(2, 1fr);
