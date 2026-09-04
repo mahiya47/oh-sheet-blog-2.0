@@ -4108,6 +4108,37 @@ a.app-auth-logo-badge:hover {
 .app-arcade-dpad-down { grid-column: 2; grid-row: 2; }
 .app-arcade-dpad-right { grid-column: 3; grid-row: 2; }
 
+/* Tetris's own control row — rotate on the left, the three move buttons
+   grouped on the right, all in one line (no separate hard-drop button;
+   that's still reachable from a keyboard via Space). */
+.app-arcade-tetris-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 260px;
+}
+.app-arcade-tetris-moves {
+  display: flex;
+  gap: 4px;
+}
+.app-arcade-tetris-controls button {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border: var(--app-border-w) solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: var(--app-surface);
+  color: var(--app-ink);
+  font-size: 1.2rem;
+  box-shadow: var(--app-shadow);
+  cursor: pointer;
+}
+.app-arcade-tetris-controls button:active {
+  transform: translate(2px, 2px);
+  box-shadow: none;
+}
+
 @media (min-width: 760px) {
   .app-arcade-grid {
     grid-template-columns: repeat(2, 1fr);

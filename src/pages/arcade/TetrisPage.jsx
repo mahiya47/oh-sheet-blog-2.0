@@ -7,7 +7,7 @@ import { useArcadeScore } from "../../lib/useArcadeScore.js";
 const GAME = getGameMeta("tetris");
 const COLS = 10;
 const ROWS = 20;
-const CELL = 25;
+const CELL = 30;
 const LINE_SCORES = [0, 100, 300, 500, 800];
 
 const SHAPES = {
@@ -262,7 +262,7 @@ export default function TetrisPage() {
               ref={canvasRef}
               width={COLS * CELL}
               height={ROWS * CELL}
-              style={{ height: "46vh" }}
+              style={{ height: "55.2vh" }}
             />
             {gameOver && (
               <div className="app-arcade-overlay-msg">
@@ -273,15 +273,14 @@ export default function TetrisPage() {
                 </button>
               </div>
             )}
-            <div className="app-arcade-dpad">
-              <button type="button" className="app-arcade-dpad-up" onClick={rotate} aria-label="Rotate">⟳</button>
-              <button type="button" className="app-arcade-dpad-left" onClick={() => move(-1)} aria-label="Left">←</button>
-              <button type="button" className="app-arcade-dpad-down" onClick={softDrop} aria-label="Soft drop">↓</button>
-              <button type="button" className="app-arcade-dpad-right" onClick={() => move(1)} aria-label="Right">→</button>
+            <div className="app-arcade-tetris-controls">
+              <button type="button" onClick={rotate} aria-label="Rotate">⟳</button>
+              <div className="app-arcade-tetris-moves">
+                <button type="button" onClick={() => move(-1)} aria-label="Left">←</button>
+                <button type="button" onClick={softDrop} aria-label="Soft drop">↓</button>
+                <button type="button" onClick={() => move(1)} aria-label="Right">→</button>
+              </div>
             </div>
-            <button type="button" className="app-arcade-btn" onClick={hardDrop}>
-              Hard drop
-            </button>
           </>
         )}
       </div>
