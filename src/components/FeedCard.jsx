@@ -297,6 +297,7 @@ export default function FeedCard({ post, onDeleted, initiallyExpanded = false })
 
   async function handleToggleFollow(e) {
     stop(e);
+    setMenuOpen(false);
     if (!requireAuth()) return;
     const next = !following;
     setFollowing(next);
@@ -538,19 +539,13 @@ export default function FeedCard({ post, onDeleted, initiallyExpanded = false })
           {relativeTime(post.createdAt)}
         </Link>
 
-        {!isOwnPost && (
-          <button
-            type="button"
-            className={"app-card-follow" + (following ? " is-following" : "")}
-            onClick={handleToggleFollow}
-          >
-            {following ? "Following" : "Follow"}
-          </button>
-        )}
         <div className="app-card-more-wrap" ref={menuRef}>
           <button
             type="button"
-            className="app-card-more"
+            className={
+              "app-card-more" +
+              (!isOwnPost ? (following ? " is-following" : " is-not-following") : "")
+            }
             aria-label="More post options"
             onClick={(e) => {
               stop(e);
@@ -571,6 +566,11 @@ export default function FeedCard({ post, onDeleted, initiallyExpanded = false })
               >
                 Visit profile
               </button>
+              {!isOwnPost && (
+                <button type="button" onClick={handleToggleFollow}>
+                  {following ? "Unfollow" : "Follow"}
+                </button>
+              )}
               {isOwnPost ? (
                 <>
                   <button

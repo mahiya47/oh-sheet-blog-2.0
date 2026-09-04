@@ -661,7 +661,7 @@ ul {
   position: relative;
   border: var(--app-border-w) solid var(--app-border);
   border-radius: var(--app-radius-lg);
-  padding: 30px 10px 10px;
+  padding: 26px 6px 6px;
   box-shadow: var(--app-shadow-lg);
   cursor: pointer;
 }
@@ -749,6 +749,17 @@ ul {
   justify-content: center;
   cursor: pointer;
 }
+/* Doubles as the follow-status indicator now that Follow/Unfollow moved
+   into this menu — green once you follow them, red until you do. */
+.app-card-more.is-following {
+  background: var(--app-green);
+  border-color: var(--app-green);
+}
+.app-card-more.is-not-following {
+  background: rgba(192, 57, 43, 0.25);
+  border-color: #c0392b;
+  color: #c0392b;
+}
 .app-card-more svg {
   width: 16px;
   height: 16px;
@@ -832,17 +843,17 @@ ul {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 10px;
+  gap: 6px;
+  margin-top: 8px;
 }
 .app-vote-group {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   background: var(--app-surface);
   border: 2px solid var(--app-border);
   border-radius: 999px;
-  padding: 3px 6px;
+  padding: 2px 4px;
 }
 .app-vote-btn {
   width: 24px;
@@ -871,7 +882,7 @@ ul {
   cursor: default;
 }
 .app-vote-score {
-  min-width: 20px;
+  min-width: 14px;
   text-align: center;
   font-weight: 700;
   font-size: 0.85rem;
@@ -879,11 +890,11 @@ ul {
 .app-action-btn {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   border: 2px solid var(--app-border);
   background: var(--app-surface);
   border-radius: 999px;
-  padding: 5px 10px;
+  padding: 4px 8px;
   font-weight: 700;
   font-size: 0.78rem;
   cursor: pointer;
@@ -2679,8 +2690,8 @@ a.app-auth-logo-badge:hover {
 
 /* Bordered content-box treatment applied to every post's own text/media. */
 .app-card-content-box {
-  margin-top: 6px;
-  padding: 6px;
+  margin-top: 4px;
+  padding: 4px;
   border: 2px solid rgba(28, 24, 16, 0.2);
   border-radius: var(--app-radius-sm);
   background: rgba(255, 255, 255, 0.5);
@@ -2690,7 +2701,7 @@ a.app-auth-logo-badge:hover {
   max-width: 100%;
 }
 .app-card-content-box .app-card-media {
-  margin-top: 10px;
+  margin-top: 6px;
 }
 
 /* ---- Destructive menu item (Delete post) ---- */
@@ -2801,7 +2812,7 @@ a.app-auth-logo-badge:hover {
 
 /* ---- Post media (image/video) ---- */
 .app-card-media {
-  margin-top: 8px;
+  margin-top: 6px;
   border-radius: var(--app-radius-sm);
   overflow: hidden;
   border: var(--app-border-w) solid var(--app-border);
@@ -2824,7 +2835,7 @@ a.app-auth-logo-badge:hover {
 /* ---- Multi-image carousel (up to 4 images per post) ---- */
 .app-carousel {
   position: relative;
-  margin-top: 12px;
+  margin-top: 6px;
   border-radius: var(--app-radius-sm);
   overflow: hidden;
   border: var(--app-border-w) solid var(--app-border);
