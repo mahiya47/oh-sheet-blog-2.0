@@ -661,7 +661,7 @@ ul {
   position: relative;
   border: var(--app-border-w) solid var(--app-border);
   border-radius: var(--app-radius-lg);
-  padding: 34px 18px 18px;
+  padding: 30px 10px 10px;
   box-shadow: var(--app-shadow-lg);
   cursor: pointer;
 }
@@ -684,7 +684,7 @@ ul {
 .app-card-tab {
   position: absolute;
   top: 0;
-  left: 18px;
+  left: 12px;
   transform: translateY(-55%);
   display: flex;
   align-items: center;
@@ -832,8 +832,8 @@ ul {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 16px;
+  gap: 8px;
+  margin-top: 10px;
 }
 .app-vote-group {
   display: flex;
@@ -883,7 +883,7 @@ ul {
   border: 2px solid var(--app-border);
   background: var(--app-surface);
   border-radius: 999px;
-  padding: 5px 11px;
+  padding: 5px 10px;
   font-weight: 700;
   font-size: 0.78rem;
   cursor: pointer;
@@ -2679,8 +2679,8 @@ a.app-auth-logo-badge:hover {
 
 /* Bordered content-box treatment applied to every post's own text/media. */
 .app-card-content-box {
-  margin-top: 8px;
-  padding: 10px 12px;
+  margin-top: 6px;
+  padding: 6px;
   border: 2px solid rgba(28, 24, 16, 0.2);
   border-radius: var(--app-radius-sm);
   background: rgba(255, 255, 255, 0.5);
@@ -2801,7 +2801,7 @@ a.app-auth-logo-badge:hover {
 
 /* ---- Post media (image/video) ---- */
 .app-card-media {
-  margin-top: 12px;
+  margin-top: 8px;
   border-radius: var(--app-radius-sm);
   overflow: hidden;
   border: var(--app-border-w) solid var(--app-border);

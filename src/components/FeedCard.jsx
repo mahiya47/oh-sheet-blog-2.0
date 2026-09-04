@@ -732,9 +732,9 @@ export default function FeedCard({ post, onDeleted, initiallyExpanded = false })
           <span>{commentCount}</span>
         </button>
 
-        <button type="button" className="app-action-btn" onClick={handleShare}>
+        <button type="button" className="app-action-btn" aria-label="Share" onClick={handleShare}>
           <NavIcon name="share" />
-          <span>{shared ? "Copied" : "Share"}</span>
+          {shared && <span>Copied</span>}
         </button>
 
         <button
