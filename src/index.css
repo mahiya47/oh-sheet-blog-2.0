@@ -519,7 +519,7 @@ ul {
   justify-content: space-around;
   background: var(--app-surface);
   border-top: var(--app-border-w) solid var(--app-border);
-  padding: 8px 4px calc(8px + env(safe-area-inset-bottom, 0px));
+  padding: 5px 4px calc(5px + env(safe-area-inset-bottom, 0px));
 }
 
 .app-bottomnav-item {
@@ -527,7 +527,7 @@ ul {
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  padding: 4px 10px;
+  padding: 3px 10px;
   border-radius: 10px;
   font-size: 0.64rem;
   font-weight: 700;
@@ -3921,16 +3921,22 @@ a.app-auth-logo-badge:hover {
   flex-shrink: 0;
 }
 
+/* Arcade pages sit closer together than the app's default page gap — the
+   header strip and the game board read as one unit, not two sections. */
+.app-arcade-page {
+  gap: 8px;
+}
+
 /* Shared header strip every arcade game page renders above its board. */
 .app-arcade-game-head {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 10px 14px;
+  gap: 6px 8px;
 }
 .app-arcade-back {
-  width: 38px;
-  height: 38px;
+  width: 32px;
+  height: 32px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -3946,29 +3952,25 @@ a.app-auth-logo-badge:hover {
   flex: 1;
   min-width: 0;
 }
+/* Icon-only now — the trophy alone reads as "Leaderboard", so this is
+   sized to match the back button instead of a wide text pill. */
 .app-arcade-lb-btn {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
   border: var(--app-border-w) solid var(--app-border);
-  border-radius: 999px;
+  border-radius: var(--app-radius-sm);
   background: var(--app-accent);
   color: var(--app-ink);
-  font-weight: 700;
-  font-size: 0.85rem;
-  padding: 8px 14px;
   cursor: pointer;
   box-shadow: var(--app-shadow);
 }
 .app-arcade-lb-btn:hover {
   transform: translate(-1px, -1px);
   box-shadow: var(--app-shadow-lg);
-}
-.app-arcade-best {
-  width: 100%;
-  font-weight: 700;
-  font-size: 0.85rem;
-  color: var(--app-muted);
 }
 
 /* Per-game leaderboard modal — a boxed panel inside the same overlay used
@@ -4020,12 +4022,12 @@ a.app-auth-logo-badge:hover {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
+  gap: 8px;
   background: var(--app-surface);
   border: var(--app-border-w) solid var(--app-border);
   border-radius: var(--app-radius-lg);
   box-shadow: var(--app-shadow-lg);
-  padding: 16px;
+  padding: 8px;
 }
 .app-arcade-board canvas {
   max-width: 100%;
@@ -4036,7 +4038,7 @@ a.app-auth-logo-badge:hover {
 }
 .app-arcade-stats-row {
   display: flex;
-  gap: 10px;
+  gap: 6px;
   flex-wrap: wrap;
   justify-content: center;
   font-weight: 800;
@@ -4046,7 +4048,7 @@ a.app-auth-logo-badge:hover {
   background: var(--app-accent);
   border: 2px solid var(--app-border);
   border-radius: 999px;
-  padding: 4px 14px;
+  padding: 3px 10px;
   font-size: 0.85rem;
 }
 .app-arcade-overlay-msg {
@@ -4066,8 +4068,8 @@ a.app-auth-logo-badge:hover {
   background: var(--app-accent);
   color: var(--app-ink);
   font-weight: 800;
-  font-size: 0.95rem;
-  padding: 10px 22px;
+  font-size: 0.9rem;
+  padding: 7px 16px;
   cursor: pointer;
   box-shadow: var(--app-shadow);
 }
@@ -4083,9 +4085,9 @@ a.app-auth-logo-badge:hover {
 }
 .app-arcade-dpad {
   display: grid;
-  grid-template-columns: repeat(3, 52px);
-  grid-template-rows: repeat(2, 52px);
-  gap: 6px;
+  grid-template-columns: repeat(3, 44px);
+  grid-template-rows: repeat(2, 44px);
+  gap: 4px;
   justify-content: center;
 }
 .app-arcade-dpad button {

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import ArcadeGameHeader from "../../components/ArcadeGameHeader.jsx";
 import ScoreModal from "../../components/ScoreModal.jsx";
-import { getGameMeta } from "../../lib/arcadeGames.js";
+import { getGameMeta, formatArcadeScore } from "../../lib/arcadeGames.js";
 import { useArcadeScore } from "../../lib/useArcadeScore.js";
 
 const GAME = getGameMeta("minesweeper");
@@ -150,8 +150,8 @@ export default function MinesweeperPage() {
   }
 
   return (
-    <div className="app-page">
-      <ArcadeGameHeader title={GAME.label} emoji={GAME.emoji} best={best} unit={GAME.unit} onShowLeaderboard={() => setShowLb(true)} />
+    <div className="app-page app-arcade-page">
+      <ArcadeGameHeader title={GAME.label} emoji={GAME.emoji} onShowLeaderboard={() => setShowLb(true)} />
 
       <div className="app-arcade-board">
         {!showBoard ? (
@@ -167,6 +167,9 @@ export default function MinesweeperPage() {
             <div className="app-arcade-stats-row">
               <span className="app-arcade-stat-pill">⏱ {seconds}s</span>
               <span className="app-arcade-stat-pill">💣 {MINES}</span>
+              {best !== null && (
+                <span className="app-arcade-stat-pill">Best: {formatArcadeScore(best, GAME.unit)}</span>
+              )}
             </div>
             <div
               style={{

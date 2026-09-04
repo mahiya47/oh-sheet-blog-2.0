@@ -241,8 +241,8 @@ export default function SudokuPage() {
   if (!board.length) return null;
 
   return (
-    <div className="app-page">
-      <ArcadeGameHeader title={GAME.label} emoji={GAME.emoji} best={best} unit={GAME.unit} onShowLeaderboard={() => setShowLb(true)} />
+    <div className="app-page app-arcade-page">
+      <ArcadeGameHeader title={GAME.label} emoji={GAME.emoji} onShowLeaderboard={() => setShowLb(true)} />
 
       <div className="app-arcade-board">
         <div className="app-arcade-stats-row">
