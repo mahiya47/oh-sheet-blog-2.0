@@ -26,7 +26,9 @@ export default function BottomNav() {
       </NavLink>
       <NavLink to="/messages" className={(navData) => linkClass(navData) + " app-notif-anchor"}>
         <ChatIcon />
-        {dmUnreadCount > 0 && <span className="app-notif-dot" />}
+        {dmUnreadCount > 0 && (
+          <span className="app-notif-badge">{dmUnreadCount > 99 ? "99+" : dmUnreadCount}</span>
+        )}
         <span>Chat</span>
       </NavLink>
 
@@ -36,7 +38,9 @@ export default function BottomNav() {
 
       <NavLink to="/notifications" className={(navData) => linkClass(navData) + " app-notif-anchor"}>
         <BellIcon />
-        {unreadCount > 0 && <span className="app-notif-dot" />}
+        {unreadCount > 0 && (
+          <span className="app-notif-badge">{unreadCount > 99 ? "99+" : unreadCount}</span>
+        )}
         <span>Alerts</span>
       </NavLink>
       <NavLink to="/profile" className={linkClass}>

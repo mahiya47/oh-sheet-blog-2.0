@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useNotifications } from "../context/NotificationContext.jsx";
+import { useDm } from "../context/DmContext.jsx";
 import { logoColor } from "../lib/logoColor.js";
 import OhSheetLogo from "./OhSheetLogo.jsx";
 import NavIcon from "./NavIcons.jsx";
@@ -22,6 +23,7 @@ const TABLET_MENU_ITEMS = [
 export default function TopBar() {
   const { user, logout } = useAuth();
   const { unreadCount } = useNotifications();
+  const { unreadCount: dmUnreadCount } = useDm();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
   const navigate = useNavigate();
@@ -85,11 +87,14 @@ export default function TopBar() {
         </button>
         <button
           type="button"
-          className="app-icon-btn app-desktop-only"
+          className="app-icon-btn app-desktop-only app-notif-anchor"
           aria-label="Messages"
           onClick={() => navigate("/messages")}
         >
           <ChatIcon />
+          {dmUnreadCount > 0 && (
+            <span className="app-notif-badge">{dmUnreadCount > 99 ? "99+" : dmUnreadCount}</span>
+          )}
         </button>
         <button
           type="button"
@@ -98,7 +103,9 @@ export default function TopBar() {
           onClick={() => navigate("/notifications")}
         >
           <BellIcon />
-          {unreadCount > 0 && <span className="app-notif-dot" />}
+          {unreadCount > 0 && (
+            <span className="app-notif-badge">{unreadCount > 99 ? "99+" : unreadCount}</span>
+          )}
         </button>
         <button
           type="button"

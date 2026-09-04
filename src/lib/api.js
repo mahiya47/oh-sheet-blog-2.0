@@ -202,6 +202,7 @@ export const api = {
   // Messages
   getConversations: () => request("/messages/conversations"),
   getDmUnreadCount: () => request("/messages/unread-count"),
+  markAllDmRead: () => request("/messages/read-all", { method: "POST" }),
   getThread: (username) => request(`/messages/${encodeURIComponent(username)}`),
   sendMessage: (username, content) =>
     request(`/messages/${encodeURIComponent(username)}`, { method: "POST", body: { content } }),

@@ -106,9 +106,9 @@ export default function SideNav() {
 function NavItem({ item }) {
   const { unreadCount } = useNotifications();
   const { unreadCount: dmUnreadCount } = useDm();
-  const showBadge =
-    (item.to === "/notifications" && unreadCount > 0) ||
-    (item.to === "/messages" && dmUnreadCount > 0);
+  const badgeCount =
+    item.to === "/notifications" ? unreadCount : item.to === "/messages" ? dmUnreadCount : 0;
+  const showBadge = badgeCount > 0;
 
   return (
     <li>
@@ -121,7 +121,9 @@ function NavItem({ item }) {
       >
         <NavIcon name={item.icon} />
         <span>{item.label}</span>
-        {showBadge && <span className="app-notif-dot" />}
+        {showBadge && (
+          <span className="app-notif-badge">{badgeCount > 99 ? "99+" : badgeCount}</span>
+        )}
       </NavLink>
     </li>
   );

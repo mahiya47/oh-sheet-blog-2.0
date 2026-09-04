@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ConversationsSkeleton } from "../components/Skeletons.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
+import { useDm } from "../context/DmContext.jsx";
 import { api } from "../lib/api.js";
 import { relativeTime } from "../lib/formatTime.js";
 
@@ -10,6 +11,7 @@ import { relativeTime } from "../lib/formatTime.js";
 export default function MessagesPage() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const { refresh } = useDm();
   const [conversations, setConversations] = useState(null);
   const [error, setError] = useState("");
 
@@ -23,8 +25,17 @@ export default function MessagesPage() {
     if (!user) return;
     api
       .getConversations()
-      .then(setConversations)
+      .then((list) => {
+        setConversations(list);
+        // Clear the chat badge as soon as the list is opened — each row
+        // below still shows its own unread count from this fetch, same
+        // pattern as the notifications bell.
+        if (list.some((c) => c.unreadCount > 0)) {
+          api.markAllDmRead().then(refresh).catch(() => {});
+        }
+      })
       .catch((err) => setError(err.message));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   if (!user) return null;

@@ -3430,18 +3430,24 @@ a.app-auth-logo-badge:hover {
   font-weight: 700;
 }
 
-/* ---- Notification unread dot (topbar icon / bottom nav / sidebar item) ---- */
+/* ---- Notification/message unread badge (topbar icon / bottom nav / sidebar item) ---- */
 .app-notif-anchor {
   position: relative;
 }
-.app-notif-dot {
+.app-notif-badge {
   position: absolute;
-  top: 2px;
-  right: 2px;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
+  top: -6px;
+  right: -8px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
   background: #c0392b;
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 800;
+  line-height: 16px;
+  text-align: center;
   border: 2px solid var(--app-surface);
 }
 

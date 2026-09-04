@@ -39,8 +39,18 @@ export default function NotificationsPage() {
     if (!user) return;
     api
       .getNotifications()
-      .then(setNotifications)
+      .then((list) => {
+        setNotifications(list);
+        // Clear the bell badge the moment this page is opened — the items
+        // below keep showing which ones were unread on this visit (using
+        // the `read` flag from this fetch), but the count elsewhere in the
+        // app should already read zero, same as opening Messages.
+        if (list.some((n) => !n.read)) {
+          api.markAllNotificationsRead().then(refresh).catch(() => {});
+        }
+      })
       .catch((err) => setError(err.message));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   async function handleMarkAllRead() {
