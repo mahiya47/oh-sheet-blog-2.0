@@ -79,7 +79,13 @@ body {
 }
 
 body {
-  background: var(--app-bg);
+  /* Subtle polka-dot pattern instead of a flat fill -- same warm tone as
+     the background, just a shade deeper, so it reads as texture rather
+     than decoration and never competes with the bold-bordered cards
+     sitting on top of it. */
+  background-color: var(--app-bg);
+  background-image: radial-gradient(var(--app-bg-deep) 1.6px, transparent 1.6px);
+  background-size: 24px 24px;
   color: var(--app-ink);
   font-family: var(--app-font-body);
 }
@@ -125,7 +131,9 @@ ul {
   flex-direction: column;
   align-items: center;
   padding: 20px 14px calc(40px + env(safe-area-inset-bottom, 0px));
-  background: var(--app-bg);
+  background-color: var(--app-bg);
+  background-image: radial-gradient(var(--app-bg-deep) 1.6px, transparent 1.6px);
+  background-size: 24px 24px;
 }
 .app-bare-main {
   width: 100%;
