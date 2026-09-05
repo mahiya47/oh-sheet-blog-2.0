@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { logoColor, buildFaviconHref } from "./lib/logoColor.js";
 import TopBar from "./components/TopBar.jsx";
 import SideNav from "./components/SideNav.jsx";
@@ -98,6 +98,7 @@ export default function App() {
   const routes = (
     <Routes>
       <Route path="/" element={<HomePage />} />
+      <Route path="/feed" element={<Navigate to="/" replace />} />
       <Route path="/search" element={<SearchPage />} />
       <Route path="/profile" element={<ProfilePage />} />
       <Route path="/profile/:username" element={<ProfilePage />} />
