@@ -7,7 +7,7 @@
 // Bump this when this file's caching logic changes in a way that should
 // throw away what's stored (a corrupt cache is worse than an empty one) —
 // the old-named caches get deleted on the next activate.
-const CACHE_VERSION = "v1";
+const CACHE_VERSION = "v2";
 const SHELL_CACHE = `app-shell-${CACHE_VERSION}`;
 const API_CACHE = `api-cache-${CACHE_VERSION}`;
 

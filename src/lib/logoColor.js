@@ -24,18 +24,18 @@ export const appIconColor = "#f5c945";
 export function buildFaviconHref(color) {
   const svg =
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">` +
-    `<circle cx="24" cy="24" r="22" fill="${color}" stroke="#1c1810" stroke-width="2.2"/>` +
-    `<path d="M12,22 L8,8 L18,16" fill="none" stroke="#1c1810" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>` +
-    `<path d="M36,22 L40,8 L30,16" fill="none" stroke="#1c1810" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>` +
-    `<ellipse cx="18" cy="26" rx="2.3" ry="2.6" fill="#1c1810"/>` +
-    `<ellipse cx="30" cy="26" rx="2.3" ry="2.6" fill="#1c1810"/>` +
-    `<path d="M24,34 C20.5,30.5 21,27.5 24,29.3 C27,27.5 27.5,30.5 24,34 Z" fill="#1c1810"/>` +
-    `<path d="M27,31 L41,27" fill="none" stroke="#1c1810" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>` +
-    `<path d="M27,33.5 L42,33.5" fill="none" stroke="#1c1810" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>` +
-    `<path d="M26,36 L40,40" fill="none" stroke="#1c1810" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>` +
-    `<path d="M21,31 L7,27" fill="none" stroke="#1c1810" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>` +
-    `<path d="M21,33.5 L6,33.5" fill="none" stroke="#1c1810" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>` +
-    `<path d="M22,36 L8,40" fill="none" stroke="#1c1810" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>` +
+    `<circle cx="24" cy="24" r="22" fill="${color}" stroke="#1c1810" stroke-width="1.8"/>` +
+    `<circle cx="24" cy="26" r="14" fill="none" stroke="#1c1810" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>` +
+    `<path d="M12,17 Q15,6 19,16" fill="none" stroke="#1c1810" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>` +
+    `<path d="M29,16 Q33,6 36,17" fill="none" stroke="#1c1810" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>` +
+    `<circle cx="19" cy="25" r="1.5" fill="#1c1810"/>` +
+    `<circle cx="29" cy="25" r="1.5" fill="#1c1810"/>` +
+    `<path d="M22.5,29.5 L25.5,29.5 L24,31.5 Z" fill="#1c1810"/>` +
+    `<path d="M21,33 Q24,35 27,33" fill="none" stroke="#1c1810" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>` +
+    `<path d="M14,29 L7,28" fill="none" stroke="#1c1810" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>` +
+    `<path d="M14,32 L7,33" fill="none" stroke="#1c1810" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>` +
+    `<path d="M34,29 L41,28" fill="none" stroke="#1c1810" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>` +
+    `<path d="M34,32 L41,33" fill="none" stroke="#1c1810" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>` +
     `</svg>`;
   return `data:image/svg+xml,${encodeURIComponent(svg)}`;
 }

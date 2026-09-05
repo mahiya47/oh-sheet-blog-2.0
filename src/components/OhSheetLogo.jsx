@@ -1,27 +1,26 @@
-// The Oh Sheet! mark — a minimal cat face: two simple fold-line ears,
-// dot eyes, a tiny heart nose, and whiskers. No head outline, just
-// these floating pieces — reads clean even very small.
+// The Oh Sheet! mark — a simple, thin-line cat face: round head, two
+// small ears, dot eyes, tiny nose, whiskers.
 export default function OhSheetLogo({ size = 22 }) {
   const line = {
     fill: "none",
     stroke: "#1c1810",
-    strokeWidth: 2.4,
+    strokeWidth: 1.9,
     strokeLinecap: "round",
     strokeLinejoin: "round",
   };
   return (
     <svg width={size} height={size} viewBox="0 0 48 48">
-      <path d="M12,22 L8,8 L18,16" {...line} />
-      <path d="M36,22 L40,8 L30,16" {...line} />
-      <ellipse cx="18" cy="26" rx="2.3" ry="2.6" fill="#1c1810" />
-      <ellipse cx="30" cy="26" rx="2.3" ry="2.6" fill="#1c1810" />
-      <path d="M24,34 C20.5,30.5 21,27.5 24,29.3 C27,27.5 27.5,30.5 24,34 Z" fill="#1c1810" />
-      <path d="M27,31 L41,27" {...line} />
-      <path d="M27,33.5 L42,33.5" {...line} />
-      <path d="M26,36 L40,40" {...line} />
-      <path d="M21,31 L7,27" {...line} />
-      <path d="M21,33.5 L6,33.5" {...line} />
-      <path d="M22,36 L8,40" {...line} />
+      <circle cx="24" cy="26" r="14" {...line} />
+      <path d="M12,17 Q15,6 19,16" {...line} />
+      <path d="M29,16 Q33,6 36,17" {...line} />
+      <circle cx="19" cy="25" r="1.5" fill="#1c1810" />
+      <circle cx="29" cy="25" r="1.5" fill="#1c1810" />
+      <path d="M22.5,29.5 L25.5,29.5 L24,31.5 Z" fill="#1c1810" />
+      <path d="M21,33 Q24,35 27,33" {...line} />
+      <path d="M14,29 L7,28" {...line} />
+      <path d="M14,32 L7,33" {...line} />
+      <path d="M34,29 L41,28" {...line} />
+      <path d="M34,32 L41,33" {...line} />
     </svg>
   );
 }
