@@ -8,6 +8,8 @@ import { relativeTime } from "../lib/formatTime.js";
 
 const VERBS = {
   follow: "started following you",
+  follow_request: "requested to follow you",
+  follow_accept: "accepted your follow request",
   upvote: "upvoted your sheet",
   comment: "commented on your sheet",
   reply: "replied to your comment",
@@ -28,6 +30,11 @@ export default function NotificationsPage() {
   const { refresh } = useNotifications();
   const [notifications, setNotifications] = useState(null);
   const [error, setError] = useState("");
+  // Follow requests this session has already accepted/declined — once
+  // handled, a notification's Accept/Decline buttons go away even though
+  // the notification itself stays in the list.
+  const [handledRequestIds, setHandledRequestIds] = useState(() => new Set());
+  const [requestBusyId, setRequestBusyId] = useState(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -80,6 +87,34 @@ export default function NotificationsPage() {
     else navigate(`/profile/${n.actor.username}`);
   }
 
+  async function handleAcceptRequest(e, n) {
+    e.stopPropagation();
+    if (!n.actor?.id) return;
+    setRequestBusyId(n.id);
+    try {
+      await api.acceptFollowRequest(n.actor.id);
+      setHandledRequestIds((prev) => new Set(prev).add(n.id));
+    } catch (err) {
+      setError(err.message || "Couldn't accept that request");
+    } finally {
+      setRequestBusyId(null);
+    }
+  }
+
+  async function handleDeclineRequest(e, n) {
+    e.stopPropagation();
+    if (!n.actor?.id) return;
+    setRequestBusyId(n.id);
+    try {
+      await api.rejectFollowRequest(n.actor.id);
+      setHandledRequestIds((prev) => new Set(prev).add(n.id));
+    } catch (err) {
+      setError(err.message || "Couldn't decline that request");
+    } finally {
+      setRequestBusyId(null);
+    }
+  }
+
   async function handleRemove(e, id) {
     e.stopPropagation();
     const prev = notifications;
@@ -113,14 +148,15 @@ export default function NotificationsPage() {
         <NotificationsSkeleton />
       ) : notifications.length === 0 ? (
         <p className="app-empty">
-          Nothing yet — when someone follows you, upvotes, comments, replies, or tags you in a
-          sheet, it'll show up here.
+          Nothing yet — when someone follows you, requests to follow you, upvotes, comments,
+          replies, or tags you in a sheet, it'll show up here.
         </p>
       ) : (
         <ul className="app-notif-list">
           {notifications.map((n) => {
             const isSystem = SYSTEM_TYPES.has(n.type);
             const name = isSystem ? "System" : n.actor?.name || n.actor?.username || "Someone";
+            const showRequestActions = n.type === "follow_request" && !handledRequestIds.has(n.id);
             return (
               <li key={n.id} className="app-notif-item-row">
                 <button
@@ -144,6 +180,26 @@ export default function NotificationsPage() {
                   </span>
                   <span className="app-notif-time">{relativeTime(n.createdAt)}</span>
                 </button>
+                {showRequestActions && (
+                  <span className="app-notif-request-actions">
+                    <button
+                      type="button"
+                      className="app-notif-request-accept"
+                      disabled={requestBusyId === n.id}
+                      onClick={(e) => handleAcceptRequest(e, n)}
+                    >
+                      Accept
+                    </button>
+                    <button
+                      type="button"
+                      className="app-notif-request-decline"
+                      disabled={requestBusyId === n.id}
+                      onClick={(e) => handleDeclineRequest(e, n)}
+                    >
+                      Decline
+                    </button>
+                  </span>
+                )}
                 <button
                   type="button"
                   className="app-notif-remove"

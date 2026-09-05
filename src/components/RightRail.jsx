@@ -10,6 +10,7 @@ export default function RightRail() {
   const { user } = useAuth();
   const [people, setPeople] = useState([]);
   const [followedIds, setFollowedIds] = useState(() => new Set());
+  const [requestedIds, setRequestedIds] = useState(() => new Set());
   const [trending, setTrending] = useState([]);
 
   useEffect(() => {
@@ -26,15 +27,15 @@ export default function RightRail() {
 
   async function handleFollow(personId) {
     if (!user) return;
-    setFollowedIds((prev) => new Set(prev).add(personId));
     try {
-      await api.follow(personId);
+      const res = await api.follow(personId);
+      if (res?.requested) {
+        setRequestedIds((prev) => new Set(prev).add(personId));
+      } else {
+        setFollowedIds((prev) => new Set(prev).add(personId));
+      }
     } catch {
-      setFollowedIds((prev) => {
-        const next = new Set(prev);
-        next.delete(personId);
-        return next;
-      });
+      // Nothing was set optimistically — nothing to roll back.
     }
   }
 
@@ -60,10 +61,10 @@ export default function RightRail() {
                   <button
                     type="button"
                     className="app-follow-btn"
-                    disabled={followedIds.has(p.id)}
+                    disabled={followedIds.has(p.id) || requestedIds.has(p.id)}
                     onClick={() => handleFollow(p.id)}
                   >
-                    {followedIds.has(p.id) ? "Following" : "Follow"}
+                    {followedIds.has(p.id) ? "Following" : requestedIds.has(p.id) ? "Requested" : "Follow"}
                   </button>
                 )}
               </li>

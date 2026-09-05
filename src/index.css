@@ -1283,6 +1283,9 @@ ul {
   color: var(--app-muted);
   font-weight: 600;
 }
+.app-profile-private-badge {
+  font-weight: 500;
+}
 .app-profile-bio {
   margin: 4px 0 0;
   font-weight: 600;
@@ -3576,6 +3579,35 @@ a.app-auth-logo-badge:hover {
 .app-notif-remove:hover {
   background: rgba(192, 57, 43, 0.12);
   color: #c0392b;
+}
+.app-notif-request-actions {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.app-notif-request-accept,
+.app-notif-request-decline {
+  border: var(--app-border-w) solid var(--app-border);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-weight: 700;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.app-notif-request-accept {
+  background: var(--app-ink);
+  color: var(--app-surface);
+  border-color: var(--app-ink);
+}
+.app-notif-request-decline {
+  background: var(--app-surface);
+  color: var(--app-ink);
+}
+.app-notif-request-accept:disabled,
+.app-notif-request-decline:disabled {
+  opacity: 0.6;
+  cursor: default;
 }
 
 /* ---- Generic modal overlay (follower/following lists, etc.) ---- */

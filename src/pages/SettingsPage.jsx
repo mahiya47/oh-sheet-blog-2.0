@@ -82,6 +82,9 @@ export default function SettingsPage() {
   const [error, setError] = useState("");
 
   // Privacy & Safety tab
+  const [isPrivate, setIsPrivate] = useState(false);
+  const [privacyBusy, setPrivacyBusy] = useState(false);
+  const [privacyError, setPrivacyError] = useState("");
   const [blockedUsers, setBlockedUsers] = useState(null);
   const [blockedError, setBlockedError] = useState("");
   const [mutedUsers, setMutedUsers] = useState(null);
@@ -184,6 +187,7 @@ export default function SettingsPage() {
     setLinkedinUrl(user.linkedinUrl || "");
     setInstagramUrl(user.instagramUrl || "");
     setPinterestUrl(user.pinterestUrl || "");
+    setIsPrivate(!!user.isPrivate);
   }, [user]);
 
   useEffect(() => {
@@ -420,6 +424,21 @@ export default function SettingsPage() {
     // If accepted, usePwaInstall() flips `installed` itself — this component
     // just re-renders into the "installed" branch below on its own.
     await promptInstall();
+  }
+
+  async function handleTogglePrivacy() {
+    setPrivacyError("");
+    const next = !isPrivate;
+    setPrivacyBusy(true);
+    try {
+      const updated = await api.updatePrivacy(next);
+      setIsPrivate(!!updated.isPrivate);
+      setUser((u) => (u ? { ...u, isPrivate: !!updated.isPrivate } : u));
+    } catch (err) {
+      setPrivacyError(err.message || "Couldn't update this");
+    } finally {
+      setPrivacyBusy(false);
+    }
   }
 
   async function handleTogglePush() {
@@ -775,6 +794,29 @@ export default function SettingsPage() {
 
         {activeTab === "Privacy & Safety" && (
           <div className="app-settings-content">
+            <div className="app-settings-group">
+              <h3>Private account</h3>
+              <label className="app-settings-toggle-row">
+                <span>Private account</span>
+                <button
+                  type="button"
+                  className={"app-settings-switch" + (isPrivate ? " is-on" : "")}
+                  role="switch"
+                  aria-checked={isPrivate}
+                  disabled={privacyBusy}
+                  onClick={handleTogglePrivacy}
+                >
+                  <span className="app-settings-switch-knob" />
+                </button>
+              </label>
+              <p className="app-settings-hint">
+                {isPrivate
+                  ? "Only people you approve can follow you and see your sheets. Anyone can still find your profile."
+                  : "Anyone can follow you and see your sheets. Turn this on and new followers will need your approval."}
+              </p>
+              {privacyError && <p className="app-auth-error">{privacyError}</p>}
+            </div>
+
             <div className="app-settings-group">
               <h3>Blocked users</h3>
               {blockedError && <p className="app-auth-error">{blockedError}</p>}

@@ -45,12 +45,17 @@ export default function ProfilePage() {
   const [savedPosts, setSavedPosts] = useState(null);
   const [activeTab, setActiveTab] = useState("Posts");
   const [following, setFollowing] = useState(false);
+  const [requested, setRequested] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const moreRef = useRef(null);
   const [listModal, setListModal] = useState(null); // "followers" | "following" | null
   const [lightboxSrc, setLightboxSrc] = useState(null);
 
   const isOwnProfile = !!user && !!profile && user.username === profile.username;
+  // A private account's sheets are only visible to the account itself and
+  // people it's already accepted as a follower.
+  const canViewContent =
+    !profile || !profile.isPrivate || profile.isFollowedByMe || profile.isOwnProfile;
 
   // Viewing a different profile re-uses this same page/component, so
   // reset the per-profile UI state and re-fetch whenever the username changes.
@@ -68,13 +73,22 @@ export default function ProfilePage() {
       .then((data) => {
         setProfile(data);
         setFollowing(!!data.isFollowedByMe);
+        setRequested(!!data.hasPendingRequest);
+        // Private + not-yet-approved: the posts endpoint would just 403 —
+        // don't bother calling it. (isOwnProfile comes straight from the
+        // backend's own view of the token, so this doesn't race against
+        // AuthContext's own async `user` load.)
+        if (data.isPrivate && !data.isFollowedByMe && !data.isOwnProfile) {
+          setPosts([]);
+          return;
+        }
+        api
+          .getPostsByUsername(viewedUsername)
+          .then(setPosts)
+          .catch(() => setPosts([]));
       })
       .catch(() => setNotFound(true));
-
-    api
-      .getPostsByUsername(viewedUsername)
-      .then(setPosts)
-      .catch(() => setPosts([]));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [viewedUsername]);
 
   useEffect(() => {
@@ -106,13 +120,27 @@ export default function ProfilePage() {
 
   async function handleToggleFollow() {
     if (!requireAuth() || !profile) return;
-    const next = !following;
-    setFollowing(next);
+
+    // Already following, or waiting on approval — either way this button
+    // undoes it.
+    if (following || requested) {
+      setFollowing(false);
+      setRequested(false);
+      try {
+        await api.unfollow(profile.id);
+      } catch {
+        setFollowing(following);
+        setRequested(requested);
+      }
+      return;
+    }
+
     try {
-      if (next) await api.follow(profile.id);
-      else await api.unfollow(profile.id);
+      const res = await api.follow(profile.id);
+      if (res?.requested) setRequested(true);
+      else setFollowing(true);
     } catch {
-      setFollowing(!next);
+      // Nothing was set optimistically in this branch — nothing to undo.
     }
   }
 
@@ -195,7 +223,10 @@ export default function ProfilePage() {
           {profile.name}
           {profile.pronouns && <span className="app-profile-pronouns">{profile.pronouns}</span>}
         </h2>
-        <p className="app-profile-handle">@{profile.username}</p>
+        <p className="app-profile-handle">
+          @{profile.username}
+          {profile.isPrivate && <span className="app-profile-private-badge"> · Private account</span>}
+        </p>
         <p className="app-profile-bio">{profile.bio || "This sheeter hasn't written a bio yet."}</p>
 
         {(profile.githubUrl ||
@@ -256,10 +287,10 @@ export default function ProfilePage() {
             <>
               <button
                 type="button"
-                className={"app-profile-follow" + (following ? " is-following" : "")}
+                className={"app-profile-follow" + (following || requested ? " is-following" : "")}
                 onClick={handleToggleFollow}
               >
-                {following ? "Following" : "Follow"}
+                {following ? "Following" : requested ? "Requested" : "Follow"}
               </button>
               <button
                 type="button"
@@ -341,6 +372,12 @@ export default function ProfilePage() {
       </div>
 
       <div className="app-profile-tab-content">
+        {!canViewContent ? (
+          <p className="app-empty">
+            This account is private. Follow @{profile.username} to see their sheets.
+          </p>
+        ) : (
+          <>
         {activeTab === "Posts" &&
           (posts.length ? (
             <div className="app-feed">
@@ -381,6 +418,8 @@ export default function ProfilePage() {
                 ))}
               </div>
             )}
+          </>
+        )}
           </>
         )}
       </div>

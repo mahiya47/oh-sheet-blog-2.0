@@ -160,6 +160,7 @@ export const api = {
   // Users
   getUserByUsername: (username) => request(`/users/${encodeURIComponent(username)}`),
   updateProfile: (payload) => request("/users/me", { method: "PUT", body: payload }),
+  updatePrivacy: (isPrivate) => request("/users/me/privacy", { method: "PUT", body: { isPrivate } }),
   exportMyData: () => request("/users/me/export"),
   deleteAccount: () => request("/auth/me", { method: "DELETE" }),
   searchAll: (q) => request(`/users/search?q=${encodeURIComponent(q)}`),
@@ -173,6 +174,11 @@ export const api = {
   getFollowInfo: (userId) => request(`/follows/${userId}`),
   getFollowers: (userId) => request(`/follows/${userId}/followers`),
   getFollowing: (userId) => request(`/follows/${userId}/following`),
+  getFollowRequests: () => request("/follows/requests"),
+  acceptFollowRequest: (requesterId) =>
+    request(`/follows/requests/${requesterId}/accept`, { method: "POST" }),
+  rejectFollowRequest: (requesterId) =>
+    request(`/follows/requests/${requesterId}`, { method: "DELETE" }),
 
   // Block / report
   block: (userId) => request(`/blocks/${userId}`, { method: "POST" }),
