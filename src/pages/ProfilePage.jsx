@@ -356,19 +356,19 @@ export default function ProfilePage() {
             )}
           </div>
         </div>
-      </div>
 
-      <div className="app-profile-tabs">
-        {TABS.filter((t) => t !== "Saved" || isOwnProfile).map((tab) => (
-          <button
-            key={tab}
-            type="button"
-            className={"app-profile-tab" + (activeTab === tab ? " is-active" : "")}
-            onClick={() => setActiveTab(tab)}
-          >
-            {tab}
-          </button>
-        ))}
+        <div className="app-profile-tabs">
+          {TABS.filter((t) => t !== "Saved" || isOwnProfile).map((tab) => (
+            <button
+              key={tab}
+              type="button"
+              className={"app-profile-tab" + (activeTab === tab ? " is-active" : "")}
+              onClick={() => setActiveTab(tab)}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="app-profile-tab-content">
