@@ -124,7 +124,7 @@ ul {
   flex: 1;
   display: block;
   width: 100%;
-  padding: 14px 14px calc(96px + env(safe-area-inset-bottom, 0px));
+  padding: 14px 2px calc(96px + env(safe-area-inset-bottom, 0px));
 }
 
 /* ---- Bare shell: login / signup / onboarding / password reset /
@@ -1238,9 +1238,9 @@ ul {
 
 .app-profile-cover {
   height: 190px;
-  /* Negative top margin cancels .app-body's top padding so the cover
-     sits flush against the top bar instead of leaving a bg-colored gap. */
-  margin: -14px -14px 0;
+  /* Negative margin cancels .app-body's padding so the cover sits flush
+     against the top bar and screen edges instead of leaving a gap. */
+  margin: -14px -2px 0;
   background: linear-gradient(135deg, var(--app-blue), var(--app-purple));
   border-bottom: var(--app-border-w) solid var(--app-border);
 }
@@ -5514,7 +5514,7 @@ a.app-auth-logo-badge:hover {
 
 .app-skeleton-cover {
   height: 120px;
-  margin: -14px -14px 0;
+  margin: -14px -2px 0;
   overflow: hidden;
   border-bottom: var(--app-border-w) solid var(--app-border);
 }
