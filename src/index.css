@@ -1251,7 +1251,7 @@ ul {
   align-items: center;
   text-align: center;
   gap: 4.8px;
-  padding: 0 14px 20px;
+  padding: 0 14px 0;
   background: var(--app-surface);
   border: var(--app-border-w) solid var(--app-border);
   border-top: none;
@@ -1478,26 +1478,28 @@ ul {
 
 .app-profile-tabs {
   display: flex;
-  margin-top: 18px;
+  gap: 4px;
+  margin-top: 6px;
   width: 100%;
   border-top: 2px solid var(--app-border);
-  padding: 0;
+  padding-top: 8px;
 }
 .app-profile-tab {
   flex: 1;
   background: none;
   border: none;
-  padding: 12px 6px;
+  padding: 10px 6px;
+  border-radius: var(--app-radius-sm);
   font-weight: 700;
   font-size: 0.88rem;
   color: var(--app-muted);
   cursor: pointer;
-  border-bottom: 3px solid transparent;
-  margin-bottom: -3px;
 }
 .app-profile-tab.is-active {
   color: var(--app-ink);
-  border-bottom: 3px solid var(--app-accent);
+  background: var(--app-accent);
+  border: var(--app-border-w) solid var(--app-border);
+  padding: 7px 6px;
 }
 
 .app-profile-tab-content {
@@ -1884,7 +1886,7 @@ ul {
     border-radius: var(--app-radius-lg) var(--app-radius-lg) 0 0;
   }
   .app-profile-main {
-    padding: 0 20px 20px;
+    padding: 0 20px 0;
   }
   .app-profile-avatar {
     width: 108px;
