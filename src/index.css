@@ -1251,7 +1251,7 @@ ul {
   align-items: center;
   text-align: center;
   gap: 4.8px;
-  padding: 0 14px 0;
+  padding: 0 14px 8px;
   background: var(--app-surface);
   border: var(--app-border-w) solid var(--app-border);
   border-top: none;
@@ -1886,7 +1886,7 @@ ul {
     border-radius: var(--app-radius-lg) var(--app-radius-lg) 0 0;
   }
   .app-profile-main {
-    padding: 0 20px 0;
+    padding: 0 20px 8px;
   }
   .app-profile-avatar {
     width: 108px;
