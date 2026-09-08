@@ -1,12 +1,17 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useNotifications } from "../context/NotificationContext.jsx";
 import { useDm } from "../context/DmContext.jsx";
+import { useAuth } from "../context/AuthContext.jsx";
 
 // Mobile-only bottom bar. Hidden on wider screens via CSS (the side nav
 // and top bar take over there) — see the mobile-first rules in index.css.
+// Icons only, no labels — five icons at this size are self-explanatory,
+// and dropping the text lets the bar sit shorter.
 export default function BottomNav() {
   const { unreadCount } = useNotifications();
   const { unreadCount: dmUnreadCount } = useDm();
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <nav className="app-bottomnav">
@@ -14,6 +19,7 @@ export default function BottomNav() {
         to="/"
         end
         className={linkClass}
+        aria-label="Home"
         // Tapping Home while already on the feed (scrolled down, or
         // mid-scroll) doesn't trigger a route change — NavLink alone does
         // nothing in that case — so scroll to top explicitly too. Smooth
@@ -22,30 +28,38 @@ export default function BottomNav() {
         onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
       >
         <HomeIcon />
-        <span>Home</span>
       </NavLink>
-      <NavLink to="/messages" className={(navData) => linkClass(navData) + " app-notif-anchor"}>
+      <NavLink
+        to="/messages"
+        aria-label="Chat"
+        className={(navData) => linkClass(navData) + " app-notif-anchor"}
+      >
         <ChatIcon />
         {dmUnreadCount > 0 && (
           <span className="app-notif-badge">{dmUnreadCount > 99 ? "99+" : dmUnreadCount}</span>
         )}
-        <span>Chat</span>
       </NavLink>
 
       <NavLink to="/create" className="app-bottomnav-create" aria-label="Create sheet">
         <PlusIcon />
       </NavLink>
 
-      <NavLink to="/notifications" className={(navData) => linkClass(navData) + " app-notif-anchor"}>
-        <BellIcon />
-        {unreadCount > 0 && (
-          <span className="app-notif-badge">{unreadCount > 99 ? "99+" : unreadCount}</span>
+      <button
+        type="button"
+        className="app-bottomnav-item"
+        aria-label="Search"
+        onClick={() => navigate("/search")}
+      >
+        <SearchIcon />
+      </button>
+      <NavLink to="/profile" className={linkClass} aria-label="Profile">
+        {user?.avatarUrl ? (
+          <img src={user.avatarUrl} alt="" className="app-bottomnav-dp-photo" />
+        ) : user ? (
+          <span className="app-bottomnav-dp-fallback">{user.name.charAt(0).toUpperCase()}</span>
+        ) : (
+          <UserIcon />
         )}
-        <span>Alerts</span>
-      </NavLink>
-      <NavLink to="/profile" className={linkClass}>
-        <UserIcon />
-        <span>Profile</span>
       </NavLink>
     </nav>
   );
@@ -79,16 +93,11 @@ function ChatIcon() {
     </svg>
   );
 }
-function BellIcon() {
+function SearchIcon() {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-      <path
-        d="M6 10a6 6 0 1112 0c0 4 1.5 5.5 2 6H4c.5-.5 2-2 2-6z"
-        stroke="currentColor"
-        strokeWidth="2.2"
-        strokeLinejoin="round"
-      />
-      <path d="M10 20a2 2 0 004 0" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+      <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2.2" />
+      <path d="M21 21l-4.3-4.3" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
     </svg>
   );
 }

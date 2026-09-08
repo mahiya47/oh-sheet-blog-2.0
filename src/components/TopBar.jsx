@@ -46,40 +46,17 @@ export default function TopBar() {
 
   return (
     <header className="app-topbar">
-      <Link
-        to="/"
-        className="app-logo-badge"
-        style={{ background: logoColor }}
-        aria-label="Oh sheet! home"
-      >
-        <OhSheetLogo size={22} />
+      <Link to="/" className="app-topbar-brand" aria-label="Oh sheet! home">
+        <span className="app-logo-badge" style={{ background: logoColor }}>
+          <OhSheetLogo size={22} />
+        </span>
+        <span className="app-topbar-wordmark">Oh Sheet!</span>
       </Link>
-
-      <div className="app-topbar-identity app-desktop-only">
-        {user ? (
-          <>
-            <Link to="/profile" className="app-topbar-dp" aria-label="Your profile">
-              {user.avatarUrl ? (
-                <img src={user.avatarUrl} alt="" className="app-topbar-dp-photo" />
-              ) : (
-                user.name.charAt(0).toUpperCase()
-              )}
-            </Link>
-            <h1 className="app-topbar-title">
-              <Link to="/">{user.username}'s sheets!</Link>
-            </h1>
-          </>
-        ) : (
-          <h1 className="app-topbar-title">
-            <Link to="/login">Log in</Link>
-          </h1>
-        )}
-      </div>
 
       <div className="app-topbar-actions">
         <button
           type="button"
-          className="app-icon-btn"
+          className="app-icon-btn app-desktop-only"
           aria-label="Search"
           onClick={() => navigate("/search")}
         >
@@ -98,7 +75,7 @@ export default function TopBar() {
         </button>
         <button
           type="button"
-          className="app-icon-btn app-desktop-only app-notif-anchor"
+          className="app-icon-btn app-notif-anchor"
           aria-label="Notifications"
           onClick={() => navigate("/notifications")}
         >
