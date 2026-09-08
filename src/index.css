@@ -5929,6 +5929,16 @@ a.app-auth-logo-badge:hover {
   border-radius: var(--app-radius-lg);
   padding: 20px 16px;
 }
+.app-mono-offline {
+  margin: 0;
+  padding: 8px 10px;
+  border: 2px dashed var(--app-border);
+  border-radius: var(--app-radius-sm);
+  font-weight: 700;
+  font-size: 0.86rem;
+  color: var(--app-muted);
+  text-align: center;
+}
 .app-mono-menu-blurb {
   margin: 0;
   color: var(--app-muted);

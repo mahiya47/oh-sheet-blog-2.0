@@ -28,13 +28,29 @@ export function useMonopolyRoom() {
   const [board, setBoard] = useState(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [connected, setConnected] = useState(socket.connected);
 
   // The board only arrives on the first push; hold onto it across updates.
   const boardRef = useRef(null);
 
   useEffect(() => {
     if (!socket.connected) socket.connect();
+    function onConnect() { setConnected(true); }
+    function onDisconnect() { setConnected(false); }
+    socket.on("connect", onConnect);
+    socket.on("disconnect", onDisconnect);
+    return () => {
+      socket.off("connect", onConnect);
+      socket.off("disconnect", onDisconnect);
+    };
   }, [socket]);
+
+  // Every request below waits on an ack. If the server never answers —
+  // it's down, mid-deploy, or running a build without the Monopoly
+  // handlers — say so instead of leaving a button spinning forever.
+  const ASK_TIMEOUT_MS = 8000;
+  const NO_ANSWER =
+    "The game server didn't respond. It may be restarting — try again in a moment.";
 
   useEffect(() => {
     function onLobby(data) {
@@ -65,7 +81,13 @@ export function useMonopolyRoom() {
   // when the connection dropped mid-game).
   const resume = useCallback(
     (id) => {
-      socket.emit("mono:resume", { roomId: id }, (res) => {
+      socket.timeout(ASK_TIMEOUT_MS).emit("mono:resume", { roomId: id }, (timedOut, res) => {
+        if (timedOut) {
+          setError(NO_ANSWER);
+          setPhase("menu");
+          setSearchParams({}, { replace: true });
+          return;
+        }
         if (!res?.ok) {
           setError(res?.error === "not_in_room" ? "That game has already started without you." : "That game is no longer running.");
           setPhase("menu");
@@ -93,8 +115,9 @@ export function useMonopolyRoom() {
   const createRoom = useCallback(() => {
     setError("");
     setBusy(true);
-    socket.emit("mono:create", {}, (res) => {
+    socket.timeout(ASK_TIMEOUT_MS).emit("mono:create", {}, (timedOut, res) => {
       setBusy(false);
+      if (timedOut) return setError(NO_ANSWER);
       if (!res?.ok) return setError("Couldn't create the room. Try again.");
       setRoomId(res.roomId);
       setCode(res.code);
@@ -108,8 +131,9 @@ export function useMonopolyRoom() {
       const clean = String(joinCode || "").trim().toUpperCase();
       if (clean.length < 4) return setError("Enter the 5-letter room code.");
       setBusy(true);
-      socket.emit("mono:join", { code: clean }, (res) => {
+      socket.timeout(ASK_TIMEOUT_MS).emit("mono:join", { code: clean }, (timedOut, res) => {
         setBusy(false);
+        if (timedOut) return setError(NO_ANSWER);
         if (!res?.ok) {
           const messages = {
             not_found: "No game found with that code.",
@@ -160,6 +184,7 @@ export function useMonopolyRoom() {
 
   return {
     phase,
+    connected,
     roomId,
     code,
     lobby,

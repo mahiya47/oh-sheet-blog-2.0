@@ -50,6 +50,9 @@ function MenuView({ room }) {
           game and share the code, or join a friend's room.
         </p>
 
+        {!room.connected && (
+          <p className="app-mono-offline">Connecting to the game server...</p>
+        )}
         {room.error && <p className="app-auth-error">{room.error}</p>}
 
         <button
