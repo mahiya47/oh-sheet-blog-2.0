@@ -5857,3 +5857,51 @@ a.app-auth-logo-badge:hover {
   font-weight: 700;
   cursor: pointer;
 }
+
+/* ---- Splash screen (shown briefly right when the app opens) ---- */
+.app-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--app-bg);
+  opacity: 1;
+  transition: opacity 0.35s ease;
+}
+.app-splash.is-hiding {
+  opacity: 0;
+  pointer-events: none;
+}
+.app-splash-badge {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  border: var(--app-border-w) solid var(--app-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.app-splash-credit {
+  position: absolute;
+  bottom: calc(28px + env(safe-area-inset-bottom, 0px));
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-family: var(--app-font-display);
+  color: var(--app-ink);
+}
+.app-splash-credit span {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--app-muted);
+}
+.app-splash-credit strong {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
