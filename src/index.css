@@ -124,7 +124,7 @@ ul {
   flex: 1;
   display: block;
   width: 100%;
-  padding: 14px 2px calc(76px + env(safe-area-inset-bottom, 0px));
+  padding: 14px 2px calc(84px + env(safe-area-inset-bottom, 0px));
 }
 
 /* ---- Bare shell: login / signup / onboarding / password reset /
@@ -516,21 +516,24 @@ ul {
   justify-content: space-around;
   background: var(--app-surface);
   border-top: var(--app-border-w) solid var(--app-border);
-  padding: 4px 4px calc(4px + env(safe-area-inset-bottom, 0px));
+  padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 0px));
 }
 
 /* Icon-only now (no text label under each icon) — border + background
-   is a plain button, sized to the icon plus a little tap-target room. */
+   is a plain button, sized to the icon plus a little tap-target room.
+   The create button below is taller than this; align-items:center on
+   the bar grows to fit it, so nothing needs to pop out of the bar to
+   read as "raised" — it's simply the biggest, boldest button in it. */
 .app-bottomnav-item {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 46px;
+  height: 46px;
   padding: 0;
   border: none;
   background: none;
-  border-radius: 10px;
+  border-radius: 12px;
   color: var(--app-muted);
 }
 .app-bottomnav-item.is-active {
@@ -541,16 +544,16 @@ ul {
 /* The profile tab's photo, shown instead of the generic user icon once
    logged in — same treatment as the top-bar / drawer dp. */
 .app-bottomnav-dp-photo {
-  width: 26px;
-  height: 26px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid var(--app-border);
   display: block;
 }
 .app-bottomnav-dp-fallback {
-  width: 26px;
-  height: 26px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   border: 2px solid var(--app-border);
   background: var(--app-accent);
@@ -559,12 +562,15 @@ ul {
   justify-content: center;
   font-family: var(--app-font-display);
   font-weight: 700;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
 }
 
+/* Create button — the tallest thing in the bar, but still fully inside
+   it (no negative-margin "raised FAB" trick, which was spilling above
+   the bar's top edge and overlapping the feed behind it). */
 .app-bottomnav-create {
-  width: 48px;
-  height: 48px;
+  width: 54px;
+  height: 54px;
   flex-shrink: 0;
   border-radius: 50%;
   display: flex;
@@ -574,10 +580,9 @@ ul {
   border: var(--app-border-w) solid var(--app-border);
   box-shadow: var(--app-shadow);
   color: var(--app-ink);
-  transform: translateY(-10px);
 }
 .app-bottomnav-create:active {
-  transform: translateY(-8px);
+  transform: scale(0.96);
 }
 
 /* ---- Main column ---- */
@@ -825,6 +830,17 @@ ul {
   font-weight: 600;
   line-height: 1.4;
   max-width: 88%;
+}
+/* Rich post content (contentHtml, from the composer) comes as one <p>
+   per line the author pressed Enter on — e.g. a caption paragraph
+   followed by a hashtag-only paragraph. Browser default <p> margins
+   left a big gap between them; this tightens it to a small, deliberate
+   space instead. */
+.app-card-text p {
+  margin: 0;
+}
+.app-card-text p + p {
+  margin-top: 4px;
 }
 
 .app-card-edit-form {

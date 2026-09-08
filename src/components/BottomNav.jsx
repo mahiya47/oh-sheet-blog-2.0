@@ -69,41 +69,56 @@ function linkClass({ isActive }) {
   return "app-bottomnav-item" + (isActive ? " is-active" : "");
 }
 
+// A friendlier, rounder cottage — soft arched roof instead of a sharp
+// peak, plus a little door for detail, matching the brand's playful,
+// hand-drawn feel better than a generic house glyph.
 function HomeIcon() {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
       <path
-        d="M4 11l8-6 8 6v9a1 1 0 01-1 1h-4v-6H9v6H5a1 1 0 01-1-1v-9z"
+        d="M4 12.5 Q12 3.5 20 12.5"
         stroke="currentColor"
-        strokeWidth="2.2"
+        strokeWidth="2.4"
+        strokeLinecap="round"
         strokeLinejoin="round"
       />
+      <path
+        d="M5.5 11.5V19a1 1 0 001 1h11a1 1 0 001-1v-7.5"
+        stroke="currentColor"
+        strokeWidth="2.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <rect x="10" y="14.2" width="4" height="5.8" rx="1.2" fill="currentColor" />
     </svg>
   );
 }
+
+// A rounded speech bubble with a typing-dots detail, easier to read at
+// a glance than a plain rectangle.
 function ChatIcon() {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-      <path
-        d="M4 5h16v11H8l-4 4V5z"
-        stroke="currentColor"
-        strokeWidth="2.2"
-        strokeLinejoin="round"
-      />
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+      <rect x="3" y="4" width="18" height="13" rx="6" stroke="currentColor" strokeWidth="2.2" />
+      <path d="M6.5 17L6.5 20.5L10 17Z" fill="currentColor" />
+      <circle cx="9" cy="10.5" r="1.15" fill="currentColor" />
+      <circle cx="12" cy="10.5" r="1.15" fill="currentColor" />
+      <circle cx="15" cy="10.5" r="1.15" fill="currentColor" />
     </svg>
   );
 }
+
 function SearchIcon() {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-      <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2.2" />
-      <path d="M21 21l-4.3-4.3" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+      <circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" strokeWidth="2.4" />
+      <path d="M20 20l-4.6-4.6" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
     </svg>
   );
 }
 function UserIcon() {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
       <circle cx="12" cy="8" r="3.4" stroke="currentColor" strokeWidth="2.2" />
       <path
         d="M5 20c1.2-4 4-6 7-6s5.8 2 7 6"
@@ -116,7 +131,7 @@ function UserIcon() {
 }
 function PlusIcon() {
   return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
       <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" />
     </svg>
   );
