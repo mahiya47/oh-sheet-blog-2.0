@@ -45,6 +45,7 @@ import RpsPage from "./pages/arcade/RpsPage.jsx";
 import TicTacToePage from "./pages/arcade/TicTacToePage.jsx";
 import SnakeLadderPage from "./pages/arcade/SnakeLadderPage.jsx";
 import LudoPage from "./pages/arcade/LudoPage.jsx";
+import MonopolyPage from "./pages/arcade/MonopolyPage.jsx";
 import IncomingChallengeModal from "./components/IncomingChallengeModal.jsx";
 import AppAnnouncementsGate from "./components/AppAnnouncementsGate.jsx";
 import InstallAppPrompt from "./components/InstallAppPrompt.jsx";
@@ -134,6 +135,7 @@ export default function App() {
       <Route path="/arcade/tictactoe" element={<TicTacToePage />} />
       <Route path="/arcade/snakeandladder" element={<SnakeLadderPage />} />
       <Route path="/arcade/ludo" element={<LudoPage />} />
+      <Route path="/arcade/monopoly" element={<MonopolyPage />} />
       <Route path="/about" element={<AboutPage />} />
       <Route path="/privacy" element={<PrivacyPolicyPage />} />
       <Route path="/rules" element={<RulesPage />} />

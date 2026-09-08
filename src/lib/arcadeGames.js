@@ -105,6 +105,14 @@ export const ARCADE_GAMES = [
     blurb: "Roll the dice, race your tokens home, and send your opponent back to base.",
     multiplayer: true,
   },
+  {
+    slug: "monopoly",
+    label: "Monopoly",
+    emoji: "🏠",
+    color: "green",
+    blurb: "Buy the board, charge rent, bankrupt your friends. Up to 8 players.",
+    multiplayer: true,
+  },
 ];
 
 export function getGameMeta(slug) {
