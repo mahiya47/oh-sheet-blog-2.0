@@ -32,7 +32,3 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     </ThemeProvider>
   </React.StrictMode>,
 );
-
-// Lets the opening screen in index.html know the app is up, so it can
-// fade out rather than being timed blindly.
-window.__appReady?.();
