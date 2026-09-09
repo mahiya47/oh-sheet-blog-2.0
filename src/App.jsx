@@ -7,6 +7,7 @@ import RightRail from "./components/RightRail.jsx";
 import BottomNav from "./components/BottomNav.jsx";
 import HomePage from "./pages/HomePage.jsx";
 import SearchPage from "./pages/SearchPage.jsx";
+import StoriesPage from "./pages/StoriesPage.jsx";
 import ProfilePage from "./pages/ProfilePage.jsx";
 import SettingsPage from "./pages/SettingsPage.jsx";
 import SupportPage from "./pages/SupportPage.jsx";
@@ -102,6 +103,7 @@ export default function App() {
       <Route path="/" element={<HomePage />} />
       <Route path="/feed" element={<Navigate to="/" replace />} />
       <Route path="/search" element={<SearchPage />} />
+      <Route path="/stories" element={<StoriesPage />} />
       <Route path="/profile" element={<ProfilePage />} />
       <Route path="/profile/:username" element={<ProfilePage />} />
       <Route path="/settings" element={<SettingsPage />} />

@@ -1,5 +1,4 @@
-import { NavLink, useNavigate } from "react-router-dom";
-import { useNotifications } from "../context/NotificationContext.jsx";
+import { NavLink } from "react-router-dom";
 import { useDm } from "../context/DmContext.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 
@@ -8,10 +7,8 @@ import { useAuth } from "../context/AuthContext.jsx";
 // Icons only, no labels — five icons at this size are self-explanatory,
 // and dropping the text lets the bar sit shorter.
 export default function BottomNav() {
-  const { unreadCount } = useNotifications();
   const { unreadCount: dmUnreadCount } = useDm();
   const { user } = useAuth();
-  const navigate = useNavigate();
 
   return (
     <nav className="app-bottomnav">
@@ -44,14 +41,9 @@ export default function BottomNav() {
         <PlusIcon />
       </NavLink>
 
-      <button
-        type="button"
-        className="app-bottomnav-item"
-        aria-label="Search"
-        onClick={() => navigate("/search")}
-      >
-        <SearchIcon />
-      </button>
+      <NavLink to="/stories" className={linkClass} aria-label="Stories">
+        <StoriesIcon />
+      </NavLink>
       <NavLink to="/profile" className={linkClass} aria-label="Profile">
         {user?.avatarUrl ? (
           <img src={user.avatarUrl} alt="" className="app-bottomnav-dp-photo" />
@@ -108,11 +100,21 @@ function ChatIcon() {
   );
 }
 
-function SearchIcon() {
+// Stories: a ring around a filled dot — the same "unwatched story"
+// shape the stories bar uses, so the tab reads as what it opens.
+function StoriesIcon() {
   return (
     <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
-      <circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" strokeWidth="2.4" />
-      <path d="M20 20l-4.6-4.6" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+      <circle
+        cx="12"
+        cy="12"
+        r="9"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+        strokeDasharray="7 3.4"
+      />
+      <circle cx="12" cy="12" r="4" fill="currentColor" />
     </svg>
   );
 }

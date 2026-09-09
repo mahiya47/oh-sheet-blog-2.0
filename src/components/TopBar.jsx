@@ -56,7 +56,7 @@ export default function TopBar() {
       <div className="app-topbar-actions">
         <button
           type="button"
-          className="app-icon-btn app-desktop-only"
+          className="app-icon-btn"
           aria-label="Search"
           onClick={() => navigate("/search")}
         >
