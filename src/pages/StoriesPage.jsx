@@ -6,16 +6,17 @@ import CreateStoryModal from "../components/CreateStoryModal.jsx";
 import StoryViewerModal from "../components/StoryViewerModal.jsx";
 
 // The full stories screen, reached from the stories tab in the phone's
-// bottom bar. The home feed's StoriesBar is a one-line summary of the
-// same data (see story.controller.js's 24h-expiry model); this is the
-// roomy version — every author who has an active story as a tappable
-// card, with your own story and the composer pinned at the top.
+// bottom bar: your own story on top, then everyone else's as rows —
+// unwatched first, already-watched collapsed underneath. The home feed's
+// StoriesBar (desktop only now) is the one-line version of the same data;
+// see story.controller.js for the 24h-expiry model both render.
 export default function StoriesPage() {
   const { user } = useAuth();
   const [groups, setGroups] = useState(null); // null = still loading
   const [error, setError] = useState("");
-  const [showCreate, setShowCreate] = useState(false);
+  const [composerTab, setComposerTab] = useState(null); // null = closed
   const [viewingAuthorId, setViewingAuthorId] = useState(null);
+  const [showViewed, setShowViewed] = useState(true);
 
   function loadStories() {
     return api
@@ -52,6 +53,8 @@ export default function StoriesPage() {
 
   const myGroup = groups?.find((g) => g.authorId === user.id) || null;
   const others = groups?.filter((g) => g.authorId !== user.id) || [];
+  const unseen = others.filter((g) => g.hasUnseen);
+  const seen = others.filter((g) => !g.hasUnseen);
 
   return (
     <div className="app-page app-stories-page">
@@ -59,14 +62,17 @@ export default function StoriesPage() {
 
       {error && <p className="app-auth-error">{error}</p>}
 
-      {/* Your own story: view what you posted, or start one. */}
-      <div className="app-stories-mine">
-        <button
-          type="button"
-          className="app-stories-mine-main"
-          onClick={() => (myGroup ? setViewingAuthorId(user.id) : setShowCreate(true))}
-        >
-          <span className={"app-story-ring" + (myGroup ? " is-own" : "")}>
+      {/* Your own story — tap to watch yours back, or to start one. The
+          + badge always opens the composer, even when you already have
+          one running. */}
+      <div className="app-story-rows">
+      <button
+        type="button"
+        className="app-story-row"
+        onClick={() => (myGroup ? setViewingAuthorId(user.id) : setComposerTab("text"))}
+      >
+        <span className="app-story-row-ring">
+          <span className={"app-story-ring" + (myGroup ? " is-own" : " is-empty")}>
             <span className="app-story-avatar">
               {user.avatarUrl ? (
                 <img src={user.avatarUrl} alt="" />
@@ -75,49 +81,105 @@ export default function StoriesPage() {
               )}
             </span>
           </span>
-          <span className="app-stories-mine-text">
-            <strong>Your story</strong>
-            <span>
-              {myGroup
-                ? `${myGroup.stories.length} active · ${totalViews(myGroup)} view${
-                    totalViews(myGroup) === 1 ? "" : "s"
-                  }`
-                : "Nothing posted yet"}
-            </span>
+          <span
+            className="app-story-row-add"
+            role="button"
+            tabIndex={0}
+            aria-label="Add to your story"
+            onClick={(e) => {
+              e.stopPropagation();
+              setComposerTab("text");
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                e.stopPropagation();
+                setComposerTab("text");
+              }
+            }}
+          >
+            +
           </span>
-        </button>
-        <button
-          type="button"
-          className="app-stories-add-btn"
-          onClick={() => setShowCreate(true)}
-        >
-          + Add
-        </button>
+        </span>
+        <span className="app-story-row-text">
+          <strong>{myGroup ? "Your story" : "Add story"}</strong>
+          <span>
+            {myGroup
+              ? `${myGroup.stories.length} update${myGroup.stories.length === 1 ? "" : "s"} · ${storyTime(latestAt(myGroup))}`
+              : "Disappears after 24 hours"}
+          </span>
+        </span>
+      </button>
       </div>
 
       {groups === null ? (
-        <div className="app-stories-grid">
-          {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="app-stories-card app-stories-card-skeleton" />
-          ))}
-        </div>
-      ) : others.length ? (
-        <div className="app-stories-grid">
-          {others.map((g) => (
-            <StoryCard key={g.authorId} group={g} onOpen={() => setViewingAuthorId(g.authorId)} />
+        <div className="app-story-rows">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="app-story-row app-story-row-skeleton" />
           ))}
         </div>
       ) : (
-        <p className="app-empty">
-          No one else has posted a story yet. Stories disappear after 24 hours.
-        </p>
+        <>
+          {unseen.length > 0 && (
+            <>
+              <p className="app-stories-label">Recent updates</p>
+              <div className="app-story-rows">
+                {unseen.map((g) => (
+                  <StoryRow key={g.authorId} group={g} onOpen={() => setViewingAuthorId(g.authorId)} />
+                ))}
+              </div>
+            </>
+          )}
+
+          {seen.length > 0 && (
+            <>
+              <button
+                type="button"
+                className="app-stories-label app-stories-label-toggle"
+                onClick={() => setShowViewed((v) => !v)}
+                aria-expanded={showViewed}
+              >
+                <span>Viewed updates</span>
+                <Chevron up={showViewed} />
+              </button>
+              {showViewed && (
+                <div className="app-story-rows">
+                  {seen.map((g) => (
+                    <StoryRow
+                      key={g.authorId}
+                      group={g}
+                      onOpen={() => setViewingAuthorId(g.authorId)}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+
+          {!others.length && (
+            <p className="app-empty">
+              No one else has posted a story yet. Stories disappear after 24 hours.
+            </p>
+          )}
+        </>
       )}
 
-      {showCreate && (
+      {/* Camera shortcut, floating clear of the bottom bar. */}
+      <button
+        type="button"
+        className="app-stories-fab"
+        aria-label="Add a photo or video story"
+        onClick={() => setComposerTab("media")}
+      >
+        <CameraIcon />
+      </button>
+
+      {composerTab && (
         <CreateStoryModal
-          onClose={() => setShowCreate(false)}
+          initialTab={composerTab}
+          onClose={() => setComposerTab(null)}
           onCreated={() => {
-            setShowCreate(false);
+            setComposerTab(null);
             loadStories();
           }}
         />
@@ -135,37 +197,10 @@ export default function StoriesPage() {
   );
 }
 
-function totalViews(group) {
-  return group.stories.reduce((sum, s) => sum + (s.viewCount || 0), 0);
-}
-
-// One author's stories as a card: their newest story as the backdrop
-// (photo, video poster frame, or the colored card a text story lives
-// on), with the ring showing whether anything in it is unwatched.
-function StoryCard({ group, onOpen }) {
-  const latest = group.stories[group.stories.length - 1];
-  const preview = latest?.imageUrl || latest?.videoUrl || null;
-  const isVideo = !latest?.imageUrl && !!latest?.videoUrl;
-
+function StoryRow({ group, onOpen }) {
   return (
-    <button
-      type="button"
-      className={"app-stories-card" + (group.hasUnseen ? " has-unseen" : "")}
-      onClick={onOpen}
-    >
-      <span className={"app-stories-card-media app-card-" + (latest?.backgroundColor || "yellow")}>
-        {preview ? (
-          isVideo ? (
-            <video src={latest.videoUrl} muted playsInline preload="metadata" />
-          ) : (
-            <img src={latest.imageUrl} alt="" />
-          )
-        ) : (
-          <span className="app-stories-card-text">{latest?.text}</span>
-        )}
-      </span>
-
-      <span className="app-stories-card-foot">
+    <button type="button" className="app-story-row" onClick={onOpen}>
+      <span className="app-story-row-ring">
         <span className={"app-story-ring" + (group.hasUnseen ? " has-unseen" : "")}>
           <span className="app-story-avatar">
             {group.author.avatarUrl ? (
@@ -175,8 +210,59 @@ function StoryCard({ group, onOpen }) {
             )}
           </span>
         </span>
-        <span className="app-stories-card-name">{group.author.username}</span>
+      </span>
+      <span className="app-story-row-text">
+        <strong>{group.author.name || group.author.username}</strong>
+        <span>{storyTime(latestAt(group))}</span>
       </span>
     </button>
+  );
+}
+
+function latestAt(group) {
+  return group.stories[group.stories.length - 1]?.createdAt;
+}
+
+// Stories only live 24 hours, so the timestamp is always today or
+// yesterday — a clock time reads better here than "3h".
+function storyTime(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  const now = new Date();
+  const sameDay =
+    d.getDate() === now.getDate() &&
+    d.getMonth() === now.getMonth() &&
+    d.getFullYear() === now.getFullYear();
+  if (sameDay) {
+    return d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+  }
+  return "Yesterday";
+}
+
+function Chevron({ up }) {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d={up ? "M6 14l6-6 6 6" : "M6 10l6 6 6-6"}
+        stroke="currentColor"
+        strokeWidth="2.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function CameraIcon() {
+  return (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M3 8.5A1.5 1.5 0 014.5 7h2.2l1.1-1.8A1 1 0 018.7 4.7h5.6a1 1 0 01.9.5L16.3 7h2.2A1.5 1.5 0 0120 8.5v9A1.5 1.5 0 0118.5 19h-14A1.5 1.5 0 013 17.5z"
+        stroke="currentColor"
+        strokeWidth="2.1"
+        strokeLinejoin="round"
+      />
+      <circle cx="11.5" cy="13" r="3.4" stroke="currentColor" strokeWidth="2.1" />
+    </svg>
   );
 }

@@ -8,8 +8,10 @@ const MAX_STORY_TEXT = 300;
 // circle. Three mutually exclusive kinds: text (on a colored card, same
 // five swatches a post card can land on), or a single photo/video. See
 // story.controller.js's createStory for the matching backend validation.
-export default function CreateStoryModal({ onClose, onCreated }) {
-  const [tab, setTab] = useState("text"); // "text" | "media"
+export default function CreateStoryModal({ onClose, onCreated, initialTab = "text" }) {
+  // initialTab lets a caller open straight onto the photo/video side —
+  // the stories page's camera button does that.
+  const [tab, setTab] = useState(initialTab); // "text" | "media"
   const [text, setText] = useState("");
   const [color, setColor] = useState(STORY_COLORS[0]);
   const [media, setMedia] = useState(null); // { url, kind, previewSrc }

@@ -48,7 +48,11 @@ export default function HomePage() {
 
   return (
     <div className="app-page">
-      <StoriesBar />
+      {/* Phones get the full Stories tab in the bottom bar instead of
+          this strip; on desktop there's no bottom bar, so it stays. */}
+      <div className="app-stories-bar-wrap">
+        <StoriesBar />
+      </div>
 
       {error && <p className="app-auth-error">{error}</p>}
 
