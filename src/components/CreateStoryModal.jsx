@@ -3,51 +3,80 @@ import { api } from "../lib/api.js";
 
 const STORY_COLORS = ["green", "yellow", "pink", "blue", "purple"];
 const MAX_STORY_TEXT = 300;
+const MAX_CAPTION = 120;
 
-// The story composer — reached from the "+" on the stories bar's own
-// circle. Three mutually exclusive kinds: text (on a colored card, same
-// five swatches a post card can land on), or a single photo/video. See
-// story.controller.js's createStory for the matching backend validation.
-export default function CreateStoryModal({ onClose, onCreated, initialTab = "text" }) {
-  // initialTab lets a caller open straight onto the photo/video side —
-  // the stories page's camera button does that.
-  const [tab, setTab] = useState(initialTab); // "text" | "media"
+// Text colours for writing on a photo — plain white/black read on most
+// pictures, the brand colours are there for fun.
+const CAPTION_COLORS = ["#ffffff", "#1c1810", "#f5c945", "#a3e6a1", "#f6a8cd", "#a3d8f2"];
+const CAPTION_POSITIONS = [
+  { key: "top", label: "Top" },
+  { key: "middle", label: "Middle" },
+  { key: "bottom", label: "Bottom" },
+];
+// Longest edge of an uploaded photo. Phone cameras produce far bigger
+// images than a story ever displays, and the caption is burned in at
+// this size, so shrinking first keeps the upload quick.
+const MAX_IMAGE_EDGE = 1440;
+
+// The story composer. Two kinds, matching what story.controller.js's
+// createStory accepts (one of text, image, or video — never a mix):
+//
+//   Text  — words on one of the five brand-coloured cards.
+//   Photo/video — a single picture or clip. On a photo you can write
+//     over the picture; since the backend won't store a caption next to
+//     an image, the words are drawn into the picture itself before it's
+//     uploaded, which is also what makes them land where you placed them.
+//
+// initialTab opens straight onto one side (the stories page's camera
+// button uses it); initialFile pre-loads a picture that was just taken.
+export default function CreateStoryModal({ onClose, onCreated, initialTab = "text", initialFile = null }) {
+  const [tab, setTab] = useState(initialFile ? "media" : initialTab);
   const [text, setText] = useState("");
   const [color, setColor] = useState(STORY_COLORS[0]);
-  const [media, setMedia] = useState(null); // { url, kind, previewSrc }
-  const [uploading, setUploading] = useState(false);
+  // { file, previewSrc, kind } — held locally and uploaded on Share, so
+  // a caption can be drawn in first.
+  const [media, setMedia] = useState(null);
+  const [caption, setCaption] = useState("");
+  const [captionColor, setCaptionColor] = useState(CAPTION_COLORS[0]);
+  const [captionPos, setCaptionPos] = useState("bottom");
   const [posting, setPosting] = useState(false);
   const [error, setError] = useState("");
   const fileInputRef = useRef(null);
 
-  // URL.createObjectURL(file) below never gets revoked on its own — the
-  // browser keeps that blob alive in memory until revokeObjectURL is
-  // called or the page unloads. This fires whenever `media` changes
-  // (covers removing the attachment and attaching a different one) and
-  // once more on unmount (covers closing the modal, or posting
-  // successfully and the modal going away with it).
+  // A photo handed over by the camera arrives ready to go.
+  useEffect(() => {
+    if (!initialFile) return;
+    setMedia({
+      file: initialFile,
+      previewSrc: URL.createObjectURL(initialFile),
+      kind: initialFile.type.startsWith("video") ? "video" : "image",
+    });
+  }, [initialFile]);
+
+  // URL.createObjectURL(file) never gets revoked on its own — the
+  // browser keeps that blob alive until revokeObjectURL is called or the
+  // page unloads. This fires whenever `media` changes (covers removing
+  // the attachment and attaching a different one) and once more on
+  // unmount (covers closing the modal, or posting successfully).
   useEffect(() => {
     return () => {
       if (media?.previewSrc) URL.revokeObjectURL(media.previewSrc);
     };
   }, [media]);
 
-  async function handleAttachFile(e) {
+  function handleAttachFile(e) {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
-    setUploading(true);
     setError("");
-    try {
-      const uploaded = await api.uploadMedia(file);
-      setMedia({ ...uploaded, previewSrc: URL.createObjectURL(file) });
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setUploading(false);
-    }
+    setMedia({
+      file,
+      previewSrc: URL.createObjectURL(file),
+      kind: file.type.startsWith("video") ? "video" : "image",
+    });
   }
 
+  const isPhoto = media?.kind === "image";
   const canPost = tab === "text" ? text.trim().length > 0 : !!media;
 
   async function handlePost() {
@@ -55,13 +84,24 @@ export default function CreateStoryModal({ onClose, onCreated, initialTab = "tex
     setPosting(true);
     setError("");
     try {
-      const payload =
-        tab === "text"
-          ? { text: text.trim(), backgroundColor: color }
-          : media.kind === "image"
-            ? { imageUrl: media.url }
-            : { videoUrl: media.url };
-      await api.createStory(payload);
+      if (tab === "text") {
+        await api.createStory({ text: text.trim(), backgroundColor: color });
+      } else {
+        // A photo with words on it gets flattened into one picture
+        // first; everything else uploads as-is.
+        const toUpload =
+          isPhoto && caption.trim()
+            ? await burnCaption(media.previewSrc, {
+                text: caption.trim(),
+                color: captionColor,
+                position: captionPos,
+              })
+            : media.file;
+        const uploaded = await api.uploadMedia(toUpload);
+        await api.createStory(
+          uploaded.kind === "video" ? { videoUrl: uploaded.url } : { imageUrl: uploaded.url }
+        );
+      }
       onCreated();
     } catch (err) {
       setError(err.message || "Couldn't post story");
@@ -122,27 +162,90 @@ export default function CreateStoryModal({ onClose, onCreated, initialTab = "tex
             </>
           ) : (
             <>
-              {uploading && <p className="app-composer-uploading">Uploading...</p>}
               {media ? (
-                <div className="app-composer-attachment">
-                  {media.kind === "image" ? (
-                    <img src={media.previewSrc} alt="Story preview" />
-                  ) : (
-                    <video src={media.previewSrc} controls />
+                <>
+                  <div className="app-story-media-stage">
+                    {isPhoto ? (
+                      <img src={media.previewSrc} alt="Story preview" />
+                    ) : (
+                      <video src={media.previewSrc} controls />
+                    )}
+                    {isPhoto && caption.trim() && (
+                      <span
+                        className={"app-story-caption-overlay is-" + captionPos}
+                        style={{ color: captionColor }}
+                      >
+                        {caption}
+                      </span>
+                    )}
+                    <button
+                      type="button"
+                      className="app-story-media-remove"
+                      onClick={() => {
+                        setMedia(null);
+                        setCaption("");
+                      }}
+                      aria-label="Remove"
+                    >
+                      ×
+                    </button>
+                  </div>
+
+                  {isPhoto && (
+                    <div className="app-story-caption-tools">
+                      <input
+                        type="text"
+                        className="app-story-caption-input"
+                        maxLength={MAX_CAPTION}
+                        value={caption}
+                        placeholder="Write on the photo..."
+                        onChange={(e) => setCaption(e.target.value)}
+                      />
+                      {caption.trim() && (
+                        <>
+                          <div className="app-story-caption-row">
+                            {CAPTION_COLORS.map((c) => (
+                              <button
+                                key={c}
+                                type="button"
+                                className={
+                                  "app-story-caption-swatch" + (c === captionColor ? " is-selected" : "")
+                                }
+                                style={{ background: c }}
+                                onClick={() => setCaptionColor(c)}
+                                aria-label={`Text colour ${c}`}
+                              />
+                            ))}
+                          </div>
+                          <div className="app-story-caption-row">
+                            {CAPTION_POSITIONS.map((p) => (
+                              <button
+                                key={p.key}
+                                type="button"
+                                className={
+                                  "app-story-caption-pos" + (p.key === captionPos ? " is-selected" : "")
+                                }
+                                onClick={() => setCaptionPos(p.key)}
+                              >
+                                {p.label}
+                              </button>
+                            ))}
+                          </div>
+                        </>
+                      )}
+                    </div>
                   )}
-                  <button type="button" onClick={() => setMedia(null)} aria-label="Remove">
-                    ×
+                </>
+              ) : (
+                <div className="app-story-attach-wrap">
+                  <button
+                    type="button"
+                    className="app-create-attach"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    Choose a photo or video
                   </button>
                 </div>
-              ) : (
-                <button
-                  type="button"
-                  className="app-create-attach"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={uploading}
-                >
-                  Choose a photo or video
-                </button>
               )}
               <input
                 ref={fileInputRef}
@@ -158,9 +261,9 @@ export default function CreateStoryModal({ onClose, onCreated, initialTab = "tex
 
           <button
             type="button"
-            className="app-arcade-btn app-whatsnew-done"
+            className="app-arcade-btn app-whatsnew-done app-story-share-btn"
             onClick={handlePost}
-            disabled={!canPost || posting || uploading}
+            disabled={!canPost || posting}
           >
             {posting ? "Posting..." : "Share to your story"}
           </button>
@@ -168,4 +271,86 @@ export default function CreateStoryModal({ onClose, onCreated, initialTab = "tex
       </div>
     </div>
   );
+}
+
+// Draws the picture and the words into one flattened JPEG, matching
+// where the overlay sits in the preview. Returns a File ready to upload.
+async function burnCaption(src, { text, color, position }) {
+  const img = await loadImage(src);
+
+  const scale = Math.min(1, MAX_IMAGE_EDGE / Math.max(img.naturalWidth, img.naturalHeight));
+  const w = Math.round(img.naturalWidth * scale);
+  const h = Math.round(img.naturalHeight * scale);
+
+  const canvas = document.createElement("canvas");
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(img, 0, 0, w, h);
+
+  // Wait for the display font before measuring, or the lines get laid
+  // out against a fallback and then redrawn wider than measured.
+  await document.fonts?.ready?.catch(() => {});
+
+  const fontSize = Math.round(w / 14);
+  const lineHeight = Math.round(fontSize * 1.25);
+  ctx.font = `700 ${fontSize}px Fredoka, Nunito, system-ui, sans-serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+
+  const lines = wrapLines(ctx, text, w * 0.86);
+  const blockHeight = lines.length * lineHeight;
+  const pad = Math.round(fontSize * 0.55);
+
+  let top;
+  if (position === "top") top = pad * 2;
+  else if (position === "middle") top = Math.round((h - blockHeight) / 2);
+  else top = h - blockHeight - pad * 2;
+  top = Math.max(pad, Math.min(top, h - blockHeight - pad));
+
+  // A soft dark band behind the words so they stay readable over a busy
+  // photo, skipped when the text is dark (it's being used on a light
+  // picture, and a dark band would fight it).
+  if (color !== "#1c1810") {
+    ctx.fillStyle = "rgba(0, 0, 0, 0.32)";
+    ctx.fillRect(0, top - pad, w, blockHeight + pad * 2);
+  }
+
+  ctx.fillStyle = color;
+  ctx.shadowColor = "rgba(0, 0, 0, 0.45)";
+  ctx.shadowBlur = Math.round(fontSize * 0.25);
+  lines.forEach((line, i) => {
+    ctx.fillText(line, w / 2, top + i * lineHeight + lineHeight / 2);
+  });
+
+  const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.9));
+  if (!blob) throw new Error("Couldn't prepare the photo");
+  return new File([blob], `story-${Date.now()}.jpg`, { type: "image/jpeg" });
+}
+
+function loadImage(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error("Couldn't read that photo"));
+    img.src = src;
+  });
+}
+
+function wrapLines(ctx, text, maxWidth) {
+  const lines = [];
+  for (const paragraph of text.split("\n")) {
+    let line = "";
+    for (const word of paragraph.split(/\s+/).filter(Boolean)) {
+      const next = line ? `${line} ${word}` : word;
+      if (ctx.measureText(next).width > maxWidth && line) {
+        lines.push(line);
+        line = word;
+      } else {
+        line = next;
+      }
+    }
+    lines.push(line);
+  }
+  return lines.filter((l) => l.length);
 }

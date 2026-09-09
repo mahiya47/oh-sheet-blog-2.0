@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext.jsx";
 import { api } from "../lib/api.js";
 import CreateStoryModal from "../components/CreateStoryModal.jsx";
 import StoryViewerModal from "../components/StoryViewerModal.jsx";
+import CameraCaptureModal from "../components/CameraCaptureModal.jsx";
 
 // The full stories screen, reached from the stories tab in the phone's
 // bottom bar: your own story on top, then everyone else's as rows —
@@ -17,6 +18,8 @@ export default function StoriesPage() {
   const [composerTab, setComposerTab] = useState(null); // null = closed
   const [viewingAuthorId, setViewingAuthorId] = useState(null);
   const [showViewed, setShowViewed] = useState(true);
+  const [showCamera, setShowCamera] = useState(false);
+  const [cameraShot, setCameraShot] = useState(null); // File from the camera
 
   function loadStories() {
     return api
@@ -169,17 +172,35 @@ export default function StoriesPage() {
         type="button"
         className="app-stories-fab"
         aria-label="Add a photo or video story"
-        onClick={() => setComposerTab("media")}
+        onClick={() => setShowCamera(true)}
       >
         <CameraIcon />
       </button>
 
+      {showCamera && (
+        <CameraCaptureModal
+          onClose={() => setShowCamera(false)}
+          onCapture={(file) => {
+            // Straight from the shutter into the composer, where the
+            // photo can be written on before it goes up.
+            setShowCamera(false);
+            setCameraShot(file);
+            setComposerTab("media");
+          }}
+        />
+      )}
+
       {composerTab && (
         <CreateStoryModal
           initialTab={composerTab}
-          onClose={() => setComposerTab(null)}
+          initialFile={cameraShot}
+          onClose={() => {
+            setComposerTab(null);
+            setCameraShot(null);
+          }}
           onCreated={() => {
             setComposerTab(null);
+            setCameraShot(null);
             loadStories();
           }}
         />

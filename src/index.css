@@ -6759,3 +6759,240 @@ button.app-stories-label-toggle {
     right: 28px;
   }
 }
+
+/* ---- Story composer: photo stage, writing on a photo ---- */
+/* The attach button gets breathing room from Share below it, and sits
+   centred rather than stretched edge to edge. */
+.app-story-attach-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 6px 0 4px;
+}
+.app-story-attach-wrap .app-create-attach {
+  width: auto;
+  min-width: 62%;
+}
+.app-story-share-btn {
+  margin-top: 14px;
+}
+
+/* The picture being composed, with the caption drawn over it exactly
+   where it will be burned into the photo on Share. */
+.app-story-media-stage {
+  position: relative;
+  border: var(--app-border-w) solid var(--app-border);
+  border-radius: var(--app-radius-md);
+  overflow: hidden;
+  background: var(--app-bg-deep);
+  display: flex;
+}
+.app-story-media-stage img,
+.app-story-media-stage video {
+  width: 100%;
+  max-height: 320px;
+  object-fit: contain;
+  display: block;
+}
+.app-story-media-remove {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--app-border);
+  background: var(--app-surface);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--app-ink);
+}
+.app-story-caption-overlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  padding: 8px 12px;
+  font-family: var(--app-font-display);
+  font-weight: 700;
+  font-size: 1.15rem;
+  line-height: 1.25;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.32);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+  word-break: break-word;
+}
+.app-story-caption-overlay.is-top {
+  top: 10px;
+}
+.app-story-caption-overlay.is-middle {
+  top: 50%;
+  transform: translateY(-50%);
+}
+.app-story-caption-overlay.is-bottom {
+  bottom: 10px;
+}
+
+.app-story-caption-tools {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+.app-story-caption-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: var(--app-border-w) solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: var(--app-surface);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+.app-story-caption-input:focus {
+  outline: none;
+  background: var(--app-bg);
+}
+.app-story-caption-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.app-story-caption-swatch {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid var(--app-border);
+  cursor: pointer;
+}
+.app-story-caption-swatch.is-selected {
+  outline: 3px solid var(--app-ink);
+  outline-offset: 2px;
+}
+.app-story-caption-pos {
+  padding: 6px 14px;
+  border: 2px solid var(--app-border);
+  border-radius: 999px;
+  background: var(--app-surface);
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+  color: var(--app-ink);
+}
+.app-story-caption-pos.is-selected {
+  background: var(--app-accent);
+}
+
+/* ---- Live camera capture ---- */
+.app-camera-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+}
+.app-camera-stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.app-camera-video,
+.app-camera-shot {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+/* Front camera preview reads as a mirror, the way a selfie camera
+   should — the capture is flipped to match. */
+.app-camera-video.is-mirrored {
+  transform: scaleX(-1);
+}
+.app-camera-note {
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  text-align: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+.app-camera-note.is-error {
+  color: #ffd9d0;
+}
+.app-camera-close,
+.app-camera-flip {
+  position: absolute;
+  top: calc(14px + env(safe-area-inset-top, 0px));
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.75);
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.app-camera-close {
+  left: 14px;
+}
+.app-camera-flip {
+  right: 14px;
+}
+
+.app-camera-controls {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 18px calc(22px + env(safe-area-inset-bottom, 0px));
+  background: #000;
+}
+.app-camera-shutter {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  border: 5px solid #fff;
+  background: rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+}
+.app-camera-shutter:active {
+  transform: scale(0.94);
+}
+.app-camera-shutter:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.app-camera-spacer {
+  width: 96px;
+}
+.app-camera-secondary,
+.app-camera-primary {
+  /* Three of these share one row on a 360px phone, so they stay on one
+     line each rather than wrapping into stacked words. */
+  padding: 10px 13px;
+  border-radius: 999px;
+  border: 2px solid #fff;
+  background: transparent;
+  color: #fff;
+  font-family: var(--app-font-display);
+  font-weight: 700;
+  font-size: 0.82rem;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.app-camera-primary {
+  background: var(--app-accent);
+  border-color: var(--app-border);
+  color: var(--app-ink);
+}

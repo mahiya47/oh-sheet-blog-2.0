@@ -66,22 +66,22 @@ function linkClass({ isActive }) {
 // hand-drawn feel better than a generic house glyph.
 function HomeIcon() {
   return (
-    <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+    <svg width="29" height="29" viewBox="0 0 24 24" fill="none">
       <path
-        d="M4 12.5 Q12 3.5 20 12.5"
+        d="M2.6 12.2 Q12 2.2 21.4 12.2"
         stroke="currentColor"
-        strokeWidth="2.4"
+        strokeWidth="2.5"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <path
-        d="M5.5 11.5V19a1 1 0 001 1h11a1 1 0 001-1v-7.5"
+        d="M4.6 10.8V19.4a1 1 0 001 1h12.8a1 1 0 001-1v-8.6"
         stroke="currentColor"
-        strokeWidth="2.4"
+        strokeWidth="2.5"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <rect x="10" y="14.2" width="4" height="5.8" rx="1.2" fill="currentColor" />
+      <rect x="9.8" y="14" width="4.4" height="6.4" rx="1.3" fill="currentColor" />
     </svg>
   );
 }
@@ -90,12 +90,12 @@ function HomeIcon() {
 // a glance than a plain rectangle.
 function ChatIcon() {
   return (
-    <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
-      <rect x="3" y="4" width="18" height="13" rx="6" stroke="currentColor" strokeWidth="2.2" />
-      <path d="M6.5 17L6.5 20.5L10 17Z" fill="currentColor" />
-      <circle cx="9" cy="10.5" r="1.15" fill="currentColor" />
-      <circle cx="12" cy="10.5" r="1.15" fill="currentColor" />
-      <circle cx="15" cy="10.5" r="1.15" fill="currentColor" />
+    <svg width="29" height="29" viewBox="0 0 24 24" fill="none">
+      <rect x="1.8" y="3.2" width="20.4" height="14.4" rx="6.6" stroke="currentColor" strokeWidth="2.4" />
+      <path d="M6 17.4L6 21.8L10.4 17.6Z" fill="currentColor" />
+      <circle cx="8" cy="10.4" r="1.35" fill="currentColor" />
+      <circle cx="12" cy="10.4" r="1.35" fill="currentColor" />
+      <circle cx="16" cy="10.4" r="1.35" fill="currentColor" />
     </svg>
   );
 }
