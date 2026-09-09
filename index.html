@@ -24,9 +24,106 @@
     <meta property="og:description" content="A place to post your sheets, upvote the good ones, and follow along." />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary" />
+    <style>
+      /* Opening screen. Inline (not in index.css) and in the HTML itself
+         (not in React) so it paints the moment the page lands, carrying
+         straight on from the phone's own launch screen instead of the
+         blank gap that used to sit there while the app loaded. */
+      #app-splash {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: #f2e8d8;
+        opacity: 1;
+        transition: opacity 0.35s ease;
+      }
+      #app-splash.is-hiding {
+        opacity: 0;
+        pointer-events: none;
+      }
+      #app-splash .app-splash-badge {
+        /* Rounded square, not a circle — it matches the app icon Android
+           shows on its own launch screen a moment earlier, so this reads
+           as that screen gaining a credit line rather than a new one. */
+        width: 104px;
+        height: 104px;
+        border-radius: 26px;
+        background: #f5c945;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      #app-splash .app-splash-credit {
+        position: absolute;
+        bottom: calc(28px + env(safe-area-inset-bottom, 0px));
+        left: 0;
+        right: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        color: #1c1810;
+        font-family: "Fredoka", "Nunito", system-ui, sans-serif;
+      }
+      #app-splash .app-splash-credit span {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #6b6252;
+      }
+      #app-splash .app-splash-credit strong {
+        font-size: 1.05rem;
+        font-weight: 700;
+      }
+    </style>
   </head>
   <body>
+    <div id="app-splash" aria-hidden="true">
+      <div class="app-splash-badge">
+        <svg width="62" height="62" viewBox="0 0 48 48">
+          <path
+            d="M9,22 A15,15 0 0 1 39,22 L39,34.5 Q35,42 31.5,34.5 Q28,42 24,34.5 Q20,42 16.5,34.5 Q12.5,42 9,34.5 Z"
+            fill="#ffffff" stroke="#1c1810" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round" />
+          <circle cx="18" cy="23" r="2.1" fill="#1c1810" />
+          <circle cx="30" cy="23" r="2.1" fill="#1c1810" />
+          <path d="M19,29 Q24,32 29,29" fill="none" stroke="#1c1810" stroke-width="2.2" stroke-linecap="round" />
+        </svg>
+      </div>
+      <div class="app-splash-credit">
+        <span>From</span>
+        <strong>Sourabh Mahiya</strong>
+      </div>
+    </div>
+
     <div id="root"></div>
+    <script>
+      (function () {
+        var MIN_MS = 1200;
+        var shownAt = Date.now();
+        var splash = document.getElementById("app-splash");
+        var hidden = false;
+
+        function hide() {
+          if (hidden || !splash) return;
+          hidden = true;
+          splash.classList.add("is-hiding");
+          setTimeout(function () {
+            splash.remove();
+          }, 400);
+        }
+
+        // main.jsx calls this once React has rendered.
+        window.__appReady = function () {
+          setTimeout(hide, Math.max(0, MIN_MS - (Date.now() - shownAt)));
+        };
+        // Belt and braces: never leave the splash up if the app fails to
+        // boot at all.
+        setTimeout(hide, 6000);
+      })();
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

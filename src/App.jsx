@@ -50,7 +50,6 @@ import MonopolyPage from "./pages/arcade/MonopolyPage.jsx";
 import IncomingChallengeModal from "./components/IncomingChallengeModal.jsx";
 import AppAnnouncementsGate from "./components/AppAnnouncementsGate.jsx";
 import InstallAppPrompt from "./components/InstallAppPrompt.jsx";
-import SplashScreen from "./components/SplashScreen.jsx";
 import { api } from "./lib/api.js";
 
 // Pages that render "bare" — no TopBar, SideNav, RightRail or BottomNav —
@@ -153,7 +152,6 @@ export default function App() {
         <main className="app-bare-main">{routes}</main>
         <IncomingChallengeModal />
         <InstallAppPrompt />
-        <SplashScreen />
       </div>
     );
   }
@@ -170,7 +168,6 @@ export default function App() {
       <IncomingChallengeModal />
       <AppAnnouncementsGate />
       <InstallAppPrompt />
-      <SplashScreen />
     </div>
   );
 }

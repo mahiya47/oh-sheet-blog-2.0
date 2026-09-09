@@ -7,16 +7,25 @@
 // Bump this when this file's caching logic changes in a way that should
 // throw away what's stored (a corrupt cache is worse than an empty one) —
 // the old-named caches get deleted on the next activate.
-const CACHE_VERSION = "v2";
+const CACHE_VERSION = "v3";
 const SHELL_CACHE = `app-shell-${CACHE_VERSION}`;
 const API_CACHE = `api-cache-${CACHE_VERSION}`;
 
-// Paths (by extension/prefix) treated as the immutable app shell — Vite's
-// hashed build output plus the icons/manifest, all cache-first since a new
-// deploy simply produces new hashed filenames rather than changing these.
-function isShellAsset(url) {
+// Vite's hashed build output: genuinely immutable, because a new deploy
+// produces new filenames rather than changing these. Safe to serve
+// cache-first forever.
+function isImmutableAsset(url) {
+  return url.pathname.startsWith("/assets/");
+}
+
+// The icons, manifest and favicon keep the SAME filenames across deploys,
+// so they are the opposite of immutable — cache-first pinned whatever
+// logo a device saw first, forever (which is how the old cat icon kept
+// turning up in Chrome's install prompt long after it was replaced).
+// These are served from cache for speed but refreshed in the background,
+// so a changed logo lands on the next visit.
+function isRevalidatingAsset(url) {
   return (
-    url.pathname.startsWith("/assets/") ||
     url.pathname.startsWith("/icons/") ||
     url.pathname === "/manifest.webmanifest" ||
     url.pathname === "/favicon.svg"
@@ -110,7 +119,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  if (isShellAsset(url)) {
+  if (isImmutableAsset(url)) {
     event.respondWith(
       caches.open(SHELL_CACHE).then(async (cache) => {
         const cached = await cache.match(request);
@@ -118,6 +127,24 @@ self.addEventListener("fetch", (event) => {
         const response = await fetch(request);
         if (response.ok) cache.put(request, response.clone());
         return response;
+      }),
+    );
+    return;
+  }
+
+  // Stale-while-revalidate: answer from cache instantly, then quietly
+  // replace it with whatever the network returns for next time.
+  if (isRevalidatingAsset(url)) {
+    event.respondWith(
+      caches.open(SHELL_CACHE).then(async (cache) => {
+        const cached = await cache.match(request);
+        const fetching = fetch(request)
+          .then((response) => {
+            if (response.ok) cache.put(request, response.clone());
+            return response;
+          })
+          .catch(() => cached || Response.error());
+        return cached || fetching;
       }),
     );
     return;
