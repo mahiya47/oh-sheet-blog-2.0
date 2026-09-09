@@ -97,6 +97,23 @@
         <strong>Sourabh Mahiya</strong>
       </div>
     </div>
+    <script>
+      // The opening screen belongs to the installed app, not to a browser
+      // tab: in a tab it would just sit on top of the feed's loading
+      // skeleton and hide it. This runs before the browser paints, so a
+      // tab never shows the screen even for a frame.
+      (function () {
+        var installed =
+          window.matchMedia("(display-mode: standalone)").matches ||
+          window.matchMedia("(display-mode: fullscreen)").matches ||
+          window.matchMedia("(display-mode: minimal-ui)").matches ||
+          window.navigator.standalone === true;
+        if (!installed) {
+          var el = document.getElementById("app-splash");
+          if (el) el.remove();
+        }
+      })();
+    </script>
 
     <div id="root"></div>
     <script>
@@ -105,6 +122,11 @@
         var shownAt = Date.now();
         var splash = document.getElementById("app-splash");
         var hidden = false;
+        // Removed above (browser tab) — nothing to fade out.
+        if (!splash) {
+          window.__appReady = function () {};
+          return;
+        }
 
         function hide() {
           if (hidden || !splash) return;
