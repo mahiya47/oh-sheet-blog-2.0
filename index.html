@@ -46,18 +46,36 @@
         pointer-events: none;
       }
       #app-splash .app-splash-badge {
-        /* Rounded square, not a circle — it matches the app icon Android
-           shows on its own launch screen a moment earlier, so this reads
-           as that screen gaining a credit line rather than a new one. */
-        width: 104px;
-        height: 104px;
-        border-radius: 26px;
+        /* Sized to sit exactly on top of the launch screen Android draws
+           a moment earlier — measured from a real device: tile 73.5% of
+           the screen width, dead centre, 21% corner radius, ghost 39% of
+           the tile. Android's screen can't be skipped or given text, so
+           the next best thing is for this one to land in precisely the
+           same place: what you see is one screen that gains a credit
+           line, not two screens swapping over. */
+        width: 73.5vw;
+        height: 73.5vw;
+        max-width: 340px;
+        max-height: 340px;
+        border-radius: 21%;
         background: #f5c945;
         display: flex;
         align-items: center;
         justify-content: center;
       }
+      #app-splash .app-splash-badge svg {
+        /* The ghost fills 62.5% of its own viewBox, so 69% of the tile
+           here puts the drawn mark at ~39% of the tile — matching what
+           the maskable icon renders at on Android's launch screen. */
+        width: 69%;
+        height: 69%;
+      }
+      @keyframes app-splash-credit-in {
+        from { opacity: 0; transform: translateY(6px); }
+        to { opacity: 1; transform: none; }
+      }
       #app-splash .app-splash-credit {
+        animation: app-splash-credit-in 0.45s ease both;
         position: absolute;
         bottom: calc(28px + env(safe-area-inset-bottom, 0px));
         left: 0;
@@ -118,7 +136,7 @@
     <div id="root"></div>
     <script>
       (function () {
-        var MIN_MS = 1200;
+        var MIN_MS = 650;   // brief brand beat, then the app's own loading skeleton takes over
         var shownAt = Date.now();
         var splash = document.getElementById("app-splash");
         var hidden = false;
