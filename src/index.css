@@ -717,13 +717,12 @@ ul {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: var(--app-surface);
-  border: var(--app-border-w) solid var(--app-border);
-  border-radius: var(--app-radius-sm);
-  padding: 6px 12px;
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 2px 2px 8px;
   font-weight: 700;
   font-size: 0.85rem;
-  margin-top: 8px;
   transform-origin: left center;
   animation: app-card-tab-in 450ms ease-out both;
 }
@@ -777,6 +776,7 @@ ul {
 .app-card-more-wrap {
   position: relative;
   flex-shrink: 0;
+  margin-left: auto;
 }
 .app-card-more {
   width: 28px;
@@ -806,7 +806,7 @@ ul {
 }
 .app-card-more-menu {
   position: absolute;
-  bottom: calc(100% + 8px);
+  top: calc(100% + 8px);
   right: 0;
   min-width: 150px;
   background: var(--app-surface);
