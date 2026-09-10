@@ -622,84 +622,88 @@ export default function FeedCard({ post, onDeleted, initiallyExpanded = false })
             {relativeTime(post.createdAt)}
           </Link>
 
-          <div className="app-card-more-wrap" ref={menuRef}>
-            <button
-              type="button"
-              className={
-                "app-card-more" +
-                (!isOwnPost ? (following ? " is-following" : " is-not-following") : "")
-              }
-              aria-label="More post options"
-              onClick={(e) => {
-                stop(e);
-                setMenuOpen((v) => !v);
-              }}
-            >
-              <NavIcon name="dots" />
-            </button>
-            {menuOpen && (
-              <div className="app-card-more-menu">
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    stop(e);
-                    setMenuOpen(false);
-                    navigate(`/profile/${post.author.username}`);
-                  }}
-                >
-                  Visit profile
-                </button>
-                {!isOwnPost && (
-                  <button type="button" onClick={handleToggleFollow}>
-                    {following ? "Unfollow" : "Follow"}
-                  </button>
-                )}
-                {isOwnPost ? (
-                  <>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        stop(e);
-                        setMenuOpen(false);
-                        setEditDraft(text);
-                        setEditDraftHtml(contentHtml);
-                        setEditImages(images);
-                        setEditVideoUrl(videoUrl);
-                        setIsEditing(true);
-                        setExpanded(false);
-                      }}
-                    >
-                      Edit post
-                    </button>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        stop(e);
-                        setMenuOpen(false);
-                        setShowAnalytics(true);
-                      }}
-                    >
-                      View analytics
-                    </button>
-                    <button type="button" className="app-card-more-danger" onClick={handleDeletePost}>
-                      Delete post
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button type="button" onClick={handleReport}>
-                      Report post
-                    </button>
-                    <button type="button" onClick={handleMuteToggle}>
-                      {isMuted ? "Unmute" : `Mute @${post.author.username}`}
-                    </button>
-                    <button type="button" onClick={handleBlock}>
-                      Block
-                    </button>
-                  </>
-                )}
-              </div>
+          <div className="app-card-tab-right">
+            {!isOwnPost && (
+              <button
+                type="button"
+                className="app-card-follow"
+                onClick={handleToggleFollow}
+              >
+                {following ? "Following" : "Follow"}
+              </button>
             )}
+
+            <div className="app-card-more-wrap" ref={menuRef}>
+              <button
+                type="button"
+                className="app-card-more"
+                aria-label="More post options"
+                onClick={(e) => {
+                  stop(e);
+                  setMenuOpen((v) => !v);
+                }}
+              >
+                <NavIcon name="dots" />
+              </button>
+              {menuOpen && (
+                <div className="app-card-more-menu">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      stop(e);
+                      setMenuOpen(false);
+                      navigate(`/profile/${post.author.username}`);
+                    }}
+                  >
+                    Visit profile
+                  </button>
+                  {isOwnPost ? (
+                    <>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          stop(e);
+                          setMenuOpen(false);
+                          setEditDraft(text);
+                          setEditDraftHtml(contentHtml);
+                          setEditImages(images);
+                          setEditVideoUrl(videoUrl);
+                          setIsEditing(true);
+                          setExpanded(false);
+                        }}
+                      >
+                        Edit post
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          stop(e);
+                          setMenuOpen(false);
+                          setShowAnalytics(true);
+                        }}
+                      >
+                        View analytics
+                      </button>
+                      <button type="button" className="app-card-more-danger" onClick={handleDeletePost}>
+                        Delete post
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button type="button" onClick={handleReport}>
+                        Report post
+                      </button>
+                      <button type="button" onClick={handleMuteToggle}>
+                        {isMuted ? "Unmute" : `Mute @${post.author.username}`}
+                      </button>
+                      <button type="button" onClick={handleBlock}>
+                        Block
+                      </button>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

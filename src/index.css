@@ -758,25 +758,32 @@ ul {
 .app-card-time:hover {
   text-decoration: underline;
 }
-/* Follow + more-options live at the end of the folder tab, right next
-   to the name/time (this used to be where a NEW/fire badge sat). */
+/* Follow button sits in the header row, just left of the 3-dot menu —
+   same white/black-border treatment as the more button, text only
+   toggles between "Follow" and "Following". */
 .app-card-follow {
   flex-shrink: 0;
   padding: 5px 12px;
   border-radius: 999px;
   border: 2px solid var(--app-border);
-  background: var(--app-accent);
+  background: var(--app-surface);
+  color: var(--app-ink);
   font-weight: 700;
   font-size: 0.74rem;
   cursor: pointer;
 }
-.app-card-follow.is-following {
-  background: var(--app-surface);
+/* Groups the Follow chip and the 3-dot menu together, flush against the
+   right edge of the header row. */
+.app-card-tab-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  flex-shrink: 0;
 }
 .app-card-more-wrap {
   position: relative;
   flex-shrink: 0;
-  margin-left: auto;
 }
 .app-card-more {
   width: 28px;
@@ -788,17 +795,6 @@ ul {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-}
-/* Doubles as the follow-status indicator now that Follow/Unfollow moved
-   into this menu — green once you follow them, red until you do. */
-.app-card-more.is-following {
-  background: var(--app-green);
-  border-color: var(--app-green);
-}
-.app-card-more.is-not-following {
-  background: rgba(192, 57, 43, 0.25);
-  border-color: #c0392b;
-  color: #c0392b;
 }
 .app-card-more svg {
   width: 16px;
