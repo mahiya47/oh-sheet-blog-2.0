@@ -33,7 +33,10 @@ export default function MessageThreadPage() {
   const [error, setError] = useState("");
   const [notFound, setNotFound] = useState(false);
   const [otherTyping, setOtherTyping] = useState(false);
+  const [following, setFollowing] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const scrollRef = useRef(null);
+  const menuRef = useRef(null);
   const lastTypingEmitRef = useRef(0);
   const typingIdleTimerRef = useRef(null);
   const otherUserIdRef = useRef(null);
@@ -72,6 +75,28 @@ export default function MessageThreadPage() {
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
   }, [messages]);
+
+  // Follow status isn't part of getThread's response, so it's fetched
+  // once per conversation (not on every 4s poll) as soon as we know who
+  // the other user is.
+  useEffect(() => {
+    if (!otherUser) return;
+    api
+      .getFollowInfo(otherUser.id)
+      .then((info) => setFollowing(!!info.isFollowing))
+      .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [otherUser?.id]);
+
+  useEffect(() => {
+    function onClick(e) {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, []);
 
   // Typing indicator — reuses the same authenticated socket the arcade
   // "challenge a friend" feature already keeps open (see
@@ -150,6 +175,44 @@ export default function MessageThreadPage() {
     }
   }
 
+  async function handleToggleFollow() {
+    if (!otherUser) return;
+    const next = !following;
+    setFollowing(next);
+    try {
+      if (next) await api.follow(otherUser.id);
+      else await api.unfollow(otherUser.id);
+    } catch {
+      setFollowing(!next);
+    }
+  }
+
+  async function handleReportUser() {
+    setMenuOpen(false);
+    if (!otherUser) return;
+    const reason = window.prompt(`Why are you reporting @${otherUser.username}?`);
+    if (!reason || !reason.trim()) return;
+    try {
+      await api.report(otherUser.id, reason.trim());
+      alert("Report submitted.");
+    } catch (err) {
+      alert(err.message || "Couldn't submit report");
+    }
+  }
+
+  async function handleBlockUser() {
+    setMenuOpen(false);
+    if (!otherUser) return;
+    if (!window.confirm(`Block @${otherUser.username}?`)) return;
+    try {
+      await api.block(otherUser.id);
+      alert(`@${otherUser.username} is blocked.`);
+      navigate("/messages");
+    } catch (err) {
+      alert(err.message || "Couldn't block user");
+    }
+  }
+
   if (!user) return null;
 
   if (notFound) {
@@ -179,6 +242,34 @@ export default function MessageThreadPage() {
           </Link>
         ) : (
           <span className="app-dm-thread-who">Loading...</span>
+        )}
+
+        {otherUser && (
+          <div className="app-card-tab-right">
+            <button type="button" className="app-card-follow" onClick={handleToggleFollow}>
+              {following ? "Following" : "Follow"}
+            </button>
+            <div className="app-card-more-wrap" ref={menuRef}>
+              <button
+                type="button"
+                className="app-card-more"
+                aria-label="More options"
+                onClick={() => setMenuOpen((v) => !v)}
+              >
+                <NavIcon name="dots" />
+              </button>
+              {menuOpen && (
+                <div className="app-card-more-menu">
+                  <button type="button" onClick={handleReportUser}>
+                    Report
+                  </button>
+                  <button type="button" onClick={handleBlockUser}>
+                    Block
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
         )}
       </div>
 
