@@ -540,103 +540,6 @@ export default function FeedCard({ post, onDeleted, initiallyExpanded = false })
       className={`app-card app-card-${cardColor}`}
       onClick={() => setExpanded((v) => !v)}
     >
-      <div className="app-card-tab">
-        <Link to={`/profile/${post.author.username}`} className="app-card-dp" onClick={stop}>
-          {post.author.avatarUrl ? (
-            <img src={post.author.avatarUrl} alt="" className="app-card-dp-photo" />
-          ) : (
-            displayName.charAt(0).toUpperCase()
-          )}
-        </Link>
-        <Link to={`/profile/${post.author.username}`} className="app-card-name" onClick={stop}>
-          {displayName}
-        </Link>
-        <span className="app-card-dot">·</span>
-        <Link to={`/post/${post.id}`} className="app-card-time" onClick={stop}>
-          {relativeTime(post.createdAt)}
-        </Link>
-
-        <div className="app-card-more-wrap" ref={menuRef}>
-          <button
-            type="button"
-            className={
-              "app-card-more" +
-              (!isOwnPost ? (following ? " is-following" : " is-not-following") : "")
-            }
-            aria-label="More post options"
-            onClick={(e) => {
-              stop(e);
-              setMenuOpen((v) => !v);
-            }}
-          >
-            <NavIcon name="dots" />
-          </button>
-          {menuOpen && (
-            <div className="app-card-more-menu">
-              <button
-                type="button"
-                onClick={(e) => {
-                  stop(e);
-                  setMenuOpen(false);
-                  navigate(`/profile/${post.author.username}`);
-                }}
-              >
-                Visit profile
-              </button>
-              {!isOwnPost && (
-                <button type="button" onClick={handleToggleFollow}>
-                  {following ? "Unfollow" : "Follow"}
-                </button>
-              )}
-              {isOwnPost ? (
-                <>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      stop(e);
-                      setMenuOpen(false);
-                      setEditDraft(text);
-                      setEditDraftHtml(contentHtml);
-                      setEditImages(images);
-                      setEditVideoUrl(videoUrl);
-                      setIsEditing(true);
-                      setExpanded(false);
-                    }}
-                  >
-                    Edit post
-                  </button>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      stop(e);
-                      setMenuOpen(false);
-                      setShowAnalytics(true);
-                    }}
-                  >
-                    View analytics
-                  </button>
-                  <button type="button" className="app-card-more-danger" onClick={handleDeletePost}>
-                    Delete post
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button type="button" onClick={handleReport}>
-                    Report post
-                  </button>
-                  <button type="button" onClick={handleMuteToggle}>
-                    {isMuted ? "Unmute" : `Mute @${post.author.username}`}
-                  </button>
-                  <button type="button" onClick={handleBlock}>
-                    Block
-                  </button>
-                </>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-
       {isEditing ? (
         <form className="app-card-edit-form" onClick={stop} onSubmit={handleSaveEdit}>
           <RichTextEditor
@@ -819,6 +722,103 @@ export default function FeedCard({ post, onDeleted, initiallyExpanded = false })
             )}
           </div>
         )}
+      </div>
+
+      <div className="app-card-tab">
+        <Link to={`/profile/${post.author.username}`} className="app-card-dp" onClick={stop}>
+          {post.author.avatarUrl ? (
+            <img src={post.author.avatarUrl} alt="" className="app-card-dp-photo" />
+          ) : (
+            displayName.charAt(0).toUpperCase()
+          )}
+        </Link>
+        <Link to={`/profile/${post.author.username}`} className="app-card-name" onClick={stop}>
+          {displayName}
+        </Link>
+        <span className="app-card-dot">·</span>
+        <Link to={`/post/${post.id}`} className="app-card-time" onClick={stop}>
+          {relativeTime(post.createdAt)}
+        </Link>
+
+        <div className="app-card-more-wrap" ref={menuRef}>
+          <button
+            type="button"
+            className={
+              "app-card-more" +
+              (!isOwnPost ? (following ? " is-following" : " is-not-following") : "")
+            }
+            aria-label="More post options"
+            onClick={(e) => {
+              stop(e);
+              setMenuOpen((v) => !v);
+            }}
+          >
+            <NavIcon name="dots" />
+          </button>
+          {menuOpen && (
+            <div className="app-card-more-menu">
+              <button
+                type="button"
+                onClick={(e) => {
+                  stop(e);
+                  setMenuOpen(false);
+                  navigate(`/profile/${post.author.username}`);
+                }}
+              >
+                Visit profile
+              </button>
+              {!isOwnPost && (
+                <button type="button" onClick={handleToggleFollow}>
+                  {following ? "Unfollow" : "Follow"}
+                </button>
+              )}
+              {isOwnPost ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      stop(e);
+                      setMenuOpen(false);
+                      setEditDraft(text);
+                      setEditDraftHtml(contentHtml);
+                      setEditImages(images);
+                      setEditVideoUrl(videoUrl);
+                      setIsEditing(true);
+                      setExpanded(false);
+                    }}
+                  >
+                    Edit post
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      stop(e);
+                      setMenuOpen(false);
+                      setShowAnalytics(true);
+                    }}
+                  >
+                    View analytics
+                  </button>
+                  <button type="button" className="app-card-more-danger" onClick={handleDeletePost}>
+                    Delete post
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button type="button" onClick={handleReport}>
+                    Report post
+                  </button>
+                  <button type="button" onClick={handleMuteToggle}>
+                    {isMuted ? "Unmute" : `Mute @${post.author.username}`}
+                  </button>
+                  <button type="button" onClick={handleBlock}>
+                    Block
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {expanded && (

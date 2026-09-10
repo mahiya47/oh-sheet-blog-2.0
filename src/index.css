@@ -690,24 +690,9 @@ ul {
   position: relative;
   border: var(--app-border-w) solid var(--app-border);
   border-radius: var(--app-radius-lg);
-  padding: 26px 6px 6px;
+  padding: 10px 6px 6px;
   box-shadow: var(--app-shadow-lg);
   cursor: pointer;
-}
-/* The header pill is pulled up out of the card (see .app-card-tab's
-   translateY), so the row that reads as the top of the post actually
-   sits ~21px above the card's box. Tapping beside the pill up there hit
-   the feed background and did nothing. This extends the card's tap area
-   over that overhang — 24px, comfortably inside the 34px gap between
-   cards, so it never steals a tap from the post above. It paints before
-   the pill, so the avatar and name links on top of it still work. */
-.app-card::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: -24px;
-  height: 24px;
 }
 .app-card-green {
   background: var(--app-green);
@@ -725,21 +710,32 @@ ul {
   background: var(--app-purple);
 }
 
+/* Header row now lives inside the card, below the vote/comment/save
+   icons, instead of as a pill pulled up above the card. It expands in
+   from the left on first render. */
 .app-card-tab {
-  position: absolute;
-  top: 0;
-  left: 12px;
-  transform: translateY(-55%);
   display: flex;
   align-items: center;
   gap: 8px;
   background: var(--app-surface);
   border: var(--app-border-w) solid var(--app-border);
-  border-bottom: none;
-  border-radius: var(--app-radius-sm) var(--app-radius-sm) 0 0;
+  border-radius: var(--app-radius-sm);
   padding: 6px 12px;
   font-weight: 700;
   font-size: 0.85rem;
+  margin-top: 8px;
+  transform-origin: left center;
+  animation: app-card-tab-in 450ms ease-out both;
+}
+@keyframes app-card-tab-in {
+  from {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+  to {
+    transform: scaleX(1);
+    opacity: 1;
+  }
 }
 .app-card-dp {
   width: 22px;
@@ -810,7 +806,7 @@ ul {
 }
 .app-card-more-menu {
   position: absolute;
-  top: calc(100% + 8px);
+  bottom: calc(100% + 8px);
   right: 0;
   min-width: 150px;
   background: var(--app-surface);
