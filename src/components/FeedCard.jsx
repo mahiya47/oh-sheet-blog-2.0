@@ -148,6 +148,7 @@ export default function FeedCard({ post, onDeleted, initiallyExpanded = false })
   const { user } = useAuth();
   const navigate = useNavigate();
   const menuRef = useRef(null);
+  const taggedRef = useRef(null);
 
   const isOwnPost = !!post.isOwnPost;
 
@@ -203,6 +204,9 @@ export default function FeedCard({ post, onDeleted, initiallyExpanded = false })
     function onClick(e) {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
         setMenuOpen(false);
+      }
+      if (taggedRef.current && !taggedRef.current.contains(e.target)) {
+        setShowTagged(false);
       }
     }
     document.addEventListener("mousedown", onClick);
@@ -777,7 +781,7 @@ export default function FeedCard({ post, onDeleted, initiallyExpanded = false })
         </button>
 
         {taggedUsers.length > 0 && (
-          <div className="app-card-tagged" onClick={stop}>
+          <div className="app-card-tagged" onClick={stop} ref={taggedRef}>
             <button
               type="button"
               className="app-card-tagged-toggle"
@@ -794,6 +798,13 @@ export default function FeedCard({ post, onDeleted, initiallyExpanded = false })
                   {taggedUsers.map((u) => (
                     <li key={u.id}>
                       <Link to={`/profile/${u.username}`} onClick={stop}>
+                        <span className="app-card-tagged-dp">
+                          {u.avatarUrl ? (
+                            <img src={u.avatarUrl} alt="" />
+                          ) : (
+                            (u.name || u.username).charAt(0).toUpperCase()
+                          )}
+                        </span>
                         {u.name || u.username}
                       </Link>
                       {user?.id === u.id && (

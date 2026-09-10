@@ -28,3 +28,4 @@ _sync_incoming.tar.gz
 # Local secrets — never commit
 .env
 .env.local
+Claude outputs/
