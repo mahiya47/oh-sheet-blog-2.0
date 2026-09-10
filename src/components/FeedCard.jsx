@@ -790,30 +790,8 @@ export default function FeedCard({ post, onDeleted, initiallyExpanded = false })
           <p className="app-card-datetime">{fullDateTime(post.createdAt)}</p>
 
           <button type="button" className="app-card-voters-toggle" onClick={handleShowVoters}>
-            {showVoters ? "Hide reactions" : "See who upvoted or downvoted"}
+            Votes{upvotes ? ` · ${upvotes}` : ""}
           </button>
-          {showVoters && (
-            <div className="app-card-voters">
-              {!voters ? (
-                <p className="app-empty">Loading...</p>
-              ) : (
-                <>
-                  <p>
-                    <strong>Upvoted:</strong>{" "}
-                    {voters.upvoters.length
-                      ? voters.upvoters.map((u) => u.name || u.username).join(", ")
-                      : "No one yet"}
-                  </p>
-                  <p>
-                    <strong>Downvoted:</strong>{" "}
-                    {voters.downvoters.length
-                      ? voters.downvoters.map((u) => u.name || u.username).join(", ")
-                      : "No one yet"}
-                  </p>
-                </>
-              )}
-            </div>
-          )}
 
           <div className="app-card-comments-scroll">
             <div className="app-card-comments">
@@ -839,6 +817,61 @@ export default function FeedCard({ post, onDeleted, initiallyExpanded = false })
               )}
             </div>
           </div>
+
+          {showVoters && (
+            <div
+              className="app-modal-overlay"
+              onClick={(e) => {
+                stop(e);
+                setShowVoters(false);
+              }}
+            >
+              <div className="app-modal app-votes-modal" onClick={stop}>
+                <div className="app-modal-head">
+                  <h3>Upvotes</h3>
+                  <button
+                    type="button"
+                    className="app-modal-close"
+                    aria-label="Close"
+                    onClick={() => setShowVoters(false)}
+                  >
+                    ×
+                  </button>
+                </div>
+                <div className="app-modal-body">
+                  {!voters ? (
+                    <p className="app-empty">Loading...</p>
+                  ) : voters.upvoters.length ? (
+                    <ul className="app-votes-list">
+                      {voters.upvoters.map((u) => (
+                        <li key={u.id}>
+                          <Link
+                            to={`/profile/${u.username}`}
+                            className="app-votes-row"
+                            onClick={() => setShowVoters(false)}
+                          >
+                            <span className="app-votes-dp">
+                              {u.avatarUrl ? (
+                                <img src={u.avatarUrl} alt="" />
+                              ) : (
+                                (u.name || u.username).charAt(0).toUpperCase()
+                              )}
+                            </span>
+                            <span className="app-votes-names">
+                              <strong>{u.name || u.username}</strong>
+                              <span>@{u.username}</span>
+                            </span>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="app-empty">No upvotes yet.</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
 
           <form className="app-comment-form" onSubmit={handleAddComment}>
             <input

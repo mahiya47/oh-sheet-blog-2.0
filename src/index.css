@@ -694,6 +694,21 @@ ul {
   box-shadow: var(--app-shadow-lg);
   cursor: pointer;
 }
+/* The header pill is pulled up out of the card (see .app-card-tab's
+   translateY), so the row that reads as the top of the post actually
+   sits ~21px above the card's box. Tapping beside the pill up there hit
+   the feed background and did nothing. This extends the card's tap area
+   over that overhang — 24px, comfortably inside the 34px gap between
+   cards, so it never steals a tap from the post above. It paints before
+   the pill, so the avatar and name links on top of it still work. */
+.app-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -24px;
+  height: 24px;
+}
 .app-card-green {
   background: var(--app-green);
 }
@@ -944,8 +959,13 @@ ul {
   width: 15px;
   height: 15px;
 }
+/* Saved: fill the bookmark itself rather than flooding the whole button
+   with colour — the button is a control, the icon is the state. */
 .app-action-btn.is-active {
-  background: var(--app-green);
+  background: var(--app-surface);
+}
+.app-action-btn.is-active svg path {
+  fill: var(--app-green);
 }
 
 /* ---- Expanded post: date/time, upvote/downvote list, comments ---- */
@@ -966,23 +986,73 @@ ul {
 }
 .app-card-voters-toggle {
   align-self: flex-start;
-  background: none;
-  border: none;
-  padding: 0;
-  color: var(--app-ink);
-  font-weight: 700;
-  font-size: 0.82rem;
-  text-decoration: underline;
-  cursor: pointer;
-}
-.app-card-voters {
   background: var(--app-surface);
   border: 2px solid var(--app-border);
-  border-radius: var(--app-radius-sm);
-  padding: 10px 12px;
+  border-radius: 999px;
+  padding: 5px 14px;
+  color: var(--app-ink);
+  font-family: var(--app-font-display);
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+.app-card-voters-toggle:active {
+  background: var(--app-accent);
+}
+/* Who upvoted, in a modal — the list grows with every vote, and inline
+   it pushed the comments further down the more popular a post got. */
+.app-votes-modal .app-modal-body {
+  padding-top: 6px;
+}
+.app-votes-list {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+}
+.app-votes-list li + li {
+  border-top: 2px solid rgba(28, 24, 16, 0.14);
+}
+.app-votes-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 4px;
+  color: inherit;
+}
+.app-votes-row:active {
+  background: var(--app-bg-deep);
+}
+.app-votes-dp {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 2px solid var(--app-border);
+  background: var(--app-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--app-font-display);
+  font-weight: 700;
+  overflow: hidden;
+}
+.app-votes-dp img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.app-votes-names {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.app-votes-names strong {
+  font-family: var(--app-font-display);
+  font-size: 0.98rem;
+}
+.app-votes-names span {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--app-muted);
 }
 .app-card-voters p {
   margin: 0;
@@ -5927,23 +5997,44 @@ a.app-auth-logo-badge:hover {
 .app-story-ring.is-empty {
   background: var(--app-muted);
 }
-.app-story-row-add {
-  position: absolute;
-  right: -2px;
-  bottom: -2px;
-  width: 22px;
-  height: 22px;
+/* Your own row: the whole left side opens your story, and a separate
+   + button on the right adds to it (it used to hang off the avatar,
+   where it crowded the photo and was a small target). */
+.app-story-row-mine {
+  gap: 8px;
+}
+.app-story-row-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+  color: inherit;
+}
+.app-story-row-plus {
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  background: var(--app-accent);
   border: 2px solid var(--app-border);
+  background: var(--app-accent);
+  color: var(--app-ink);
+  font-family: var(--app-font-display);
+  font-weight: 700;
+  font-size: 1.3rem;
+  line-height: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--app-font-display);
-  font-weight: 700;
-  font-size: 0.95rem;
-  line-height: 1;
-  color: var(--app-ink);
+  cursor: pointer;
+}
+.app-story-row-plus:active {
+  transform: scale(0.95);
 }
 
 .app-story-row-text {
@@ -6248,4 +6339,68 @@ button.app-stories-label-toggle {
   background: var(--app-accent);
   border-color: var(--app-border);
   color: var(--app-ink);
+}
+
+/* ---- Messages: people you can start a chat with ---- */
+.app-dm-start-title {
+  margin: 18px 0 0;
+  font-family: var(--app-font-display);
+  font-size: 1rem;
+}
+.app-dm-start-list {
+  display: flex;
+  flex-direction: column;
+  background: var(--app-surface);
+  border: var(--app-border-w) solid var(--app-border);
+  border-radius: var(--app-radius-lg);
+  overflow: hidden;
+  margin-top: 8px;
+}
+.app-dm-start-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+}
+.app-dm-start-list li + li {
+  border-top: 2px solid rgba(28, 24, 16, 0.14);
+}
+.app-dm-start-who {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: inherit;
+}
+.app-dm-start-names {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.app-dm-start-names strong {
+  font-family: var(--app-font-display);
+  font-size: 0.98rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.app-dm-start-names span {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--app-muted);
+}
+.app-dm-start-btn {
+  flex-shrink: 0;
+  border: 2px solid var(--app-border);
+  background: var(--app-accent);
+  border-radius: 999px;
+  padding: 7px 16px;
+  font-family: var(--app-font-display);
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--app-ink);
+}
+.app-dm-start-btn:active {
+  transform: scale(0.97);
 }

@@ -13,6 +13,7 @@ export default function MessagesPage() {
   const navigate = useNavigate();
   const { refresh } = useDm();
   const [conversations, setConversations] = useState(null);
+  const [people, setPeople] = useState(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -38,7 +39,23 @@ export default function MessagesPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
+  // People to start a chat with: whoever you follow, falling back to the
+  // same suggestions the right rail shows when you don't follow anyone
+  // yet — otherwise a new account lands here with nothing to do.
+  useEffect(() => {
+    if (!user) return;
+    api
+      .getFollowing(user.id)
+      .then((list) => (list.length ? list : api.getSuggestions().catch(() => [])))
+      .then(setPeople)
+      .catch(() => setPeople([]));
+  }, [user]);
+
   if (!user) return null;
+
+  // Anyone already in the list above doesn't need a second row down here.
+  const inConversation = new Set((conversations || []).map((c) => c.user.id));
+  const startable = (people || []).filter((p) => p.id !== user.id && !inConversation.has(p.id));
 
   return (
     <div className="app-page">
@@ -79,9 +96,35 @@ export default function MessagesPage() {
           ))}
         </ul>
       ) : (
-        <p className="app-empty">
-          No messages yet — visit someone's profile and tap Message to start a conversation.
-        </p>
+        <p className="app-empty">No messages yet — start one below.</p>
+      )}
+
+      {startable.length > 0 && (
+        <>
+          <h3 className="app-dm-start-title">Start a chat</h3>
+          <ul className="app-dm-start-list">
+            {startable.map((p) => (
+              <li key={p.id}>
+                <Link to={`/profile/${p.username}`} className="app-dm-start-who">
+                  <span className="app-dm-conv-dp">
+                    {p.avatarUrl ? (
+                      <img src={p.avatarUrl} alt="" />
+                    ) : (
+                      (p.name || p.username).charAt(0).toUpperCase()
+                    )}
+                  </span>
+                  <span className="app-dm-start-names">
+                    <strong>{p.name || p.username}</strong>
+                    <span>@{p.username}</span>
+                  </span>
+                </Link>
+                <Link to={`/messages/${p.username}`} className="app-dm-start-btn">
+                  Message
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </>
       )}
     </div>
   );

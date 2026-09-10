@@ -69,50 +69,39 @@ export default function StoriesPage() {
           + badge always opens the composer, even when you already have
           one running. */}
       <div className="app-story-rows">
-      <button
-        type="button"
-        className="app-story-row"
-        onClick={() => (myGroup ? setViewingAuthorId(user.id) : setComposerTab("text"))}
-      >
-        <span className="app-story-row-ring">
-          <span className={"app-story-ring" + (myGroup ? " is-own" : " is-empty")}>
-            <span className="app-story-avatar">
-              {user.avatarUrl ? (
-                <img src={user.avatarUrl} alt="" />
-              ) : (
-                (user.name || user.username).charAt(0).toUpperCase()
-              )}
+        <div className="app-story-row app-story-row-mine">
+          <button
+            type="button"
+            className="app-story-row-main"
+            onClick={() => (myGroup ? setViewingAuthorId(user.id) : setComposerTab("text"))}
+          >
+            <span className={"app-story-ring" + (myGroup ? " is-own" : " is-empty")}>
+              <span className="app-story-avatar">
+                {user.avatarUrl ? (
+                  <img src={user.avatarUrl} alt="" />
+                ) : (
+                  (user.name || user.username).charAt(0).toUpperCase()
+                )}
+              </span>
             </span>
-          </span>
-          <span
-            className="app-story-row-add"
-            role="button"
-            tabIndex={0}
+            <span className="app-story-row-text">
+              <strong>{myGroup ? "Your story" : "Add story"}</strong>
+              <span>
+                {myGroup
+                  ? `${myGroup.stories.length} update${myGroup.stories.length === 1 ? "" : "s"} · ${storyTime(latestAt(myGroup))}`
+                  : "Disappears after 24 hours"}
+              </span>
+            </span>
+          </button>
+          <button
+            type="button"
+            className="app-story-row-plus"
             aria-label="Add to your story"
-            onClick={(e) => {
-              e.stopPropagation();
-              setComposerTab("text");
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                e.stopPropagation();
-                setComposerTab("text");
-              }
-            }}
+            onClick={() => setComposerTab("text")}
           >
             +
-          </span>
-        </span>
-        <span className="app-story-row-text">
-          <strong>{myGroup ? "Your story" : "Add story"}</strong>
-          <span>
-            {myGroup
-              ? `${myGroup.stories.length} update${myGroup.stories.length === 1 ? "" : "s"} · ${storyTime(latestAt(myGroup))}`
-              : "Disappears after 24 hours"}
-          </span>
-        </span>
-      </button>
+          </button>
+        </div>
       </div>
 
       {groups === null ? (
