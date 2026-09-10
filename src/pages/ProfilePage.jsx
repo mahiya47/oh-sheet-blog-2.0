@@ -110,6 +110,26 @@ export default function ProfilePage() {
     }
   }, [activeTab, isOwnProfile, savedPosts]);
 
+  // Keep the Saved tab in sync the moment a post is saved/unsaved anywhere
+  // in the app (this page included), instead of only picking it up on the
+  // next fetch/reload — see the matching dispatch in FeedCard.jsx.
+  useEffect(() => {
+    function onBookmarkChanged(e) {
+      const { post, saved: nowSaved } = e.detail || {};
+      if (!post) return;
+      setSavedPosts((prev) => {
+        if (!prev) return prev; // Saved tab hasn't been opened/loaded yet
+        if (nowSaved) {
+          if (prev.some((p) => p.id === post.id)) return prev;
+          return [post, ...prev];
+        }
+        return prev.filter((p) => p.id !== post.id);
+      });
+    }
+    window.addEventListener("app:bookmark-changed", onBookmarkChanged);
+    return () => window.removeEventListener("app:bookmark-changed", onBookmarkChanged);
+  }, []);
+
   function requireAuth() {
     if (!user) {
       navigate("/login", { state: { from: `/profile/${viewedUsername}` } });

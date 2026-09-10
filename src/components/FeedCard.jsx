@@ -314,10 +314,23 @@ export default function FeedCard({ post, onDeleted, initiallyExpanded = false })
     if (!requireAuth()) return;
     const next = !saved;
     setSaved(next);
+    // Let any Saved-list view (e.g. the profile's Saved tab) update itself
+    // immediately instead of waiting for a refetch/refresh — see the
+    // listener in ProfilePage.jsx.
+    window.dispatchEvent(
+      new CustomEvent("app:bookmark-changed", {
+        detail: { post: { ...post, isBookmarked: next }, saved: next },
+      }),
+    );
     try {
       await api.toggleBookmark(post.id, saved);
     } catch {
       setSaved(!next);
+      window.dispatchEvent(
+        new CustomEvent("app:bookmark-changed", {
+          detail: { post: { ...post, isBookmarked: !next }, saved: !next },
+        }),
+      );
     }
   }
 
@@ -704,7 +717,12 @@ export default function FeedCard({ post, onDeleted, initiallyExpanded = false })
         </div>
       )}
 
-      <div className="app-card-actions" onClick={stop}>
+      {/* No blanket stop() here anymore — empty space in this row (right of
+          the save button, around the buttons, etc.) should still expand the
+          post like the rest of the card. Each interactive control below
+          stops propagation itself so tapping a button doesn't also
+          collapse/expand the card underneath it. */}
+      <div className="app-card-actions">
         <div className="app-vote-group">
           <button
             type="button"
@@ -727,7 +745,14 @@ export default function FeedCard({ post, onDeleted, initiallyExpanded = false })
           </button>
         </div>
 
-        <button type="button" className="app-action-btn" onClick={() => setExpanded(true)}>
+        <button
+          type="button"
+          className="app-action-btn"
+          onClick={(e) => {
+            stop(e);
+            setExpanded(true);
+          }}
+        >
           <NavIcon name="chat" />
           <span>{commentCount}</span>
         </button>
@@ -752,7 +777,7 @@ export default function FeedCard({ post, onDeleted, initiallyExpanded = false })
         </button>
 
         {taggedUsers.length > 0 && (
-          <div className="app-card-tagged">
+          <div className="app-card-tagged" onClick={stop}>
             <button
               type="button"
               className="app-card-tagged-toggle"
