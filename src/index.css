@@ -1938,6 +1938,13 @@ ul {
     padding: 22px 20px 60px;
   }
 
+  /* .app-body's top padding grows from 14px to 22px here, so the DM
+     thread header's negative margin (see .app-dm-thread-head) needs to
+     grow to match, to keep it flush against the top bar. */
+  .app-dm-thread-head {
+    margin-top: -22px;
+  }
+
   .app-topbar {
     padding: 14px 24px;
     gap: 16px;
@@ -4725,9 +4732,12 @@ a.app-auth-logo-badge:hover {
   gap: 10px;
   background: var(--app-surface);
   border-bottom: var(--app-border-w) solid var(--app-border);
-  border-radius: var(--app-radius-md) var(--app-radius-md) 0 0;
+  border-radius: 0;
   padding: 10px 14px 12px;
-  margin: 0 0 4px;
+  /* Pulls the header up to sit flush against the top bar, closing the
+     gap that .app-body's own top padding would otherwise leave — see
+     the matching -22px override once that padding grows at 760px. */
+  margin: -14px 0 4px;
 }
 .app-dm-thread-back {
   border: none;

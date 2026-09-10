@@ -769,7 +769,7 @@ export default function FeedCard({ post, onDeleted, initiallyExpanded = false })
 
         <button
           type="button"
-          className="app-action-btn app-desktop-only"
+          className="app-action-btn"
           aria-label="Share"
           onClick={handleShare}
         >
