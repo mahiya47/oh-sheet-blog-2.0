@@ -4205,6 +4205,10 @@ a.app-auth-logo-badge:hover {
   background: var(--app-surface);
   color: var(--app-ink);
   box-shadow: var(--app-shadow);
+  /* Also rendered as a <button> (Monopoly, where back leaves the room
+     first) instead of a Link — reset so it matches the Link exactly. */
+  cursor: pointer;
+  font: inherit;
 }
 .app-arcade-game-title {
   margin: 0;
@@ -4533,12 +4537,38 @@ a.app-auth-logo-badge:hover {
   width: 100%;
   max-width: 640px;
   margin: 0 auto;
-  /* Top/bottom padding has to fully clear the corner player card's real
-     height (avatar + name + cash + the "Your Turn"/"Playing…"/"away"
-     pill, stacked with gaps) — it was 68px, well under that stack's
-     ~100-120px, so the card spilled onto the board's corner tile
-     (photo/cash overlapping the tile text). 120px clears the worst case. */
-  padding: 120px 6px;
+  /* Top/bottom padding has to clear the corner player card's real height
+     (avatar + name + cash, plus the rare "away" tag) so the card doesn't
+     spill onto the board's corner tile. The "Your Turn"/"Playing…" pill
+     that used to live here was the biggest part of that stack — it's
+     gone now (see the turn bar above the board instead), so this can be
+     smaller than before without the card touching the tiles. */
+  padding: 100px 6px;
+}
+/* ---- Turn bar: sits between the header and the board, saying whose go
+   it is — replaces the per-corner "Your Turn"/"Playing…" pill, which
+   changed the corner card's height every turn and made the card visibly
+   jump position (worst on the bottom two corners, anchored by their
+   bottom edge). Pink/accent when it's you, plain otherwise. ---- */
+.app-mono-turn-bar {
+  width: fit-content;
+  max-width: calc(100% - 4px);
+  margin: 6px auto 0;
+  padding: 7px 18px;
+  border-radius: 999px;
+  background: var(--app-bg-deep);
+  color: var(--app-ink);
+  font-family: var(--app-font-display);
+  font-weight: 800;
+  font-size: 0.85rem;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.app-mono-turn-bar.is-you {
+  background: var(--app-accent);
+  box-shadow: var(--app-shadow);
 }
 .app-mono-board-wrap {
   position: relative;
@@ -4793,6 +4823,14 @@ a.app-auth-logo-badge:hover {
 /* Roll / end-turn / waiting — the default state of the panel. */
 .app-mono-panel-idle {
   flex: 1;
+  /* Without this, a flex child's default min-height is "auto" (its
+     content size), which overrides flex:1 and lets it grow taller than
+     the panel — overflow-y:auto then never kicks in, and the fixed-size
+     panel's own overflow:hidden clips whatever doesn't fit (seen as the
+     Chance card's heading cut off at the top, OK button cut off at the
+     bottom). This lets the child actually shrink to the panel's height,
+     so long content scrolls instead of being cut off. */
+  min-height: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -4853,6 +4891,10 @@ a.app-auth-logo-badge:hover {
    look — a short message, centred, filling the panel. */
 .app-mono-panel-msg {
   flex: 1;
+  /* Same flex min-height fix as .app-mono-panel-idle above — lets this
+     actually scroll instead of being clipped top and bottom by the
+     panel's overflow:hidden when the card text is long. */
+  min-height: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -4886,6 +4928,7 @@ a.app-auth-logo-badge:hover {
 /* ---- Buy prompt — the unowned-property decision, filling the panel ---- */
 .app-mono-panel-buy {
   flex: 1;
+  min-height: 0;
   width: 100%;
   padding: 14px;
   display: flex;

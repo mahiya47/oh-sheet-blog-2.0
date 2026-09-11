@@ -3,7 +3,6 @@ import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import MonopolyBoard from "../../components/monopoly/MonopolyBoard.jsx";
 import MultiplayerHeader from "../../components/MultiplayerHeader.jsx";
-import NavIcon from "../../components/NavIcons.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { getGameMeta } from "../../lib/arcadeGames.js";
 import { GROUP_COLORS, HOUSE_COLORS } from "../../lib/monopolyLayout.js";
@@ -204,16 +203,11 @@ function GameView({ room }) {
 
   return (
     <div className="app-page app-mono-page">
-      <MultiplayerHeader
-        title={GAME.label}
-        emoji={GAME.emoji}
-        subtitle={game.phase === "over" ? "Game over" : `${currentName}'s turn`}
-        action={
-          <button type="button" className="app-mono-leave-btn" onClick={room.leaveRoom} aria-label="Leave game">
-            <NavIcon name="logout" />
-          </button>
-        }
-      />
+      <MultiplayerHeader title={GAME.label} emoji={GAME.emoji} onBack={room.leaveRoom} />
+
+      <div className={"app-mono-turn-bar" + (myTurn && game.phase !== "over" ? " is-you" : "")}>
+        {game.phase === "over" ? "Game over" : myTurn ? "Your turn!" : `${currentName}'s turn`}
+      </div>
 
       <div className="app-mono-arena">
         {game.players.map((p, seat) => (
@@ -300,8 +294,12 @@ function PlayerCorner({ seat, player, info, netWorth, isMe, isTurn, cornerClass 
           {player.bankrupt ? "Bankrupt" : <>${player.cash} <em>(${netWorth})</em></>}
         </span>
       </div>
-      {isTurn && isMe && <span className="app-mono-corner-pill">Your Turn</span>}
-      {isTurn && !isMe && <span className="app-mono-corner-pill is-waiting">Playing…</span>}
+      {/* Whose turn it is now shows in the turn bar above the board instead
+          — that pill used to add/remove height here every turn, which on
+          the bottom two corners (anchored by their bottom edge) made the
+          photo and name visibly jump position each time the turn changed.
+          The pulsing ring + accent-coloured name above are still there as
+          the on-card indicator, without changing the card's height. */}
       {!player.connected && !player.bankrupt && <span className="app-mono-tag">away</span>}
     </div>
   );
