@@ -4524,13 +4524,21 @@ a.app-auth-logo-badge:hover {
   width: 100%;
   height: auto;
 }
-.app-mono-hud-bottom {
+.app-mp-head-action {
+  margin-left: auto;
+}
+.app-mono-leave-btn {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
-  width: 100%;
-  max-width: 640px;
-  margin: 14px auto 0;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: var(--app-border-w) solid var(--app-border);
+  border-radius: 50%;
+  background: var(--app-surface);
+  color: var(--app-ink);
+  cursor: pointer;
 }
 
 /* ---- Corner player cards ---- */
@@ -4630,6 +4638,15 @@ a.app-auth-logo-badge:hover {
   color: var(--app-ink);
   opacity: 0.85;
 }
+.app-mono-tag {
+  padding: 2px 8px;
+  border: var(--app-border-w) solid var(--app-border);
+  border-radius: 999px;
+  background: var(--app-bg);
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
 
 /* Bottom-of-arena "you" card, action panel, manage panel and log all
    stack in a single column below the board — kept simple across every
@@ -4718,32 +4735,6 @@ a.app-auth-logo-badge:hover {
   font-weight: 800;
   fill: var(--app-ink);
 }
-.app-mono-center-bg {
-  fill: var(--app-surface);
-  stroke: var(--app-border);
-  stroke-width: 6;
-}
-.app-mono-center-title {
-  font-family: var(--app-font-display), sans-serif;
-  font-size: 52px;
-  font-weight: 700;
-  fill: var(--app-ink);
-}
-.app-mono-center-sub {
-  font-family: var(--app-font-display), sans-serif;
-  font-size: 24px;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  fill: var(--app-accent);
-}
-.app-mono-die rect {
-  fill: var(--app-surface);
-  stroke: var(--app-border);
-  stroke-width: 5;
-}
-.app-mono-pip {
-  fill: var(--app-ink);
-}
 .app-mono-token circle {
   stroke: var(--app-border);
   stroke-width: 3;
@@ -4775,92 +4766,122 @@ a.app-auth-logo-badge:hover {
   }
 }
 
-/* ---- Card popup — lands on the board's centre panel, next to the
-   dice, instead of floating elsewhere on the page. ---- */
-.app-mono-card-pop {
+/* ---- Centre panel — sits over the empty middle of the board (see
+   .app-mono-center-bg's old spot, x/y 200..1120 of a 1320 viewBox, i.e.
+   15.15%..84.85%) and shows exactly one thing at a time: roll/end-turn,
+   a buy decision, a tapped property, a drawn card, a debt, or a quick
+   flash of the latest thing that happened. ---- */
+.app-mono-center-panel {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 5;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  width: 62%;
-  max-width: 320px;
-  padding: 14px 16px;
-  background: var(--app-surface);
-  border: var(--app-border-w) solid var(--app-border);
-  border-radius: var(--app-radius-md);
-  text-align: center;
-  animation: app-mono-card-in 220ms ease-out both;
-}
-.app-mono-card-kind {
-  font-family: var(--app-font-display);
-  font-weight: 700;
-  font-size: 0.9rem;
-}
-.app-mono-card-pop p {
-  margin: 0;
-  font-weight: 600;
-  font-size: 0.85rem;
-  line-height: 1.4;
-}
-@keyframes app-mono-card-in {
-  from { transform: translate(-50%, -50%) scale(0.85); opacity: 0; }
-  to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-}
-
-/* A brief flash of the latest log line (rent paid, salary collected...)
-   over the board — the same slot the card popup uses. */
-.app-mono-event-pop {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  left: 15.1515%;
+  top: 15.1515%;
+  width: 69.697%;
+  height: 69.697%;
   z-index: 4;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  width: 68%;
-  max-width: 300px;
-  padding: 12px 16px;
-  background: var(--app-surface);
   border: var(--app-border-w) solid var(--app-border);
   border-radius: var(--app-radius-md);
-  text-align: center;
-  opacity: 0.97;
-  pointer-events: none;
+  background: var(--app-surface);
+  overflow: hidden;
   animation: app-mono-card-in 200ms ease-out both;
 }
-.app-mono-event-icon {
-  font-size: 22px;
-}
-.app-mono-event-pop p {
-  margin: 0;
-  font-weight: 700;
-  font-size: 0.78rem;
-  line-height: 1.35;
+@keyframes app-mono-card-in {
+  from { opacity: 0; transform: scale(0.94); }
+  to { opacity: 1; transform: scale(1); }
 }
 
-/* ---- Buy prompt — the unowned-property decision, centred over
-   everything like the title deed modal ---- */
-.app-mono-buy-card {
-  width: 100%;
-  max-width: min(320px, calc(100vw - 32px));
-  margin: 0 auto;
-  padding: 22px 20px;
+/* Roll / end-turn / waiting — the default state of the panel. */
+.app-mono-panel-idle {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px;
   text-align: center;
+  overflow-y: auto;
+}
+.app-mono-panel-prompt {
+  margin: 0;
+  font-weight: 800;
+  font-size: 0.95rem;
+}
+.app-mono-roll-btn {
+  padding: 12px 28px;
+  font-size: 1rem;
+}
+.app-mono-panel-subrow {
+  display: flex;
+  gap: 8px;
+}
+.app-mono-dice-row {
+  display: flex;
+  gap: 10px;
+}
+.app-mono-die-html {
+  position: relative;
+  width: 40px;
+  height: 40px;
   border: var(--app-border-w) solid var(--app-border);
-  border-radius: var(--app-radius-lg);
-  background: var(--app-surface);
-  animation: app-mono-card-in 220ms ease-out both;
+  border-radius: 9px;
+  background: var(--app-bg);
+}
+.app-mono-pip-html {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  margin: -3.5px 0 0 -3.5px;
+  border-radius: 50%;
+  background: var(--app-ink);
+}
+
+/* Drawn card, debt notice, and the "latest event" flash all share this
+   look — a short message, centred, filling the panel. */
+.app-mono-panel-msg {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px;
+  text-align: center;
+  overflow-y: auto;
+}
+.app-mono-panel-msg.is-urgent {
+  background: #fdeceb;
+}
+:root[data-theme="dark"] .app-mono-panel-msg.is-urgent {
+  background: #3a1f1f;
+}
+.app-mono-panel-msg-kind {
+  font-family: var(--app-font-display);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+.app-mono-panel-msg p {
+  margin: 0;
+  font-weight: 600;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+.app-mono-panel-msg .app-arcade-btn {
+  width: 100%;
+}
+
+/* ---- Buy prompt — the unowned-property decision, filling the panel ---- */
+.app-mono-panel-buy {
+  flex: 1;
+  width: 100%;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+  overflow-y: auto;
 }
 .app-mono-buy-title {
   margin: 0;
@@ -4893,8 +4914,8 @@ a.app-auth-logo-badge:hover {
   font-size: 1rem;
 }
 .app-mono-buy-icon {
-  padding: 8px 0;
-  font-size: 62px;
+  padding: 2px 0;
+  font-size: 34px;
   line-height: 1;
 }
 .app-mono-buy-btns {
@@ -4927,140 +4948,44 @@ a.app-auth-logo-badge:hover {
   cursor: default;
 }
 
-/* ---- Bottom HUD: your status, actions, properties, history ---- */
-.app-mono-you {
+/* ---- Tapped-property card — fills the centre panel, replacing the old
+   full-screen title deed modal ---- */
+.app-mono-panel-tile {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
   display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  border: var(--app-border-w) solid var(--app-border);
-  border-radius: var(--app-radius-sm);
-  background: var(--app-surface);
-  flex-wrap: wrap;
+  flex-direction: column;
+  position: relative;
 }
-.app-mono-you-dot {
-  flex-shrink: 0;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
+.app-mono-panel-close {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 1;
+  width: 26px;
+  height: 26px;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0;
   border: var(--app-border-w) solid var(--app-border);
-  color: #fff;
-  font-weight: 700;
-}
-.app-mono-you-cash {
-  font-family: var(--app-font-display);
-  font-size: 1.2rem;
-  font-weight: 700;
-}
-.app-mono-tag {
-  padding: 3px 9px;
-  border: var(--app-border-w) solid var(--app-border);
-  border-radius: 999px;
-  background: var(--app-bg);
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-.app-mono-tag.is-bad {
-  background: #e5484d;
-  color: #fff;
-}
-
-.app-mono-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 14px;
-  border: var(--app-border-w) solid var(--app-border);
-  border-radius: var(--app-radius-sm);
+  border-radius: 50%;
   background: var(--app-surface);
-}
-.app-mono-actions.is-urgent {
-  background: #fdeceb;
-  border-color: #e5484d;
-}
-:root[data-theme="dark"] .app-mono-actions.is-urgent {
-  background: #3a1f1f;
-}
-.app-mono-prompt {
-  margin: 0;
-  font-weight: 700;
-}
-.app-mono-actions .app-arcade-btn {
-  width: 100%;
-}
-
-.app-mono-tabs {
-  display: flex;
-  gap: 8px;
-}
-.app-mono-tab {
-  flex: 1;
-  padding: 8px 12px;
-  border: var(--app-border-w) solid var(--app-border);
-  border-radius: 999px;
-  background: var(--app-surface);
-  font-weight: 700;
+  font-size: 0.8rem;
+  line-height: 1;
   cursor: pointer;
 }
-.app-mono-tabs .app-mp-leave {
-  flex: 1;
+.app-mono-panel-tile-head {
+  padding: 12px 30px 12px 12px;
+  border-bottom: var(--app-border-w) solid var(--app-border);
 }
-
-.app-mono-log {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  max-height: 260px;
-  overflow-y: auto;
-  padding: 10px 12px;
-  border: var(--app-border-w) solid var(--app-border);
-  border-radius: var(--app-radius-sm);
-  background: var(--app-surface);
-}
-.app-mono-log-line {
+.app-mono-panel-tile-head h4 {
   margin: 0;
-  padding-bottom: 6px;
-  border-bottom: 1.5px dashed var(--app-border);
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--app-muted);
-}
-.app-mono-log-line:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
-}
-
-/* ---- Title deed modal ---- */
-.app-mono-deed-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 60;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-  background: rgba(0, 0, 0, 0.5);
-}
-.app-mono-deed {
-  width: 100%;
-  max-width: min(340px, calc(100vw - 32px));
-  max-height: 85vh;
-  margin: 0 auto;
-  overflow-y: auto;
-  border: var(--app-border-w) solid var(--app-border);
-  border-radius: var(--app-radius-md);
-  background: var(--app-surface);
-  display: flex;
-  flex-direction: column;
+  font-family: var(--app-font-display);
+  font-size: 1rem;
+  color: #1c1810;
+  text-align: center;
 }
 .app-mono-deed-actions {
   display: flex;
@@ -5071,22 +4996,11 @@ a.app-auth-logo-badge:hover {
 .app-mono-deed-actions .app-arcade-btn {
   width: 100%;
 }
-.app-mono-deed-head {
-  padding: 16px;
-  border-bottom: var(--app-border-w) solid var(--app-border);
-}
-.app-mono-deed-head h4 {
-  margin: 0;
-  font-family: var(--app-font-display);
-  font-size: 1.1rem;
-  color: #1c1810;
-  text-align: center;
-}
-.app-mono-deed-body {
+.app-mono-panel-tile-body {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 16px;
+  gap: 8px;
+  padding: 12px;
 }
 .app-mono-deed-price {
   margin: 0;
@@ -5096,10 +5010,10 @@ a.app-auth-logo-badge:hover {
 .app-mono-deed-rents {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.85rem;
+  font-size: 0.78rem;
 }
 .app-mono-deed-rents td {
-  padding: 5px 4px;
+  padding: 4px;
   border-bottom: 1.5px dashed var(--app-border);
 }
 .app-mono-deed-rents td:last-child {
@@ -5124,10 +5038,6 @@ a.app-auth-logo-badge:hover {
   text-align: center;
   font-size: 0.85rem;
 }
-.app-mono-deed .app-arcade-btn {
-  margin: 0 16px 16px;
-}
-
 /* ---- Game over ---- */
 .app-mono-over {
   position: fixed;

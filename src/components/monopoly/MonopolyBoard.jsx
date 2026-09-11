@@ -49,6 +49,7 @@ export default function MonopolyBoard({ board, game, mySeat, onTileClick, select
           : null;
         const level = st?.houses || 0;
         const rentNow = tile.rent ? tile.rent[level] : null;
+        const owned = owner !== null;
 
         return (
           <g
@@ -82,6 +83,7 @@ export default function MonopolyBoard({ board, game, mySeat, onTileClick, select
                 mortgaged={!!st?.mortgaged}
                 level={level}
                 rentNow={rentNow}
+                owned={owned}
                 onColor={!!bandColor}
               />
             )}
@@ -89,30 +91,11 @@ export default function MonopolyBoard({ board, game, mySeat, onTileClick, select
         );
       })}
 
-      {/* Centre panel — the brand mark, plus the dice when they've been rolled */}
-      <g className="app-mono-center">
-        <rect
-          x={200}
-          y={200}
-          width={BOARD_PX - 400}
-          height={BOARD_PX - 400}
-          rx="20"
-          className="app-mono-center-bg"
-        />
-        <text className="app-mono-center-title" x={BOARD_PX / 2} y={BOARD_PX / 2 - 140} textAnchor="middle">
-          OH SHEET!
-        </text>
-        <text className="app-mono-center-sub" x={BOARD_PX / 2} y={BOARD_PX / 2 - 80} textAnchor="middle">
-          HOGWARTS EDITION
-        </text>
-        {/* Dice sit near the bottom of the centre panel, not the middle */}
-        {game.dice && (
-          <g transform={`translate(${BOARD_PX / 2 - 130} ${BOARD_PX / 2 + 250})`}>
-            <Die value={game.dice[0]} x={0} />
-            <Die value={game.dice[1]} x={150} />
-          </g>
-        )}
-      </g>
+      {/* The centre panel itself is an HTML overlay (see CenterPanel in
+          MonopolyPage.jsx) positioned on top of this empty middle square —
+          it needs real buttons and text wrapping, which is awkward inside
+          SVG. Nothing is drawn here; the felt background already shows
+          through underneath it. */}
 
       {/* Player tokens, drawn last so they sit on top of everything */}
       {[...byTile.entries()].map(([pos, occupants]) =>
@@ -147,7 +130,7 @@ export default function MonopolyBoard({ board, game, mySeat, onTileClick, select
 // painted in its group colour (see `onColor`). Font size scales down at
 // narrow viewports via CSS (see .app-mono-tile-name) — the name is never
 // hidden outright, so every tile stays identifiable on a phone.
-function TileLabel({ tile, box, mortgaged, level, rentNow, onColor }) {
+function TileLabel({ tile, box, mortgaged, level, rentNow, owned, onColor }) {
   const icon = tile.group ? null : tileIcon(tile);
   const cls = onColor ? " is-on-color" : "";
   // 8 characters is what actually fits across a tile at this larger text
@@ -170,6 +153,10 @@ function TileLabel({ tile, box, mortgaged, level, rentNow, onColor }) {
     y += ICON_H;
   }
   if (tile.price) {
+    // Once a street is owned, the price is swapped for its current rent —
+    // not just once it's been upgraded. Utilities have no flat rent table
+    // (theirs depends on the dice roll), so they keep showing price.
+    const showRent = owned && tile.rent;
     parts.push(
       <text
         key="price"
@@ -178,7 +165,7 @@ function TileLabel({ tile, box, mortgaged, level, rentNow, onColor }) {
         y={y + 15}
         textAnchor="middle"
       >
-        {level > 0 ? `RENT $${rentNow}` : `$${tile.price}`}
+        {showRent ? `RENT $${rentNow}` : `$${tile.price}`}
       </text>
     );
     y += PRICE_H;
@@ -224,28 +211,6 @@ function CornerLabel({ tile, t }) {
           </text>
         ))}
       </g>
-    </g>
-  );
-}
-
-const PIPS = {
-  1: [[0, 0]],
-  2: [[-1, -1], [1, 1]],
-  3: [[-1, -1], [0, 0], [1, 1]],
-  4: [[-1, -1], [1, -1], [-1, 1], [1, 1]],
-  5: [[-1, -1], [1, -1], [0, 0], [-1, 1], [1, 1]],
-  6: [[-1, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [1, 1]],
-};
-
-function Die({ value, x }) {
-  const size = 110;
-  const step = 28;
-  return (
-    <g transform={`translate(${x} 0)`} className="app-mono-die">
-      <rect x="0" y="0" width={size} height={size} rx="18" />
-      {(PIPS[value] || []).map(([px, py], k) => (
-        <circle key={k} cx={size / 2 + px * step} cy={size / 2 + py * step} r="10" className="app-mono-pip" />
-      ))}
     </g>
   );
 }
