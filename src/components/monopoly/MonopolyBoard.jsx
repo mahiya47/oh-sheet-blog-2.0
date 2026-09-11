@@ -15,9 +15,9 @@ const MAX_LEVEL = 3;
 // many tiles it has to cross — few tiles (a normal dice roll) means a slow,
 // readable hop per tile; many tiles (a long card move) speeds up so it
 // never drags. Never faster than MIN_HOP_MS or slower than MAX_HOP_MS.
-const TOTAL_HOP_MS = 900;
-const MIN_HOP_MS = 60;
-const MAX_HOP_MS = 220;
+const TOTAL_HOP_MS = 1500;
+const MIN_HOP_MS = 90;
+const MAX_HOP_MS = 260;
 
 // Lighten a hex colour toward white — used for the unowned price band, a
 // paler tint of the tile's group colour.

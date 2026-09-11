@@ -495,16 +495,24 @@ function DefaultCard({ game, me, myTurn, mySeat, players, act, currentName, curr
   }
 
   // phase === "action" — debt is handled by CenterPanel before this ever
-  // renders, so this is just "roll again" or "end turn".
+  // renders. Doubles means you got the same number on both dice, so you
+  // roll again; the button rolls right away in one tap instead of just
+  // handing back the plain roll button.
   return (
     <div className="app-mono-panel-idle">
       {dice && <DiceRow dice={dice} />}
       <p className="app-mono-panel-prompt">
-        {game.doubles > 0 ? "Doubles!" : "Tap a property to manage it."}
+        {game.doubles > 0 ? "You rolled the same number on both dice — one more turn!" : "Tap a property to manage it."}
       </p>
-      <button type="button" className="app-arcade-btn app-mono-primary app-mono-roll-btn" onClick={() => act("mono:end_turn")}>
-        {game.doubles > 0 ? "Roll again" : "End turn"}
-      </button>
+      {game.doubles > 0 ? (
+        <button type="button" className="app-arcade-btn app-mono-primary app-mono-roll-btn" onClick={() => act("mono:roll")}>
+          🎲 Roll again
+        </button>
+      ) : (
+        <button type="button" className="app-arcade-btn app-mono-primary app-mono-roll-btn" onClick={() => act("mono:end_turn")}>
+          End turn
+        </button>
+      )}
     </div>
   );
 }
