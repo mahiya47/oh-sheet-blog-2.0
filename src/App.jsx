@@ -99,6 +99,11 @@ export default function App() {
   const { user, loading } = useAuth();
   const location = useLocation();
   const bare = isBarePath(location.pathname);
+  // Monopoly's own header already has a back link and a leave-game button,
+  // so on phones the global top bar and bottom nav are just wasted space
+  // squeezing the board — hidden there only (see the matching mobile-only
+  // CSS on .app-shell-game). Desktop keeps the normal chrome.
+  const gameFullscreen = location.pathname.startsWith("/arcade/monopoly");
   // Anyone not signed in gets the landing pitch instead of real content —
   // everywhere except the bare auth screens and the public info pages
   // above. Held off until the auth check finishes so a signed-in user
@@ -190,7 +195,7 @@ export default function App() {
   }
 
   return (
-    <div className="app-shell">
+    <div className={gameFullscreen ? "app-shell app-shell-game" : "app-shell"}>
       <TopBar />
       <div className="app-body">
         <SideNav />

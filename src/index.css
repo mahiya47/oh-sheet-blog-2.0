@@ -1979,6 +1979,26 @@ ul {
   display: none;
 }
 
+/* ---- Monopoly: full-screen on phones ----
+   The game's own header (MultiplayerHeader, rendered inside .app-mono-page)
+   already has a back-to-arcade link and a leave-game button, so on a phone
+   the global top bar and bottom nav are just squeezing the board for no
+   reason. Hide both, and shrink .app-body's padding back down from the
+   room it was reserving for them (14px top for the sticky top bar, 84px+
+   safe-area at the bottom for the fixed bottom nav). Scoped to (a) phones
+   only — .app-shell-game keeps the normal chrome at the 760px breakpoint
+   below, where the side nav takes over anyway — and (b) the Monopoly route
+   only, via the .app-shell-game class App.jsx adds just for that route. */
+@media (max-width: 759px) {
+  .app-shell-game .app-topbar,
+  .app-shell-game .app-bottomnav {
+    display: none;
+  }
+  .app-shell-game .app-body {
+    padding: 6px 2px calc(6px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
 /* =========================================================================
    Breakpoint 1 — tablet and up (760px): the side nav and the full top
    bar (avatar, title, chat, notifications, home) take over from the
