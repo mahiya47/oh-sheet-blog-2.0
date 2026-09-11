@@ -15,8 +15,9 @@ const MIN_PLAYERS = 2;
 const MAX_PLAYERS = 4;
 // Seat order matches the 4 HUD corners: top-left, top-right, bottom-left,
 // bottom-right — same order the server assigns TOKEN_COLORS in.
-const TOKEN_COLORS = ["#3e9dd8", "#e5484d", "#4caf82", "#f5c945"];
+const TOKEN_COLORS = ["#2f6fed", "#e5484d", "#43a047", "#f5c945"]; // blue, red, green, yellow
 const CORNER_CLASS = ["is-tl", "is-tr", "is-bl", "is-br"];
+const MAX_LEVEL = 3;
 
 // Full names don't fit anywhere in this UI — corners, turn banners, the
 // title deed — so every player-facing label uses first name only.
@@ -558,7 +559,7 @@ function TileCard({ tile, st, players, game, board, mySeat, act, canManage, onCl
   const isStreet = tile.type === "street";
   const mine = canManage && owner === mySeat;
   const fullGroup = mine && isStreet && groupComplete(game, board, tile.group, mySeat);
-  const canUpgrade = mine && isStreet && fullGroup && !st.mortgaged && st.houses < 5;
+  const canUpgrade = mine && isStreet && fullGroup && !st.mortgaged && st.houses < MAX_LEVEL;
   const canDowngrade = mine && isStreet && st.houses > 0;
   const canMortgage = mine && !st.mortgaged && (!isStreet || st.houses === 0);
   const canUnmortgage = mine && st.mortgaged;
@@ -577,13 +578,10 @@ function TileCard({ tile, st, players, game, board, mySeat, act, canManage, onCl
             <tbody>
               <tr><td>Rent</td><td>${tile.rent[0]}</td></tr>
               <tr><td>With colour set</td><td>${tile.rent[0] * 2}</td></tr>
-              <tr><td>Level 1</td><td>${tile.rent[1]}</td></tr>
-              <tr><td>Level 2</td><td>${tile.rent[2]}</td></tr>
-              <tr><td>Level 3</td><td>${tile.rent[3]}</td></tr>
-              <tr><td>Level 4</td><td>${tile.rent[4]}</td></tr>
-              <tr><td>Level 5 (max)</td><td>${tile.rent[5]}</td></tr>
-              <tr className="app-mono-deed-sep"><td>Upgrade cost</td><td>${tile.build} each</td></tr>
-              <tr><td>Mortgage value</td><td>${Math.floor(tile.price / 2)}</td></tr>
+              <tr><td>Level 1 (${tile.build[0]} to build)</td><td>${tile.rent[1]}</td></tr>
+              <tr><td>Level 2 (${tile.build[1]} to build)</td><td>${tile.rent[2]}</td></tr>
+              <tr><td>Level 3 (${tile.build[2]} to build, max)</td><td>${tile.rent[3]}</td></tr>
+              <tr className="app-mono-deed-sep"><td>Mortgage value</td><td>${Math.floor(tile.price / 2)}</td></tr>
             </tbody>
           </table>
         )}
@@ -604,7 +602,7 @@ function TileCard({ tile, st, players, game, board, mySeat, act, canManage, onCl
         <p className="app-mono-deed-owner">
           {owner !== null ? (
             <>Owned by <strong style={{ color: game.players[owner]?.color }}>{ownerName}</strong>
-              {isStreet && st.houses > 0 && ` · Level ${st.houses}${st.houses === 5 ? " (max)" : ""}`}
+              {isStreet && st.houses > 0 && ` · Level ${st.houses}${st.houses === MAX_LEVEL ? " (max)" : ""}`}
               {st.mortgaged && " · mortgaged"}
             </>
           ) : tile.price ? "Unowned" : ""}
@@ -614,7 +612,7 @@ function TileCard({ tile, st, players, game, board, mySeat, act, canManage, onCl
           <div className="app-mono-deed-actions">
             {canUpgrade && (
               <button type="button" className="app-arcade-btn app-mono-primary" onClick={() => act("mono:build", { index: tile.i })}>
-                Upgrade (${tile.build})
+                Upgrade (${tile.build[st.houses]})
               </button>
             )}
             {canDowngrade && (

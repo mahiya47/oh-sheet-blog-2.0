@@ -1,14 +1,36 @@
 import {
   BOARD_PX,
   TILES,
-  ownerRect,
-  contentBox,
   wrapName,
   tokenAnchor,
   GROUP_COLORS,
   HOUSE_COLORS,
   tokenOffset,
 } from "../../lib/monopolyLayout.js";
+
+const MAX_LEVEL = 3;
+
+// Lighten a hex colour toward white — used for the unowned price band, a
+// paler tint of the tile's group colour.
+function tint(hex, amt = 0.55) {
+  const h = hex.replace("#", "");
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  const mix = (c) => Math.round(c + (255 - c) * amt);
+  const toHex = (c) => c.toString(16).padStart(2, "0");
+  return `#${toHex(mix(r))}${toHex(mix(g))}${toHex(mix(b))}`;
+}
+
+// Pick black or white text for whatever colour a price band ends up —
+// tinted group colour, or a player's own token colour once it's owned.
+function contrastText(hex) {
+  const h = hex.replace("#", "");
+  const [r, g, b] = [0, 2, 4].map((i) => parseInt(h.substring(i, i + 2), 16) / 255);
+  const lin = (c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+  const luminance = 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+  return luminance > 0.55 ? "#1c1810" : "#ffffff";
+}
 
 // The board itself: one SVG, so it stays crisp at any size and scales
 // from a phone to a desktop without a second layout. Tiles are tappable —
@@ -38,9 +60,8 @@ export default function MonopolyBoard({ board, game, mySeat, onTileClick, select
         if (!tile) return null;
         const st = game.tiles[t.i];
         const owner = st?.owner ?? null;
-        const ownerColor = owner !== null ? game.players[owner]?.color : null;
-        const own = ownerRect(t);
-        const box = contentBox(t);
+        const owned = owner !== null;
+        const ownerColor = owned ? game.players[owner]?.color : null;
         const isCorner = t.side === "corner";
         const bandColor = tile.group
           ? GROUP_COLORS[tile.group]
@@ -49,7 +70,17 @@ export default function MonopolyBoard({ board, game, mySeat, onTileClick, select
           : null;
         const level = st?.houses || 0;
         const rentNow = tile.rent ? tile.rent[level] : null;
-        const owned = owner !== null;
+
+        // Every tile is a two-tone card: a price/rent band on top (tinted
+        // group colour while unowned, the owning player's own colour once
+        // bought), and the group colour underneath it for the name.
+        // Chance/Chest tiles have no group colour, so they stay a plain
+        // single white card. Text is positioned against this same `t` rect
+        // (via `box`/`topH` below) so it lines up with the split exactly.
+        const box = t;
+        const topH = t.h * 0.32;
+        const topColor = bandColor ? (owned ? ownerColor : tint(bandColor)) : null;
+        const priceTextColor = topColor ? contrastText(topColor) : null;
 
         return (
           <g
@@ -61,18 +92,15 @@ export default function MonopolyBoard({ board, game, mySeat, onTileClick, select
             }
             onClick={() => onTileClick?.(t.i)}
           >
-            <rect
-              x={t.x}
-              y={t.y}
-              width={t.w}
-              height={t.h}
-              className="app-mono-tile-bg"
-              style={bandColor ? { fill: bandColor } : undefined}
-            />
-
-            {ownerColor && own && (
-              <rect x={own.x} y={own.y} width={own.w} height={own.h} fill={ownerColor} className="app-mono-owner" />
+            {bandColor ? (
+              <>
+                <rect x={t.x} y={t.y} width={t.w} height={topH} fill={topColor} />
+                <rect x={t.x} y={t.y + topH} width={t.w} height={t.h - topH} fill={bandColor} />
+              </>
+            ) : (
+              <rect x={t.x} y={t.y} width={t.w} height={t.h} fill="#ffffff" />
             )}
+            <rect x={t.x} y={t.y} width={t.w} height={t.h} className="app-mono-tile-outline" />
 
             {isCorner ? (
               <CornerLabel tile={tile} t={t} />
@@ -80,11 +108,13 @@ export default function MonopolyBoard({ board, game, mySeat, onTileClick, select
               <TileLabel
                 tile={tile}
                 box={box}
+                topH={topH}
                 mortgaged={!!st?.mortgaged}
                 level={level}
                 rentNow={rentNow}
                 owned={owned}
                 onColor={!!bandColor}
+                priceTextColor={priceTextColor}
               />
             )}
           </g>
@@ -110,8 +140,8 @@ export default function MonopolyBoard({ board, game, mySeat, onTileClick, select
               className={"app-mono-token" + (p.seat === mySeat ? " is-me" : "") + (p.connected ? "" : " is-away")}
               transform={`translate(${anchor.x + dx} ${anchor.y + dy})`}
             >
-              <circle r="14" fill={p.color} />
-              <text textAnchor="middle" y="5" className="app-mono-token-label">
+              <circle r="22" fill={p.color} />
+              <text textAnchor="middle" y="6" className="app-mono-token-label">
                 {p.seat + 1}
               </text>
             </g>
@@ -122,27 +152,66 @@ export default function MonopolyBoard({ board, game, mySeat, onTileClick, select
   );
 }
 
-// A side tile's contents — matching a classic "solid colour card" board:
-// price (or, once upgraded, the current rent) sits at the top in a small
-// bold line, and the name sits big and bold below it. Non-street tiles
-// (Hogwarts Houses, Chance, Chest) get a small icon up top instead of a
-// price. Text switches to white automatically when the tile itself is
-// painted in its group colour (see `onColor`). Font size scales down at
+// A side tile's contents. Streets and Hogwarts Houses (anything with a
+// two-tone card background — see `onColor`) get the price/rent pinned in
+// the top band and the name centred in the bottom band, matching the
+// card split drawn behind them. Chance/Chest tiles have no band split, so
+// they keep a simple centred icon + name. Font size scales down at
 // narrow viewports via CSS (see .app-mono-tile-name) — the name is never
 // hidden outright, so every tile stays identifiable on a phone.
-function TileLabel({ tile, box, mortgaged, level, rentNow, owned, onColor }) {
-  const icon = tile.group ? null : tileIcon(tile);
-  const cls = onColor ? " is-on-color" : "";
-  // 8 characters is what actually fits across a tile at this larger text
-  // size — more than that and names bleed into their neighbours.
+function TileLabel({ tile, box, topH, mortgaged, level, rentNow, owned, onColor, priceTextColor }) {
+  const cx = box.x + box.w / 2;
+
+  if (onColor) {
+    const icon = tile.group ? null : tileIcon(tile); // Hogwarts Houses only
+    // Once a street is owned, the price is swapped for its current rent —
+    // not just once it's been upgraded. Utilities have no flat rent table
+    // (theirs depends on the dice roll), so they keep showing price.
+    const showRent = owned && tile.rent;
+    let topText = showRent ? `$${rentNow}` : tile.price ? `$${tile.price}` : "";
+    if (showRent && level > 0) topText += level >= MAX_LEVEL ? " · MAX" : ` · L${level}`;
+    if (icon) topText = `${icon} ${topText}`;
+
+    const lines = wrapName(tile.name, 8, 2);
+    const LINE_H = 24;
+    const nameZoneH = box.h - topH;
+    const nameStackH = lines.length * LINE_H;
+    const nameStartY = box.y + topH + Math.max(4, (nameZoneH - nameStackH) / 2);
+
+    return (
+      <g className="app-mono-tile-text">
+        {topText && (
+          <text
+            className="app-mono-tile-price"
+            style={{ fill: priceTextColor }}
+            x={cx}
+            y={box.y + topH / 2 + 6}
+            textAnchor="middle"
+          >
+            {topText}
+          </text>
+        )}
+        {lines.map((line, k) => (
+          <text key={k} className="app-mono-tile-name is-on-color" x={cx} y={nameStartY + 17 + k * LINE_H} textAnchor="middle">
+            {line}
+          </text>
+        ))}
+        {mortgaged && (
+          <text className="app-mono-mortgage-mark" x={cx} y={box.y + box.h - 5} textAnchor="middle">
+            MORTGAGED
+          </text>
+        )}
+      </g>
+    );
+  }
+
+  // Chance / Community Chest — simple centred icon + name, no price band.
+  const icon = tileIcon(tile);
   const lines = wrapName(tile.name, 8, 2);
   const LINE_H = 26;
   const ICON_H = icon ? 32 : 0;
-  const PRICE_H = tile.price ? 24 : 0;
-  const stackH = ICON_H + PRICE_H + lines.length * LINE_H;
-  const cx = box.x + box.w / 2;
+  const stackH = ICON_H + lines.length * LINE_H;
   let y = box.y + (box.h - stackH) / 2;
-
   const parts = [];
   if (icon) {
     parts.push(
@@ -152,47 +221,13 @@ function TileLabel({ tile, box, mortgaged, level, rentNow, owned, onColor }) {
     );
     y += ICON_H;
   }
-  if (tile.price) {
-    // Once a street is owned, the price is swapped for its current rent —
-    // not just once it's been upgraded. Utilities have no flat rent table
-    // (theirs depends on the dice roll), so they keep showing price.
-    const showRent = owned && tile.rent;
-    parts.push(
-      <text
-        key="price"
-        className={"app-mono-tile-price" + cls + (level > 0 ? " is-upgraded" : "")}
-        x={cx}
-        y={y + 15}
-        textAnchor="middle"
-      >
-        {showRent ? `RENT $${rentNow}` : `$${tile.price}`}
-      </text>
-    );
-    y += PRICE_H;
-  }
-
   lines.forEach((line, k) => {
     parts.push(
-      <text key={`n${k}`} className={"app-mono-tile-name" + cls} x={cx} y={y + 17 + k * LINE_H} textAnchor="middle">
+      <text key={`n${k}`} className="app-mono-tile-name" x={cx} y={y + 17 + k * LINE_H} textAnchor="middle">
         {line}
       </text>
     );
   });
-  y += lines.length * LINE_H;
-  if (level > 0) {
-    parts.push(
-      <text key="lvl" className={"app-mono-tile-level" + cls} x={cx} y={y + 15} textAnchor="middle">
-        {level >= 5 ? "MAX LEVEL" : `LEVEL ${level}`}
-      </text>
-    );
-  }
-  if (mortgaged) {
-    parts.push(
-      <text key="mtg" className="app-mono-mortgage-mark" x={cx} y={box.y + box.h - 6} textAnchor="middle">
-        MORTGAGED
-      </text>
-    );
-  }
   return <g className="app-mono-tile-text">{parts}</g>;
 }
 

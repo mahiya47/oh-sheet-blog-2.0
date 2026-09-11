@@ -4652,30 +4652,26 @@ a.app-auth-logo-badge:hover {
    stack in a single column below the board — kept simple across every
    screen width instead of shifting into a side column on desktop. */
 
-/* ---- Board SVG ---- */
+/* ---- Board SVG — white background throughout, per request ---- */
 .app-mono-felt {
-  fill: var(--app-bg-deep);
+  fill: #ffffff;
   stroke: var(--app-border);
   stroke-width: 8;
 }
 .app-mono-tile {
   cursor: pointer;
 }
-.app-mono-tile-bg {
-  fill: var(--app-surface);
+.app-mono-tile.is-mortgaged {
+  opacity: 0.55;
+}
+.app-mono-tile-outline {
+  fill: none;
   stroke: var(--app-border);
   stroke-width: 2.5;
 }
-.app-mono-tile.is-selected .app-mono-tile-bg {
+.app-mono-tile.is-selected .app-mono-tile-outline {
   stroke: var(--app-accent);
   stroke-width: 6;
-}
-.app-mono-tile.is-mortgaged .app-mono-tile-bg {
-  opacity: 0.55;
-}
-.app-mono-owner {
-  stroke: #fff;
-  stroke-width: 2;
 }
 .app-mono-tile-icon {
   font-size: 30px;
@@ -4691,32 +4687,12 @@ a.app-auth-logo-badge:hover {
   fill: #fff;
 }
 .app-mono-tile-price {
+  /* fill is set inline per-tile (MonopolyBoard.jsx) so it always contrasts
+     with that tile's price band, whatever colour it currently is. */
   font-family: var(--app-font-body), sans-serif;
   font-size: 16px;
   font-weight: 800;
   letter-spacing: 0.02em;
-  fill: var(--app-muted);
-}
-.app-mono-tile-price.is-on-color {
-  fill: #fff;
-  opacity: 0.92;
-}
-.app-mono-tile-price.is-upgraded {
-  fill: var(--app-accent);
-}
-.app-mono-tile-price.is-upgraded.is-on-color {
-  fill: #fff294;
-}
-.app-mono-tile-level {
-  font-family: var(--app-font-body), sans-serif;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.03em;
-  fill: var(--app-muted);
-}
-.app-mono-tile-level.is-on-color {
-  fill: #fff;
-  opacity: 0.85;
 }
 .app-mono-mortgage-mark {
   font-family: var(--app-font-body), sans-serif;
@@ -4749,7 +4725,7 @@ a.app-auth-logo-badge:hover {
 .app-mono-token-label {
   fill: #fff;
   font-family: var(--app-font-display), sans-serif;
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 700;
 }
 /* Font size steps down at narrower board sizes instead of disappearing
@@ -4771,6 +4747,9 @@ a.app-auth-logo-badge:hover {
    15.15%..84.85%) and shows exactly one thing at a time: roll/end-turn,
    a buy decision, a tapped property, a drawn card, a debt, or a quick
    flash of the latest thing that happened. ---- */
+.app-mono-page {
+  background: #ffffff;
+}
 .app-mono-center-panel {
   position: absolute;
   left: 15.1515%;
@@ -4782,7 +4761,7 @@ a.app-auth-logo-badge:hover {
   flex-direction: column;
   border: var(--app-border-w) solid var(--app-border);
   border-radius: var(--app-radius-md);
-  background: var(--app-surface);
+  background: #ffffff;
   overflow: hidden;
   animation: app-mono-card-in 200ms ease-out both;
 }

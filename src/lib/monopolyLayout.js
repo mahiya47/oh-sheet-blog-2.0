@@ -141,24 +141,31 @@ export function wrapName(name, perLine = 12, maxLines = 2) {
   return clipped;
 }
 
+// Kept clear of red / yellow / green / blue on purpose — those 4 are the
+// player token colours (see TOKEN_COLORS in MonopolyPage.jsx), and a tile
+// in the same colour as a token reads as confusing, not thematic. The
+// group keys (still "red", "yellow", etc. — that's just internal naming
+// carried over from the character groupings) map to these instead.
 export const GROUP_COLORS = {
   brown: "#8d6244",
-  lightblue: "#8ccdf0",
+  lightblue: "#b39ddb", // lavender
   pink: "#ef8fb6",
   orange: "#f2973f",
-  red: "#e5484d",
-  yellow: "#f5c945",
-  green: "#42ad7c",
-  navy: "#2f5fd8",
+  red: "#a24d7a", // plum
+  yellow: "#8a6a3f", // bronze
+  green: "#7a726a", // taupe
+  navy: "#4a3728", // espresso
 };
 
 // The 4 Hogwarts Houses stand in for utilities — each gets its own
-// crest colour instead of a shared "utility" colour.
+// crest colour instead of a shared "utility" colour. Same rule as
+// above: none of these are red/yellow/green/blue, even though real
+// Hogwarts house colours are exactly that.
 export const HOUSE_COLORS = {
-  "Gryffindor Tower": "#7f0e0e",
-  "Hufflepuff Basement": "#ecb939",
-  "Ravenclaw Tower": "#222f5b",
-  "Slytherin Dungeon": "#1a472a",
+  "Gryffindor Tower": "#7d3c98", // purple
+  "Hufflepuff Basement": "#b5651d", // rust
+  "Ravenclaw Tower": "#37474f", // slate
+  "Slytherin Dungeon": "#4e4a3a", // olive charcoal
 };
 
 // Tokens sit over the colour band at the inner edge of a tile rather
@@ -179,7 +186,9 @@ export function tokenAnchor(t) {
 // axis instead of stacking into a blob.
 export function tokenOffset(slot, total, side) {
   const perRow = Math.max(total, 1);
-  const along = (slot - (perRow - 1) / 2) * 21;
+  // Bigger tokens (see MonopolyBoard.jsx) need more room between them —
+  // some overlap onto the name is fine, they're the point of the board.
+  const along = (slot - (perRow - 1) / 2) * 30;
   const vertical = side === "left" || side === "right";
   if (vertical) {
     return { dx: side === "left" ? -12 : 12, dy: along };
