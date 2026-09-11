@@ -9,7 +9,8 @@ import { useMonopolyRoom } from "../../lib/useMonopolyRoom.js";
 
 const GAME = getGameMeta("monopoly");
 const JAIL_FINE = 50;
-const PLAYER_COUNT = 4;
+const MIN_PLAYERS = 2;
+const MAX_PLAYERS = 4;
 // Seat order matches the 4 HUD corners: top-left, top-right, bottom-left,
 // bottom-right — same order the server assigns TOKEN_COLORS in.
 const TOKEN_COLORS = ["#3e9dd8", "#e5484d", "#4caf82", "#f5c945"];
@@ -48,11 +49,11 @@ function MenuView({ room }) {
 
   return (
     <div className="app-page">
-      <MultiplayerHeader title={GAME.label} emoji={GAME.emoji} subtitle="4 players · online" />
+      <MultiplayerHeader title={GAME.label} emoji={GAME.emoji} subtitle="2-4 players · online" />
       <div className="app-mono-menu">
         <p className="app-mono-menu-blurb">
           Buy up the wizarding world, charge rent, and bankrupt everyone
-          else. Exactly 4 players a game. Start a room and share the code,
+          else. 2 to 4 players a game. Start a room and share the code,
           or join a friend's.
         </p>
 
@@ -111,7 +112,7 @@ function LobbyView({ room }) {
   }
 
   const count = lobby?.players.length || 0;
-  const need = PLAYER_COUNT - count;
+  const need = MIN_PLAYERS - count;
 
   return (
     <div className="app-page">
@@ -122,7 +123,7 @@ function LobbyView({ room }) {
           {code}
           <span className="app-mono-code-copy">{copied ? "Copied!" : "Tap to copy"}</span>
         </button>
-        <p className="app-mono-lobby-hint">Share this code — friends join from the Monopoly page. Needs exactly 4 players.</p>
+        <p className="app-mono-lobby-hint">Share this code — friends join from the Monopoly page. 2 to 4 players.</p>
 
         <div className="app-mono-seat-list">
           {lobby?.players.map((p, seat) => (
@@ -132,7 +133,7 @@ function LobbyView({ room }) {
               {p.userId === lobby.hostUserId && <span className="app-mono-seat-host">Host</span>}
             </div>
           ))}
-          {Array.from({ length: Math.max(0, (lobby?.max || PLAYER_COUNT) - count) }, (_, k) => (
+          {Array.from({ length: Math.max(0, (lobby?.max || MAX_PLAYERS) - count) }, (_, k) => (
             <div key={`empty-${k}`} className="app-mono-seat is-empty">
               <span className="app-mono-seat-dot" />
               <span className="app-mono-seat-name">Waiting for a player...</span>
@@ -146,9 +147,11 @@ function LobbyView({ room }) {
               type="button"
               className="app-arcade-btn app-mono-primary"
               onClick={room.startGame}
-              disabled={count < PLAYER_COUNT}
+              disabled={count < MIN_PLAYERS}
             >
-              {count < PLAYER_COUNT ? `Need ${need} more player${need > 1 ? "s" : ""}` : "Start game (4/4)"}
+              {count < MIN_PLAYERS
+                ? `Need ${need} more player${need > 1 ? "s" : ""}`
+                : `Start game (${count}/${MAX_PLAYERS})`}
             </button>
           ) : (
             <p className="app-empty">Waiting for the host to start...</p>
