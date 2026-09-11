@@ -332,9 +332,9 @@ function CenterPanel({
   }, [lastLogText]);
 
   // The server keeps `game.card` set until the next roll or end-turn — it
-  // doesn't clear itself. Without this timer the drawn-card message would
-  // sit here forever with nothing to tap, blocking the roll/end-turn
-  // button underneath it for the rest of the game.
+  // doesn't clear itself. Everyone taps OK to dismiss it once they've read
+  // it; the timer is just a safety net in case someone never taps it, so
+  // it can never permanently block the roll/end-turn button underneath.
   const [cardVisible, setCardVisible] = useState(false);
   const cardText = game.card?.text;
   useEffect(() => {
@@ -343,7 +343,7 @@ function CenterPanel({
       return;
     }
     setCardVisible(true);
-    const t = setTimeout(() => setCardVisible(false), 3500);
+    const t = setTimeout(() => setCardVisible(false), 7000);
     return () => clearTimeout(t);
   }, [cardText]);
 
@@ -367,13 +367,16 @@ function CenterPanel({
     );
   }
 
-  if (game.card && myTurn && cardVisible) {
+  if (game.card && cardVisible) {
     return (
       <div className="app-mono-panel-msg">
         <span className="app-mono-panel-msg-kind">
           {game.card.deck === "chance" ? "❓ Chance" : "🎁 Community Chest"}
         </span>
         <p>{game.card.text}</p>
+        <button type="button" className="app-arcade-btn app-mono-primary" onClick={() => setCardVisible(false)}>
+          OK
+        </button>
       </div>
     );
   }
@@ -412,6 +415,8 @@ function CenterPanel({
       game={game}
       me={me}
       myTurn={myTurn}
+      mySeat={mySeat}
+      players={players}
       act={act}
       currentName={currentName}
       currentConnected={currentConnected}
@@ -422,7 +427,7 @@ function CenterPanel({
 // The idle state of the centre panel — roll the dice, or watch someone
 // else's turn. The roll button turns into the end-turn button once
 // you've rolled, in the same spot.
-function DefaultCard({ game, me, myTurn, act, currentName, currentConnected }) {
+function DefaultCard({ game, me, myTurn, mySeat, players, act, currentName, currentConnected }) {
   const dice = game.dice;
 
   if (game.phase === "over") {
@@ -433,7 +438,17 @@ function DefaultCard({ game, me, myTurn, act, currentName, currentConnected }) {
     );
   }
 
+  // Anyone not currently rolling/acting spends that dead time on a
+  // pending Jail vote, if there is one — it replaces the plain "waiting"
+  // message since they have nothing else to do anyway. The current actor
+  // never sees this in place of their own roll/end-turn buttons, so a
+  // slow or absent voter can never block the game (see nextTurn's
+  // resolveJailVote safety net on the server, too).
   if (!myTurn) {
+    const jv = game.jailVote;
+    if (jv) {
+      return <JailVoteCard jv={jv} players={players} mySeat={mySeat} act={act} dice={dice} />;
+    }
     return (
       <div className="app-mono-panel-idle">
         {dice && <DiceRow dice={dice} />}
@@ -491,6 +506,40 @@ function DefaultCard({ game, me, myTurn, act, currentName, currentConnected }) {
       <button type="button" className="app-arcade-btn app-mono-primary app-mono-roll-btn" onClick={() => act("mono:end_turn")}>
         {game.doubles > 0 ? "Roll again" : "End turn"}
       </button>
+    </div>
+  );
+}
+
+// Whoever isn't rolling votes on a table-mate stuck in Azkaban — free them
+// early, or leave them to serve their time as normal. The jailed player
+// sees their own status instead of a ballot; a voter who's already voted
+// sees a "waiting on the table" note instead of the buttons again.
+function JailVoteCard({ jv, players, mySeat, act, dice }) {
+  const jailedName = firstName(players[jv.seat]?.name || players[jv.seat]?.username || `Seat ${jv.seat + 1}`);
+  const freeCount = Object.values(jv.votes).filter((v) => v === "free").length;
+  const keepCount = Object.values(jv.votes).filter((v) => v === "keep").length;
+  const isJailed = mySeat === jv.seat;
+  const hasVoted = jv.votes[mySeat] !== undefined;
+  const canVote = !isJailed && jv.eligible.includes(mySeat) && !hasVoted;
+
+  return (
+    <div className="app-mono-panel-idle">
+      {dice && <DiceRow dice={dice} />}
+      <p className="app-mono-panel-prompt">
+        {isJailed ? "The table is voting on whether to free you from Azkaban." : `Free ${jailedName} from Azkaban?`}
+      </p>
+      <p className="app-mono-jail-tally">🔓 {freeCount} to free · 🔒 {keepCount} to keep</p>
+      {canVote && (
+        <div className="app-mono-panel-subrow">
+          <button type="button" className="app-arcade-btn app-mono-primary" onClick={() => act("mono:jail_vote", { choice: "free" })}>
+            Free them
+          </button>
+          <button type="button" className="app-arcade-btn" onClick={() => act("mono:jail_vote", { choice: "keep" })}>
+            Keep in Jail
+          </button>
+        </div>
+      )}
+      {!isJailed && hasVoted && <p className="app-mono-panel-note">You voted — waiting on the table.</p>}
     </div>
   );
 }

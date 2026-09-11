@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import {
   BOARD_PX,
   TILES,
@@ -9,6 +10,14 @@ import {
 } from "../../lib/monopolyLayout.js";
 
 const MAX_LEVEL = 3;
+
+// A whole hop-across-the-board animation aims for about this long, however
+// many tiles it has to cross — few tiles (a normal dice roll) means a slow,
+// readable hop per tile; many tiles (a long card move) speeds up so it
+// never drags. Never faster than MIN_HOP_MS or slower than MAX_HOP_MS.
+const TOTAL_HOP_MS = 900;
+const MIN_HOP_MS = 60;
+const MAX_HOP_MS = 220;
 
 // Lighten a hex colour toward white — used for the unowned price band, a
 // paler tint of the tile's group colour.
@@ -36,14 +45,68 @@ function contrastText(hex) {
 // from a phone to a desktop without a second layout. Tiles are tappable —
 // tapping one opens its title deed.
 export default function MonopolyBoard({ board, game, mySeat, onTileClick, selected }) {
+  const total = TILES.length;
+
+  // Tokens hop tile-by-tile to their real position instead of teleporting.
+  // `displayPos[seat]` is where a token is actually drawn right now;
+  // `game.players[seat].pos` is where the server says it belongs. When
+  // those disagree, step displayPos toward it one tile at a time.
+  const [displayPos, setDisplayPos] = useState(() => game.players.map((p) => p.pos));
+  const timersRef = useRef([]);
+  const posKey = game.players.map((p) => p.pos).join(",");
+
+  useEffect(() => {
+    game.players.forEach((p, seat) => {
+      const from = displayPos[seat];
+      const to = p.pos;
+      if (from === undefined) return;
+      if (from === to) return;
+      if (timersRef.current[seat]) clearInterval(timersRef.current[seat]);
+
+      // Walk the shorter way around — except a short backward hop (like a
+      // "go back 3 spaces" card) always animates backward even when the
+      // long way forward would technically be shorter to wrap into.
+      const fwd = (to - from + total) % total;
+      const back = (from - to + total) % total;
+      const goBack = back <= 5 && back < fwd;
+      const steps = goBack ? back : fwd;
+      const dir = goBack ? -1 : 1;
+      const hopMs = Math.max(MIN_HOP_MS, Math.min(MAX_HOP_MS, Math.round(TOTAL_HOP_MS / steps)));
+
+      let cur = from;
+      let hop = 0;
+      timersRef.current[seat] = setInterval(() => {
+        hop += 1;
+        cur = (cur + dir + total) % total;
+        setDisplayPos((prev) => {
+          const next = [...prev];
+          next[seat] = cur;
+          return next;
+        });
+        if (hop >= steps) {
+          clearInterval(timersRef.current[seat]);
+          timersRef.current[seat] = null;
+        }
+      }, hopMs);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [posKey, total]);
+
+  useEffect(
+    () => () => timersRef.current.forEach((t) => t && clearInterval(t)),
+    []
+  );
+
   if (!board) return null;
 
-  // Group tokens by tile so several players on one square lay out neatly.
+  // Group tokens by tile so several players on one square lay out neatly —
+  // by their animated position, not necessarily where they'll end up yet.
   const byTile = new Map();
-  game.players.forEach((p) => {
+  game.players.forEach((p, seat) => {
     if (p.bankrupt) return;
-    if (!byTile.has(p.pos)) byTile.set(p.pos, []);
-    byTile.get(p.pos).push(p);
+    const pos = displayPos[seat] ?? p.pos;
+    if (!byTile.has(pos)) byTile.set(pos, []);
+    byTile.get(pos).push(p);
   });
 
   return (
@@ -78,7 +141,7 @@ export default function MonopolyBoard({ board, game, mySeat, onTileClick, select
         // single white card. Text is positioned against this same `t` rect
         // (via `box`/`topH` below) so it lines up with the split exactly.
         const box = t;
-        const topH = t.h * 0.32;
+        const topH = t.h * 0.29;
         const topColor = bandColor ? (owned ? ownerColor : tint(bandColor)) : null;
         const priceTextColor = topColor ? contrastText(topColor) : null;
         // Computed per-tile rather than a fixed white — the Hogwarts House
@@ -177,11 +240,11 @@ function TileLabel({ tile, box, topH, mortgaged, level, rentNow, owned, onColor,
     if (showRent && level > 0) topText += level >= MAX_LEVEL ? " · MAX" : ` · L${level}`;
     if (icon) topText = `${icon} ${topText}`;
 
-    const lines = wrapName(tile.name, 8, 2);
-    const LINE_H = 24;
+    const lines = wrapName(tile.name, 9, 2);
+    const LINE_H = 28;
     const nameZoneH = box.h - topH;
     const nameStackH = lines.length * LINE_H;
-    const nameStartY = box.y + topH + Math.max(4, (nameZoneH - nameStackH) / 2);
+    const nameStartY = box.y + topH + Math.max(2, (nameZoneH - nameStackH) / 2);
 
     return (
       <g className="app-mono-tile-text">
@@ -212,8 +275,8 @@ function TileLabel({ tile, box, topH, mortgaged, level, rentNow, owned, onColor,
 
   // Chance / Community Chest — simple centred icon + name, no price band.
   const icon = tileIcon(tile);
-  const lines = wrapName(tile.name, 8, 2);
-  const LINE_H = 26;
+  const lines = wrapName(tile.name, 9, 2);
+  const LINE_H = 28;
   const ICON_H = icon ? 32 : 0;
   const stackH = ICON_H + lines.length * LINE_H;
   let y = box.y + (box.h - stackH) / 2;
@@ -241,7 +304,7 @@ function CornerLabel({ tile, t }) {
   // fixed per-type label — a corner's name can change (START became
   // "Platform 9¾") or its type can become an ordinary card tile (the old
   // Platform corner is now just a Community Chest square).
-  const lines = wrapName(tile.name.toUpperCase(), 9, 2);
+  const lines = wrapName(tile.name.toUpperCase(), 10, 2);
   const startY = t.y + 100;
   return (
     <g>
