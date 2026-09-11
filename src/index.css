@@ -4324,12 +4324,10 @@ a.app-auth-logo-badge:hover {
 }
 
 /* =========================================================================
-   Monopoly — had a fully working server-authoritative game engine but
-   NO styling at all (every .app-mono-* class below was previously
-   undefined), which is why tiles rendered as unstyled black-on-black
-   SVG shapes with invisible text. This section is the whole visual
-   layer: menu, lobby, board, side panel and all its sub-panels, the
-   drawn-card popup, the title deed modal, and the game-over screen.
+   Monopoly — Hogwarts Edition. 4-player game, one HUD card pinned to
+   each corner of the board (like a mobile board-game app), a centred
+   buy/event popup over the board itself, and property upgrades shown
+   as a rising rent number rather than house icons.
    ========================================================================= */
 
 /* ---- Menu (create/join) ---- */
@@ -4508,50 +4506,134 @@ a.app-auth-logo-badge:hover {
   text-transform: uppercase;
 }
 
-/* ---- Game layout ---- */
-.app-mono-layout {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-.app-mono-board-wrap {
+/* ---- Game arena: the board, with a player HUD card pinned to each
+   of its 4 corners ---- */
+.app-mono-arena {
   position: relative;
   width: 100%;
   max-width: 640px;
   margin: 0 auto;
+  padding: 68px 6px;
+}
+.app-mono-board-wrap {
+  position: relative;
+  width: 100%;
 }
 .app-mono-board {
   display: block;
   width: 100%;
   height: auto;
 }
-.app-mono-side {
+.app-mono-hud-bottom {
   display: flex;
   flex-direction: column;
   gap: 12px;
   width: 100%;
   max-width: 640px;
-  margin: 0 auto;
+  margin: 14px auto 0;
 }
-@media (min-width: 1040px) {
-  .app-mono-layout {
-    flex-direction: row;
-    align-items: flex-start;
-    gap: 24px;
-  }
-  .app-mono-board-wrap {
-    flex: 1 1 auto;
-    max-width: 760px;
-    margin: 0;
-  }
-  .app-mono-side {
-    flex: 0 0 340px;
-    max-width: 340px;
-    margin: 0;
-    position: sticky;
-    top: 90px;
-  }
+
+/* ---- Corner player cards ---- */
+.app-mono-corner {
+  position: absolute;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 48%;
 }
+.app-mono-corner.is-tl { top: 0; left: 0; }
+.app-mono-corner.is-tr { top: 0; right: 0; flex-direction: row-reverse; }
+.app-mono-corner.is-bl { bottom: 0; left: 0; }
+.app-mono-corner.is-br { bottom: 0; right: 0; flex-direction: row-reverse; }
+.app-mono-corner.is-out { opacity: 0.45; }
+.app-mono-corner-avatar {
+  position: relative;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid var(--app-border);
+  background: var(--app-surface);
+}
+.app-mono-corner-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.app-mono-corner-avatar-fallback {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.app-mono-corner-ring {
+  position: absolute;
+  inset: -6px;
+  border: 2px solid var(--app-accent);
+  border-radius: 50%;
+  animation: app-mono-pulse 1.4s ease-in-out infinite;
+}
+@keyframes app-mono-pulse {
+  0%, 100% { opacity: 0.9; transform: scale(1); }
+  50% { opacity: 0.25; transform: scale(1.14); }
+}
+.app-mono-corner-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.app-mono-corner.is-tr .app-mono-corner-info,
+.app-mono-corner.is-br .app-mono-corner-info {
+  align-items: flex-end;
+  text-align: right;
+}
+.app-mono-corner-name {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 800;
+  font-size: 0.8rem;
+}
+.app-mono-corner.is-turn .app-mono-corner-name {
+  color: var(--app-accent);
+}
+.app-mono-corner-cash {
+  font-family: var(--app-font-display);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+.app-mono-corner-cash em {
+  margin-left: 3px;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 0.7rem;
+  color: var(--app-muted);
+}
+.app-mono-corner-pill {
+  width: fit-content;
+  margin-top: 2px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: var(--app-accent);
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.app-mono-corner-pill.is-waiting {
+  background: var(--app-bg-deep);
+  color: var(--app-ink);
+  opacity: 0.85;
+}
+
+/* Bottom-of-arena "you" card, action panel, manage panel and log all
+   stack in a single column below the board — kept simple across every
+   screen width instead of shifting into a side column on desktop. */
 
 /* ---- Board SVG ---- */
 .app-mono-felt {
@@ -4596,6 +4678,16 @@ a.app-auth-logo-badge:hover {
   font-family: var(--app-font-body), sans-serif;
   font-size: 13px;
   font-weight: 700;
+  fill: var(--app-muted);
+}
+.app-mono-tile-price.is-upgraded {
+  fill: var(--app-accent);
+}
+.app-mono-tile-level {
+  font-family: var(--app-font-body), sans-serif;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
   fill: var(--app-muted);
 }
 .app-mono-mortgage-mark {
@@ -4658,17 +4750,6 @@ a.app-auth-logo-badge:hover {
   font-size: 14px;
   font-weight: 700;
 }
-.app-mono-house rect {
-  fill: #2f8f4e;
-  stroke: var(--app-border);
-  stroke-width: 1.2;
-}
-.app-mono-hotel rect {
-  fill: #e5484d;
-  stroke: var(--app-border);
-  stroke-width: 1.2;
-}
-
 /* Font size steps down at narrower board sizes instead of disappearing
    outright — see the "no names on mobile" fix in MonopolyBoard.jsx. */
 @media (max-width: 480px) {
@@ -4720,7 +4801,121 @@ a.app-auth-logo-badge:hover {
   to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 }
 
-/* ---- Side panel ---- */
+/* A brief flash of the latest log line (rent paid, salary collected...)
+   over the board — the same slot the card popup uses. */
+.app-mono-event-pop {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 68%;
+  max-width: 300px;
+  padding: 12px 16px;
+  background: var(--app-surface);
+  border: var(--app-border-w) solid var(--app-border);
+  border-radius: var(--app-radius-md);
+  text-align: center;
+  opacity: 0.97;
+  pointer-events: none;
+  animation: app-mono-card-in 200ms ease-out both;
+}
+.app-mono-event-icon {
+  font-size: 22px;
+}
+.app-mono-event-pop p {
+  margin: 0;
+  font-weight: 700;
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+/* ---- Buy prompt — the unowned-property decision, centred over
+   everything like the title deed modal ---- */
+.app-mono-buy-card {
+  width: 100%;
+  max-width: 320px;
+  padding: 22px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+  border: var(--app-border-w) solid var(--app-border);
+  border-radius: var(--app-radius-lg);
+  background: var(--app-surface);
+  animation: app-mono-card-in 220ms ease-out both;
+}
+.app-mono-buy-title {
+  margin: 0;
+  font-family: var(--app-font-display);
+  font-size: 1.15rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.app-mono-buy-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  width: 100%;
+}
+.app-mono-buy-grid div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.app-mono-buy-grid span {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--app-muted);
+}
+.app-mono-buy-grid strong {
+  font-family: var(--app-font-display);
+  font-size: 1rem;
+}
+.app-mono-buy-icon {
+  padding: 8px 0;
+  font-size: 62px;
+  line-height: 1;
+}
+.app-mono-buy-btns {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+.app-mono-buy-pass,
+.app-mono-buy-buy {
+  flex: 1;
+  padding: 12px;
+  border: var(--app-border-w) solid var(--app-border);
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+}
+.app-mono-buy-pass {
+  background: var(--app-bg);
+  color: var(--app-ink);
+}
+.app-mono-buy-buy {
+  background: var(--app-accent);
+  color: #fff;
+}
+.app-mono-buy-buy:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ---- Bottom HUD: your status, actions, properties, history ---- */
 .app-mono-you {
   display: flex;
   align-items: center;
@@ -4799,58 +4994,8 @@ a.app-auth-logo-badge:hover {
   font-weight: 700;
   cursor: pointer;
 }
-.app-mono-tab.is-active {
-  background: var(--app-accent);
-}
-
-.app-mono-players {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  max-height: 260px;
-  overflow-y: auto;
-}
-.app-mono-player {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 7px 10px;
-  border: var(--app-border-w) solid var(--app-border);
-  border-radius: var(--app-radius-sm);
-  background: var(--app-surface);
-}
-.app-mono-player.is-turn {
-  background: var(--app-accent);
-}
-.app-mono-player.is-out {
-  opacity: 0.5;
-}
-.app-mono-player-dot {
-  flex-shrink: 0;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: var(--app-border-w) solid var(--app-border);
-  color: #fff;
-  font-weight: 700;
-  font-size: 0.75rem;
-}
-.app-mono-player-name {
+.app-mono-tabs .app-mp-leave {
   flex: 1;
-  min-width: 0;
-  font-weight: 700;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.app-mono-player-meta {
-  flex-shrink: 0;
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--app-muted);
 }
 
 .app-mono-log {
@@ -4930,9 +5075,10 @@ a.app-auth-logo-badge:hover {
   text-align: left;
   cursor: pointer;
 }
-.app-mono-manage-houses {
-  font-size: 0.75rem;
-  letter-spacing: -1px;
+.app-mono-manage-level {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--app-accent);
 }
 .app-mono-manage-flag {
   font-size: 0.68rem;

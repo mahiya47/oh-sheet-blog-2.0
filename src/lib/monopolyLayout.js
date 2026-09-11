@@ -1,20 +1,19 @@
 // ==========================================================
-// Board geometry + colours for the Monopoly board.
+// Board geometry + colours for the Monopoly board — Hogwarts Edition.
 //
 // The board itself (names, prices, rents) comes from the SERVER — it
 // arrives with the first `mono:state` push and is cached. This file only
-// works out WHERE each of the 40 tiles sits in the SVG, which is pure
+// works out WHERE each of the 32 tiles sits in the SVG, which is pure
 // geometry and never needs to agree with the server about anything.
 //
-// 40 tiles = 4 corners + 9 tiles per side — the classic Monopoly shape.
-// Anticlockwise layout: GO at the bottom-right, Jail bottom-left, Free
-// Parking top-left, Go To Jail top-right; corners sit at indexes
-// 0 / 10 / 20 / 30.
+// 32 tiles = 4 corners + 7 tiles per side. Anticlockwise layout: START
+// at the bottom-right, Azkaban bottom-left, Platform 9¾ top-left, the
+// Auction House top-right; corners sit at indexes 0 / 8 / 16 / 24.
 // ==========================================================
 
 export const BOARD_PX = 1320; // viewBox is BOARD_PX square
 const CORNER = 180;
-const SIDE_TILES = 9; // non-corner tiles between each pair of corners
+const SIDE_TILES = 7; // non-corner tiles between each pair of corners
 const TILE = (BOARD_PX - CORNER * 2) / SIDE_TILES;
 const DEPTH = 150; // how far a side tile reaches in from the edge
 export const BAND = 36; // colour stripe thickness
@@ -26,9 +25,9 @@ function cornerAt(i, x, y) {
 }
 
 function buildTiles() {
-  const tiles = Array.from({ length: 40 });
+  const tiles = Array.from({ length: 32 });
 
-  // GO — bottom-right corner
+  // START — bottom-right corner
   tiles[0] = cornerAt(0, BOARD_PX - CORNER, BOARD_PX - CORNER);
   // Bottom edge, running right to left
   for (let k = 1; k <= SIDE_TILES; k++) {
@@ -36,29 +35,29 @@ function buildTiles() {
     const y = BOARD_PX - DEPTH;
     tiles[k] = { i: k, x, y, w: TILE, h: DEPTH, side: "bottom", cx: x + TILE / 2, cy: y + DEPTH / 2 };
   }
-  // Jail — bottom-left corner
-  tiles[10] = cornerAt(10, 0, BOARD_PX - CORNER);
+  // Azkaban — bottom-left corner
+  tiles[8] = cornerAt(8, 0, BOARD_PX - CORNER);
   // Left edge, running bottom to top
   for (let k = 1; k <= SIDE_TILES; k++) {
     const x = 0;
     const y = BOARD_PX - CORNER - k * TILE;
-    tiles[10 + k] = { i: 10 + k, x, y, w: DEPTH, h: TILE, side: "left", cx: x + DEPTH / 2, cy: y + TILE / 2 };
+    tiles[8 + k] = { i: 8 + k, x, y, w: DEPTH, h: TILE, side: "left", cx: x + DEPTH / 2, cy: y + TILE / 2 };
   }
-  // Free Parking — top-left corner
-  tiles[20] = cornerAt(20, 0, 0);
+  // Platform 9¾ — top-left corner
+  tiles[16] = cornerAt(16, 0, 0);
   // Top edge, running left to right
   for (let k = 1; k <= SIDE_TILES; k++) {
     const x = CORNER + (k - 1) * TILE;
     const y = 0;
-    tiles[20 + k] = { i: 20 + k, x, y, w: TILE, h: DEPTH, side: "top", cx: x + TILE / 2, cy: y + DEPTH / 2 };
+    tiles[16 + k] = { i: 16 + k, x, y, w: TILE, h: DEPTH, side: "top", cx: x + TILE / 2, cy: y + DEPTH / 2 };
   }
-  // Go To Jail — top-right corner
-  tiles[30] = cornerAt(30, BOARD_PX - CORNER, 0);
+  // Auction House — top-right corner
+  tiles[24] = cornerAt(24, BOARD_PX - CORNER, 0);
   // Right edge, running top to bottom
   for (let k = 1; k <= SIDE_TILES; k++) {
     const x = BOARD_PX - DEPTH;
     const y = CORNER + (k - 1) * TILE;
-    tiles[30 + k] = { i: 30 + k, x, y, w: DEPTH, h: TILE, side: "right", cx: x + DEPTH / 2, cy: y + TILE / 2 };
+    tiles[24 + k] = { i: 24 + k, x, y, w: DEPTH, h: TILE, side: "right", cx: x + DEPTH / 2, cy: y + TILE / 2 };
   }
 
   return tiles;
@@ -151,6 +150,15 @@ export const GROUP_COLORS = {
   navy: "#2f5fd8",
 };
 
+// The 4 Hogwarts Houses stand in for utilities — each gets its own
+// crest colour instead of a shared "utility" colour.
+export const HOUSE_COLORS = {
+  "Gryffindor Tower": "#7f0e0e",
+  "Hufflepuff Basement": "#ecb939",
+  "Ravenclaw Tower": "#222f5b",
+  "Slytherin Dungeon": "#1a472a",
+};
+
 // Tokens sit over the colour band at the inner edge of a tile rather
 // than dead centre, so they don't cover the name and price.
 export function tokenAnchor(t) {
@@ -165,17 +173,14 @@ export function tokenAnchor(t) {
   }
 }
 
-// Up to 8 tokens can share a tile — spread them along the tile's long
-// axis (two rows if it gets crowded) instead of stacking into a blob.
+// Up to 4 tokens can share a tile — spread them along the tile's long
+// axis instead of stacking into a blob.
 export function tokenOffset(slot, total, side) {
-  const perRow = total > 4 ? 4 : Math.max(total, 1);
-  const col = slot % perRow;
-  const row = Math.floor(slot / perRow);
-  const along = (col - (perRow - 1) / 2) * 21;
-  const across = row * 22;
+  const perRow = Math.max(total, 1);
+  const along = (slot - (perRow - 1) / 2) * 21;
   const vertical = side === "left" || side === "right";
   if (vertical) {
-    return { dx: side === "left" ? -across : across, dy: along };
+    return { dx: side === "left" ? -12 : 12, dy: along };
   }
-  return { dx: along, dy: side === "top" ? across : -across };
+  return { dx: along, dy: side === "top" ? 12 : -12 };
 }

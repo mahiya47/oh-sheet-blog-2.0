@@ -7,6 +7,7 @@ import {
   wrapName,
   tokenAnchor,
   GROUP_COLORS,
+  HOUSE_COLORS,
   tokenOffset,
 } from "../../lib/monopolyLayout.js";
 
@@ -43,7 +44,13 @@ export default function MonopolyBoard({ board, game, mySeat, onTileClick, select
         const own = ownerRect(t);
         const box = contentBox(t);
         const isCorner = t.side === "corner";
-        const groupColor = tile.group ? GROUP_COLORS[tile.group] : null;
+        const bandColor = tile.group
+          ? GROUP_COLORS[tile.group]
+          : tile.type === "utility"
+          ? HOUSE_COLORS[tile.name]
+          : null;
+        const level = st?.houses || 0;
+        const rentNow = tile.rent ? tile.rent[level] : null;
 
         return (
           <g
@@ -57,8 +64,8 @@ export default function MonopolyBoard({ board, game, mySeat, onTileClick, select
           >
             <rect x={t.x} y={t.y} width={t.w} height={t.h} className="app-mono-tile-bg" />
 
-            {groupColor && band && (
-              <rect x={band.x} y={band.y} width={band.w} height={band.h} fill={groupColor} className="app-mono-band" />
+            {bandColor && band && (
+              <rect x={band.x} y={band.y} width={band.w} height={band.h} fill={bandColor} className="app-mono-band" />
             )}
 
             {ownerColor && own && (
@@ -68,11 +75,8 @@ export default function MonopolyBoard({ board, game, mySeat, onTileClick, select
             {isCorner ? (
               <CornerLabel tile={tile} t={t} />
             ) : (
-              <TileLabel tile={tile} box={box} mortgaged={!!st?.mortgaged} />
+              <TileLabel tile={tile} box={box} mortgaged={!!st?.mortgaged} level={level} rentNow={rentNow} />
             )}
-
-            {/* Houses / hotel */}
-            {st?.houses > 0 && band && <Buildings tile={t} band={band} houses={st.houses} />}
           </g>
         );
       })}
@@ -91,7 +95,7 @@ export default function MonopolyBoard({ board, game, mySeat, onTileClick, select
           OH SHEET!
         </text>
         <text className="app-mono-center-sub" x={BOARD_PX / 2} y={BOARD_PX / 2 + 10} textAnchor="middle">
-          MONOPOLY
+          HOGWARTS EDITION
         </text>
         {game.dice && (
           <g transform={`translate(${BOARD_PX / 2 - 130} ${BOARD_PX / 2 + 60})`}>
@@ -127,13 +131,14 @@ export default function MonopolyBoard({ board, game, mySeat, onTileClick, select
 }
 
 // A side tile's contents: an icon for the non-street squares, the name
-// wrapped to fit, and the price. Everything is centred in the space the
-// colour band leaves, and stays horizontal on all four sides. Font size
+// wrapped to fit, and the price. Once a property has been upgraded, the
+// current rent replaces the price line — that's the "upgrade" the tile
+// shows, instead of drawing house/hotel pips on the board. Font size
 // scales down at narrow viewports via CSS (see .app-mono-tile-name) —
 // the name is never hidden outright, so every tile stays identifiable
 // on a phone.
-function TileLabel({ tile, box, mortgaged }) {
-  const icon = tile.group ? null : tileIcon(tile.type);
+function TileLabel({ tile, box, mortgaged, level, rentNow }) {
+  const icon = tile.group ? null : tileIcon(tile);
   // 10 characters is what actually fits across a tile at this text size —
   // more than that and names bleed into their neighbours.
   const lines = wrapName(tile.name, 10, 2);
@@ -164,8 +169,15 @@ function TileLabel({ tile, box, mortgaged }) {
   y += lines.length * LINE_H;
   if (tile.price) {
     parts.push(
-      <text key="price" className="app-mono-tile-price" x={cx} y={y + 15} textAnchor="middle">
-        ${tile.price}
+      <text key="price" className={"app-mono-tile-price" + (level > 0 ? " is-upgraded" : "")} x={cx} y={y + 15} textAnchor="middle">
+        {level > 0 ? `Rent $${rentNow}` : `$${tile.price}`}
+      </text>
+    );
+  }
+  if (level > 0) {
+    parts.push(
+      <text key="lvl" className="app-mono-tile-level" x={cx} y={y + 32} textAnchor="middle">
+        {level >= 5 ? "MAX LEVEL" : `Lv ${level}`}
       </text>
     );
   }
@@ -185,7 +197,7 @@ function CornerLabel({ tile, t }) {
   return (
     <g>
       <text className="app-mono-corner-icon" x={t.cx} y={t.y + 52} textAnchor="middle">
-        {tileIcon(tile.type)}
+        {tileIcon(tile)}
       </text>
       <g className="app-mono-tile-text">
         {lines.map((line, k) => (
@@ -194,36 +206,6 @@ function CornerLabel({ tile, t }) {
           </text>
         ))}
       </g>
-    </g>
-  );
-}
-
-// Houses sit in a row along the colour band; a hotel replaces them.
-function Buildings({ tile, band, houses }) {
-  const horizontal = tile.side === "bottom" || tile.side === "top";
-  const isHotel = houses === 5;
-  const count = isHotel ? 1 : houses;
-  const size = isHotel ? 26 : 17;
-  const gap = isHotel ? 0 : 5;
-  const span = count * size + (count - 1) * gap;
-
-  return (
-    <g className={isHotel ? "app-mono-hotel" : "app-mono-house"}>
-      {Array.from({ length: count }, (_, k) => {
-        const offset = -span / 2 + k * (size + gap);
-        const cx = horizontal ? band.x + band.w / 2 + offset : band.x + band.w / 2;
-        const cy = horizontal ? band.y + band.h / 2 : band.y + band.h / 2 + offset;
-        return (
-          <rect
-            key={k}
-            x={cx - size / 2}
-            y={cy - size / 2}
-            width={size}
-            height={size}
-            rx="3"
-          />
-        );
-      })}
     </g>
   );
 }
@@ -250,27 +232,34 @@ function Die({ value, x }) {
   );
 }
 
-function tileIcon(type) {
-  switch (type) {
-    case "go": return "→";
-    case "jail": return "🔒";
-    case "parking": return "🅿";
-    case "gotojail": return "👮";
+// Each Hogwarts House gets its own crest emoji instead of a shared
+// "utility" icon.
+const HOUSE_ICONS = {
+  "Gryffindor Tower": "🦁",
+  "Hufflepuff Basement": "🦡",
+  "Ravenclaw Tower": "🦅",
+  "Slytherin Dungeon": "🐍",
+};
+
+function tileIcon(tile) {
+  if (tile.type === "utility") return HOUSE_ICONS[tile.name] || "🏰";
+  switch (tile.type) {
+    case "go": return "✨";
+    case "jail": return "🏰";
+    case "platform": return "🚉";
+    case "auction": return "🔨";
     case "chance": return "❓";
     case "chest": return "🎁";
-    case "tax": return "💸";
-    case "rail": return "🚄";
-    case "utility": return "💡";
     default: return "";
   }
 }
 
 function cornerLabel(type) {
   switch (type) {
-    case "go": return "GO";
-    case "jail": return "JAIL";
-    case "parking": return "FREE PARKING";
-    case "gotojail": return "GO TO JAIL";
+    case "go": return "START";
+    case "jail": return "AZKABAN";
+    case "platform": return "PLATFORM 9¾";
+    case "auction": return "AUCTION";
     default: return "";
   }
 }
