@@ -4533,7 +4533,12 @@ a.app-auth-logo-badge:hover {
   width: 100%;
   max-width: 640px;
   margin: 0 auto;
-  padding: 68px 6px;
+  /* Top/bottom padding has to fully clear the corner player card's real
+     height (avatar + name + cash + the "Your Turn"/"Playing…"/"away"
+     pill, stacked with gaps) — it was 68px, well under that stack's
+     ~100-120px, so the card spilled onto the board's corner tile
+     (photo/cash overlapping the tile text). 120px clears the worst case. */
+  padding: 120px 6px;
 }
 .app-mono-board-wrap {
   position: relative;
