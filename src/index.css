@@ -1628,10 +1628,10 @@ ul {
 
 .app-profile-tab-content {
   padding: 0;
-  /* Cancels .app-page's 18px flex-gap so the Posts tab's content sits
-     ~2px under the profile card (supplied by .app-feed's own
-     margin-top), matching the tightened Home-page feed gap. */
-  margin-top: -18px;
+  /* Lets .app-page's normal 18px flex-gap apply here (unlike the Home
+     feed, which cancels it for a tighter 2px gap) — profile posts get
+     more breathing room under the followers/following card. */
+  margin-top: 0;
 }
 .app-profile-about {
   display: flex;
