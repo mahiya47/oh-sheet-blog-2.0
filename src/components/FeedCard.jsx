@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import NavIcon from "./NavIcons.jsx";
+import VerifiedBadge from "./VerifiedBadge.jsx";
 import PostText from "./PostText.jsx";
 import RichTextEditor from "./RichTextEditor.jsx";
 import ImageCarousel from "./ImageCarousel.jsx";
@@ -617,6 +618,7 @@ export default function FeedCard({ post, onDeleted, initiallyExpanded = false })
           <Link to={`/profile/${post.author.username}`} className="app-card-name" onClick={stop}>
             {displayName}
           </Link>
+          <VerifiedBadge user={post.author} />
           <span className="app-card-dot">·</span>
           <Link to={`/post/${post.id}`} className="app-card-time" onClick={stop}>
             {relativeTime(post.createdAt)}

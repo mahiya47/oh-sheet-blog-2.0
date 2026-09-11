@@ -4,6 +4,7 @@ import FeedCard from "../components/FeedCard.jsx";
 import NavIcon from "../components/NavIcons.jsx";
 import FollowListModal from "../components/FollowListModal.jsx";
 import ImageLightbox from "../components/ImageLightbox.jsx";
+import VerifiedBadge from "../components/VerifiedBadge.jsx";
 import { ProfileHeaderSkeleton } from "../components/Skeletons.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 import { api } from "../lib/api.js";
@@ -241,6 +242,7 @@ export default function ProfilePage() {
 
         <h2 className="app-profile-username">
           {profile.name}
+          <VerifiedBadge user={profile} />
           {profile.pronouns && <span className="app-profile-pronouns">{profile.pronouns}</span>}
         </h2>
         <p className="app-profile-handle">

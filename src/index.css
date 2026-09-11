@@ -676,8 +676,22 @@ ul {
 .app-feed {
   display: flex;
   flex-direction: column;
-  gap: 34px;
-  margin-top: 22px;
+  gap: 14px;
+  margin-top: 2px;
+}
+
+/* Home page only: on mobile the stories strip is hidden (see
+   .app-stories-bar-wrap), so .app-feed is the first visible thing under
+   the top bar — pull it up to close .app-body's 14px top padding down
+   to a 2px gap. Once the stories strip reappears at 760px, restore the
+   normal spacing below it. */
+.app-home-page > .app-feed {
+  margin-top: -12px;
+}
+@media (min-width: 760px) {
+  .app-home-page > .app-feed {
+    margin-top: 22px;
+  }
 }
 
 .app-empty {
@@ -689,7 +703,7 @@ ul {
 .app-card {
   position: relative;
   border: var(--app-border-w) solid var(--app-border);
-  border-radius: var(--app-radius-lg);
+  border-radius: 0;
   padding: 10px 6px 6px;
   box-shadow: var(--app-shadow-lg);
   cursor: pointer;
@@ -1365,6 +1379,32 @@ ul {
   font-family: var(--app-font-display);
   font-size: 1.3rem;
 }
+
+/* Verified tick: gold on the creator account, rainbow gradient on anyone
+   who opted in to showing a non-straight orientation, plain blue on
+   everyone else. Sits inline next to a display name wherever one is
+   shown (post header, profile header, DM thread header). */
+.app-verified-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 4px;
+  line-height: 0;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+.app-verified-badge--blue {
+  color: #3897f0;
+}
+.app-verified-badge--creator {
+  color: #d4af37;
+}
+.app-verified-badge--rainbow {
+  color: inherit;
+}
+.app-profile-username .app-verified-badge {
+  margin-left: 6px;
+}
 .app-profile-pronouns {
   margin-left: 8px;
   font-family: var(--app-font-body);
@@ -1587,7 +1627,11 @@ ul {
 }
 
 .app-profile-tab-content {
-  padding: 8px 0 0;
+  padding: 0;
+  /* Cancels .app-page's 18px flex-gap so the Posts tab's content sits
+     ~2px under the profile card (supplied by .app-feed's own
+     margin-top), matching the tightened Home-page feed gap. */
+  margin-top: -18px;
 }
 .app-profile-about {
   display: flex;
@@ -2837,7 +2881,7 @@ a.app-auth-logo-badge:hover {
   margin-top: 4px;
   padding: 4px;
   border: 2px solid rgba(28, 24, 16, 0.2);
-  border-radius: var(--app-radius-sm);
+  border-radius: 0;
   background: rgba(255, 255, 255, 0.5);
 }
 .app-card-content-box .app-card-text {
@@ -2957,7 +3001,7 @@ a.app-auth-logo-badge:hover {
 /* ---- Post media (image/video) ---- */
 .app-card-media {
   margin-top: 6px;
-  border-radius: var(--app-radius-sm);
+  border-radius: 0;
   overflow: hidden;
   border: var(--app-border-w) solid var(--app-border);
 }

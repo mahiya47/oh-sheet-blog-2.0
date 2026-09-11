@@ -47,7 +47,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="app-page">
+    <div className="app-page app-home-page">
       {/* Phones get the full Stories tab in the bottom bar instead of
           this strip; on desktop there's no bottom bar, so it stays. */}
       <div className="app-stories-bar-wrap">

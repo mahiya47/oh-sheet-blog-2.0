@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import NavIcon from "../components/NavIcons.jsx";
+import VerifiedBadge from "../components/VerifiedBadge.jsx";
 import { MessageThreadSkeleton } from "../components/Skeletons.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useDm } from "../context/DmContext.jsx";
@@ -239,6 +240,7 @@ export default function MessageThreadPage() {
               )}
             </span>
             <span>{otherUser.name || otherUser.username}</span>
+            <VerifiedBadge user={otherUser} />
           </Link>
         ) : (
           <span className="app-dm-thread-who">Loading...</span>
