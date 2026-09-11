@@ -331,22 +331,6 @@ function CenterPanel({
     return () => clearTimeout(t);
   }, [lastLogText]);
 
-  // The server keeps `game.card` set until the next roll or end-turn — it
-  // doesn't clear itself. Everyone taps OK to dismiss it once they've read
-  // it; the timer is just a safety net in case someone never taps it, so
-  // it can never permanently block the roll/end-turn button underneath.
-  const [cardVisible, setCardVisible] = useState(false);
-  const cardText = game.card?.text;
-  useEffect(() => {
-    if (!cardText) {
-      setCardVisible(false);
-      return;
-    }
-    setCardVisible(true);
-    const t = setTimeout(() => setCardVisible(false), 7000);
-    return () => clearTimeout(t);
-  }, [cardText]);
-
   if (buying) {
     return <BuyCard tile={buying} me={me} onBuy={() => act("mono:buy")} onPass={() => act("mono:decline_buy")} />;
   }
@@ -367,16 +351,31 @@ function CenterPanel({
     );
   }
 
-  if (game.card && cardVisible) {
+  // The server keeps `game.card` set until whoever drew it dismisses it —
+  // it never times out on its own. Only they get the OK button; everyone
+  // else just watches, with the card clearly labelled as that player's,
+  // and it stays up for them too until that player taps OK. If that
+  // player has disconnected, skip straight past this (see currentConnected
+  // below) so the table isn't stuck staring at a card nobody can dismiss —
+  // "Skip disconnected player" further down stays reachable instead.
+  if (game.card && currentConnected) {
+    const drawerSeat = game.card.seat;
+    const isDrawer = mySeat === drawerSeat;
+    const drawerName = firstName(players[drawerSeat]?.name || players[drawerSeat]?.username || `Seat ${drawerSeat + 1}`);
     return (
       <div className="app-mono-panel-msg">
         <span className="app-mono-panel-msg-kind">
           {game.card.deck === "chance" ? "❓ Chance" : "🎁 Community Chest"}
         </span>
+        <p className="app-mono-panel-note">{isDrawer ? "You drew:" : `${drawerName} drew:`}</p>
         <p>{game.card.text}</p>
-        <button type="button" className="app-arcade-btn app-mono-primary" onClick={() => setCardVisible(false)}>
-          OK
-        </button>
+        {isDrawer ? (
+          <button type="button" className="app-arcade-btn app-mono-primary" onClick={() => act("mono:card_ack")}>
+            OK
+          </button>
+        ) : (
+          <p className="app-mono-panel-note">Waiting for {drawerName} to continue…</p>
+        )}
       </div>
     );
   }
