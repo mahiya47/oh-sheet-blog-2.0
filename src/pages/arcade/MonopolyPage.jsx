@@ -367,6 +367,12 @@ function CenterPanel({
         <span className="app-mono-panel-msg-kind">
           {game.card.deck === "chance" ? "❓ Chance" : "🎁 Community Chest"}
         </span>
+        {game.dice && (
+          <>
+            <DiceRow dice={game.dice} />
+            <p className="app-mono-panel-note">Rolled {game.dice[0]} + {game.dice[1]} = {game.dice[0] + game.dice[1]}</p>
+          </>
+        )}
         <p className="app-mono-panel-note">{isDrawer ? "You drew:" : `${drawerName} drew:`}</p>
         <p>{game.card.text}</p>
         {isDrawer ? (

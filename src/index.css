@@ -4546,14 +4546,16 @@ a.app-auth-logo-badge:hover {
   position: absolute;
   z-index: 3;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
+  text-align: center;
+  gap: 4px;
   max-width: 48%;
 }
 .app-mono-corner.is-tl { top: 0; left: 0; }
-.app-mono-corner.is-tr { top: 0; right: 0; flex-direction: row-reverse; }
+.app-mono-corner.is-tr { top: 0; right: 0; }
 .app-mono-corner.is-bl { bottom: 0; left: 0; }
-.app-mono-corner.is-br { bottom: 0; right: 0; flex-direction: row-reverse; }
+.app-mono-corner.is-br { bottom: 0; right: 0; }
 .app-mono-corner.is-out { opacity: 0.45; }
 .app-mono-corner-avatar {
   position: relative;
@@ -4590,16 +4592,12 @@ a.app-auth-logo-badge:hover {
 .app-mono-corner-info {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 1px;
   min-width: 0;
 }
-.app-mono-corner.is-tr .app-mono-corner-info,
-.app-mono-corner.is-br .app-mono-corner-info {
-  align-items: flex-end;
-  text-align: right;
-}
 .app-mono-corner-name {
-  max-width: 120px;
+  max-width: 96px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -4801,9 +4799,9 @@ a.app-auth-logo-badge:hover {
 }
 .app-mono-panel-note {
   margin: 0;
-  font-size: 0.78rem;
+  font-size: 0.86rem;
   font-weight: 600;
-  opacity: 0.65;
+  opacity: 0.7;
 }
 .app-mono-dice-row {
   display: flex;
@@ -4848,12 +4846,12 @@ a.app-auth-logo-badge:hover {
 .app-mono-panel-msg-kind {
   font-family: var(--app-font-display);
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: 1rem;
 }
 .app-mono-panel-msg p {
   margin: 0;
   font-weight: 600;
-  font-size: 0.82rem;
+  font-size: 0.98rem;
   line-height: 1.4;
 }
 .app-mono-panel-msg .app-arcade-btn {
