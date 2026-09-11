@@ -4679,7 +4679,7 @@ a.app-auth-logo-badge:hover {
 }
 .app-mono-tile-name {
   font-family: var(--app-font-display), sans-serif;
-  font-size: 26px;
+  font-size: 28px;
   font-weight: 800;
   fill: var(--app-ink);
 }
@@ -4687,7 +4687,7 @@ a.app-auth-logo-badge:hover {
   /* fill is set inline per-tile (MonopolyBoard.jsx) so it always contrasts
      with that tile's price band, whatever colour it currently is. */
   font-family: var(--app-font-body), sans-serif;
-  font-size: 18px;
+  font-size: 19px;
   font-weight: 800;
   letter-spacing: 0.02em;
 }
@@ -4704,7 +4704,7 @@ a.app-auth-logo-badge:hover {
 }
 .app-mono-corner-label {
   font-family: var(--app-font-display), sans-serif;
-  font-size: 21px;
+  font-size: 23px;
   font-weight: 800;
   fill: var(--app-ink);
 }
@@ -4729,13 +4729,13 @@ a.app-auth-logo-badge:hover {
    outright — see the "no names on mobile" fix in MonopolyBoard.jsx. */
 @media (max-width: 480px) {
   .app-mono-tile-name {
-    font-size: 22px;
+    font-size: 24px;
   }
   .app-mono-tile-price {
-    font-size: 16px;
+    font-size: 17px;
   }
   .app-mono-tile-icon {
-    font-size: 28px;
+    font-size: 29px;
   }
 }
 

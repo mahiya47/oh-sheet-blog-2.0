@@ -15,9 +15,9 @@ const MAX_LEVEL = 3;
 // many tiles it has to cross — few tiles (a normal dice roll) means a slow,
 // readable hop per tile; many tiles (a long card move) speeds up so it
 // never drags. Never faster than MIN_HOP_MS or slower than MAX_HOP_MS.
-const TOTAL_HOP_MS = 1500;
-const MIN_HOP_MS = 90;
-const MAX_HOP_MS = 260;
+const TOTAL_HOP_MS = 1950;
+const MIN_HOP_MS = 120;
+const MAX_HOP_MS = 340;
 
 // Lighten a hex colour toward white — used for the unowned price band, a
 // paler tint of the tile's group colour.
@@ -141,7 +141,7 @@ export default function MonopolyBoard({ board, game, mySeat, onTileClick, select
         // single white card. Text is positioned against this same `t` rect
         // (via `box`/`topH` below) so it lines up with the split exactly.
         const box = t;
-        const topH = t.h * 0.29;
+        const topH = t.h * 0.26;
         const topColor = bandColor ? (owned ? ownerColor : tint(bandColor)) : null;
         const priceTextColor = topColor ? contrastText(topColor) : null;
         // Computed per-tile rather than a fixed white — the Hogwarts House
@@ -241,10 +241,10 @@ function TileLabel({ tile, box, topH, mortgaged, level, rentNow, owned, onColor,
     if (icon) topText = `${icon} ${topText}`;
 
     const lines = wrapName(tile.name, 9, 2);
-    const LINE_H = 28;
+    const LINE_H = 44;
     const nameZoneH = box.h - topH;
     const nameStackH = lines.length * LINE_H;
-    const nameStartY = box.y + topH + Math.max(2, (nameZoneH - nameStackH) / 2);
+    const nameStartY = box.y + topH + Math.max(1, (nameZoneH - nameStackH) / 2);
 
     return (
       <g className="app-mono-tile-text">
@@ -276,7 +276,7 @@ function TileLabel({ tile, box, topH, mortgaged, level, rentNow, owned, onColor,
   // Chance / Community Chest — simple centred icon + name, no price band.
   const icon = tileIcon(tile);
   const lines = wrapName(tile.name, 9, 2);
-  const LINE_H = 28;
+  const LINE_H = 38;
   const ICON_H = icon ? 32 : 0;
   const stackH = ICON_H + lines.length * LINE_H;
   let y = box.y + (box.h - stackH) / 2;
