@@ -4683,9 +4683,6 @@ a.app-auth-logo-badge:hover {
   font-weight: 800;
   fill: var(--app-ink);
 }
-.app-mono-tile-name.is-on-color {
-  fill: #fff;
-}
 .app-mono-tile-price {
   /* fill is set inline per-tile (MonopolyBoard.jsx) so it always contrasts
      with that tile's price band, whatever colour it currently is. */

@@ -81,6 +81,10 @@ export default function MonopolyBoard({ board, game, mySeat, onTileClick, select
         const topH = t.h * 0.32;
         const topColor = bandColor ? (owned ? ownerColor : tint(bandColor)) : null;
         const priceTextColor = topColor ? contrastText(topColor) : null;
+        // Computed per-tile rather than a fixed white — the Hogwarts House
+        // tiles are a pale off-white background, so white text there would
+        // vanish.
+        const nameTextColor = bandColor ? contrastText(bandColor) : null;
 
         return (
           <g
@@ -115,6 +119,7 @@ export default function MonopolyBoard({ board, game, mySeat, onTileClick, select
                 owned={owned}
                 onColor={!!bandColor}
                 priceTextColor={priceTextColor}
+                nameTextColor={nameTextColor}
               />
             )}
           </g>
@@ -159,7 +164,7 @@ export default function MonopolyBoard({ board, game, mySeat, onTileClick, select
 // they keep a simple centred icon + name. Font size scales down at
 // narrow viewports via CSS (see .app-mono-tile-name) — the name is never
 // hidden outright, so every tile stays identifiable on a phone.
-function TileLabel({ tile, box, topH, mortgaged, level, rentNow, owned, onColor, priceTextColor }) {
+function TileLabel({ tile, box, topH, mortgaged, level, rentNow, owned, onColor, priceTextColor, nameTextColor }) {
   const cx = box.x + box.w / 2;
 
   if (onColor) {
@@ -192,7 +197,7 @@ function TileLabel({ tile, box, topH, mortgaged, level, rentNow, owned, onColor,
           </text>
         )}
         {lines.map((line, k) => (
-          <text key={k} className="app-mono-tile-name is-on-color" x={cx} y={nameStartY + 17 + k * LINE_H} textAnchor="middle">
+          <text key={k} className="app-mono-tile-name" style={{ fill: nameTextColor }} x={cx} y={nameStartY + 17 + k * LINE_H} textAnchor="middle">
             {line}
           </text>
         ))}
@@ -232,7 +237,11 @@ function TileLabel({ tile, box, topH, mortgaged, level, rentNow, owned, onColor,
 }
 
 function CornerLabel({ tile, t }) {
-  const lines = wrapName(cornerLabel(tile.type), 9, 2);
+  // Corner labels use the tile's own name (upper-cased) rather than a
+  // fixed per-type label — a corner's name can change (START became
+  // "Platform 9¾") or its type can become an ordinary card tile (the old
+  // Platform corner is now just a Community Chest square).
+  const lines = wrapName(tile.name.toUpperCase(), 9, 2);
   const startY = t.y + 100;
   return (
     <g>
@@ -262,22 +271,11 @@ const HOUSE_ICONS = {
 function tileIcon(tile) {
   if (tile.type === "utility") return HOUSE_ICONS[tile.name] || "🏰";
   switch (tile.type) {
-    case "go": return "✨";
+    case "go": return "🚉";
     case "jail": return "🏰";
-    case "platform": return "🚉";
     case "auction": return "🔨";
     case "chance": return "❓";
     case "chest": return "🎁";
-    default: return "";
-  }
-}
-
-function cornerLabel(type) {
-  switch (type) {
-    case "go": return "START";
-    case "jail": return "AZKABAN";
-    case "platform": return "PLATFORM 9¾";
-    case "auction": return "AUCTION";
     default: return "";
   }
 }

@@ -3,21 +3,26 @@
 //
 // The board itself (names, prices, rents) comes from the SERVER — it
 // arrives with the first `mono:state` push and is cached. This file only
-// works out WHERE each of the 32 tiles sits in the SVG, which is pure
+// works out WHERE each of the 30 tiles sits in the SVG, which is pure
 // geometry and never needs to agree with the server about anything.
 //
-// 32 tiles = 4 corners + 7 tiles per side. Clockwise layout: START at
-// the bottom-left, Azkaban top-left, Platform 9¾ top-right, the Auction
-// House bottom-right; corners sit at indexes 0 / 8 / 16 / 24. Increasing
-// index always walks clockwise: up the left side, across the top, down
-// the right side, back along the bottom.
+// 30 tiles = 4 corners + 6 tiles on the top/bottom edges + 7 tiles on the
+// left/right edges (the board is slightly wider than it is tall isn't
+// the point — fewer tiles across the top/bottom just gives each one more
+// room). Clockwise layout: START at the bottom-left, Azkaban top-left,
+// the Community Chest corner top-right, the Auction House bottom-right;
+// corners sit at indexes 0 / 8 / 15 / 23. Increasing index always walks
+// clockwise: up the left side, across the top, down the right side,
+// back along the bottom.
 // ==========================================================
 
 export const BOARD_PX = 1320; // viewBox is BOARD_PX square
 const CORNER = 180;
-const SIDE_TILES = 7; // non-corner tiles between each pair of corners
-const TILE = (BOARD_PX - CORNER * 2) / SIDE_TILES;
-const DEPTH = 150; // how far a side tile reaches in from the edge
+const SIDE_TILES_V = 7; // non-corner tiles on the left/right (vertical) edges
+const SIDE_TILES_H = 6; // non-corner tiles on the top/bottom (horizontal) edges
+const TILE_V = (BOARD_PX - CORNER * 2) / SIDE_TILES_V; // left/right tile length
+const TILE_H = (BOARD_PX - CORNER * 2) / SIDE_TILES_H; // top/bottom tile length — bigger, since there are fewer of them
+const DEPTH = 168; // how far a side tile reaches in from the edge — bigger tiles all round, less padding
 export const BAND = 36; // colour stripe thickness
 
 // side: which edge the tile sits on — decides text rotation and which
@@ -27,39 +32,39 @@ function cornerAt(i, x, y) {
 }
 
 function buildTiles() {
-  const tiles = Array.from({ length: 32 });
+  const tiles = Array.from({ length: 30 });
 
   // START — bottom-left corner
   tiles[0] = cornerAt(0, 0, BOARD_PX - CORNER);
-  // Left edge, running bottom to top
-  for (let k = 1; k <= SIDE_TILES; k++) {
+  // Left edge, running bottom to top — 7 tiles
+  for (let k = 1; k <= SIDE_TILES_V; k++) {
     const x = 0;
-    const y = BOARD_PX - CORNER - k * TILE;
-    tiles[k] = { i: k, x, y, w: DEPTH, h: TILE, side: "left", cx: x + DEPTH / 2, cy: y + TILE / 2 };
+    const y = BOARD_PX - CORNER - k * TILE_V;
+    tiles[k] = { i: k, x, y, w: DEPTH, h: TILE_V, side: "left", cx: x + DEPTH / 2, cy: y + TILE_V / 2 };
   }
   // Azkaban — top-left corner
   tiles[8] = cornerAt(8, 0, 0);
-  // Top edge, running left to right
-  for (let k = 1; k <= SIDE_TILES; k++) {
-    const x = CORNER + (k - 1) * TILE;
+  // Top edge, running left to right — 6 tiles
+  for (let k = 1; k <= SIDE_TILES_H; k++) {
+    const x = CORNER + (k - 1) * TILE_H;
     const y = 0;
-    tiles[8 + k] = { i: 8 + k, x, y, w: TILE, h: DEPTH, side: "top", cx: x + TILE / 2, cy: y + DEPTH / 2 };
+    tiles[8 + k] = { i: 8 + k, x, y, w: TILE_H, h: DEPTH, side: "top", cx: x + TILE_H / 2, cy: y + DEPTH / 2 };
   }
-  // Platform 9¾ — top-right corner
-  tiles[16] = cornerAt(16, BOARD_PX - CORNER, 0);
-  // Right edge, running top to bottom
-  for (let k = 1; k <= SIDE_TILES; k++) {
+  // Community Chest — top-right corner (was Platform 9¾, now just a card tile)
+  tiles[15] = cornerAt(15, BOARD_PX - CORNER, 0);
+  // Right edge, running top to bottom — 7 tiles
+  for (let k = 1; k <= SIDE_TILES_V; k++) {
     const x = BOARD_PX - DEPTH;
-    const y = CORNER + (k - 1) * TILE;
-    tiles[16 + k] = { i: 16 + k, x, y, w: DEPTH, h: TILE, side: "right", cx: x + DEPTH / 2, cy: y + TILE / 2 };
+    const y = CORNER + (k - 1) * TILE_V;
+    tiles[15 + k] = { i: 15 + k, x, y, w: DEPTH, h: TILE_V, side: "right", cx: x + DEPTH / 2, cy: y + TILE_V / 2 };
   }
   // Auction House — bottom-right corner
-  tiles[24] = cornerAt(24, BOARD_PX - CORNER, BOARD_PX - CORNER);
-  // Bottom edge, running right to left
-  for (let k = 1; k <= SIDE_TILES; k++) {
-    const x = BOARD_PX - CORNER - k * TILE;
+  tiles[23] = cornerAt(23, BOARD_PX - CORNER, BOARD_PX - CORNER);
+  // Bottom edge, running right to left — 6 tiles
+  for (let k = 1; k <= SIDE_TILES_H; k++) {
+    const x = BOARD_PX - CORNER - k * TILE_H;
     const y = BOARD_PX - DEPTH;
-    tiles[24 + k] = { i: 24 + k, x, y, w: TILE, h: DEPTH, side: "bottom", cx: x + TILE / 2, cy: y + DEPTH / 2 };
+    tiles[23 + k] = { i: 23 + k, x, y, w: TILE_H, h: DEPTH, side: "bottom", cx: x + TILE_H / 2, cy: y + DEPTH / 2 };
   }
 
   return tiles;
@@ -145,27 +150,29 @@ export function wrapName(name, perLine = 12, maxLines = 2) {
 // player token colours (see TOKEN_COLORS in MonopolyPage.jsx), and a tile
 // in the same colour as a token reads as confusing, not thematic. The
 // group keys (still "red", "yellow", etc. — that's just internal naming
-// carried over from the character groupings) map to these instead.
+// carried over from the character groupings) map to these instead. Rich,
+// saturated tones rather than muted ones — vibrant, just not primary.
 export const GROUP_COLORS = {
-  brown: "#8d6244",
-  lightblue: "#b39ddb", // lavender
-  pink: "#ef8fb6",
-  orange: "#f2973f",
-  red: "#a24d7a", // plum
-  yellow: "#8a6a3f", // bronze
-  green: "#7a726a", // taupe
-  navy: "#4a3728", // espresso
+  brown: "#8b5a2b",
+  lightblue: "#9b6fd6", // vivid purple
+  pink: "#ec5f98", // hot pink
+  orange: "#f2851f",
+  red: "#c2185b", // magenta/fuchsia
+  yellow: "#b8752f", // amber/copper
+  green: "#5b4a6f", // deep plum-grey
+  navy: "#6b3a2a", // mahogany
 };
 
-// The 4 Hogwarts Houses stand in for utilities — each gets its own
-// crest colour instead of a shared "utility" colour. Same rule as
-// above: none of these are red/yellow/green/blue, even though real
-// Hogwarts house colours are exactly that.
+// The 4 Hogwarts Houses stand in for utilities. Unlike the streets, all
+// 4 share the SAME colour — an off-white — rather than each getting its
+// own, so they read as a distinct "neutral" category on the board (and
+// stay well clear of the red/yellow/green/blue token colours).
+const HOUSE_COLOR = "#f6f3ea";
 export const HOUSE_COLORS = {
-  "Gryffindor Tower": "#7d3c98", // purple
-  "Hufflepuff Basement": "#b5651d", // rust
-  "Ravenclaw Tower": "#37474f", // slate
-  "Slytherin Dungeon": "#4e4a3a", // olive charcoal
+  "Gryffindor Tower": HOUSE_COLOR,
+  "Hufflepuff Basement": HOUSE_COLOR,
+  "Ravenclaw Tower": HOUSE_COLOR,
+  "Slytherin Dungeon": HOUSE_COLOR,
 };
 
 // Tokens sit over the colour band at the inner edge of a tile rather

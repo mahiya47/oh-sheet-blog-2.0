@@ -331,6 +331,22 @@ function CenterPanel({
     return () => clearTimeout(t);
   }, [lastLogText]);
 
+  // The server keeps `game.card` set until the next roll or end-turn — it
+  // doesn't clear itself. Without this timer the drawn-card message would
+  // sit here forever with nothing to tap, blocking the roll/end-turn
+  // button underneath it for the rest of the game.
+  const [cardVisible, setCardVisible] = useState(false);
+  const cardText = game.card?.text;
+  useEffect(() => {
+    if (!cardText) {
+      setCardVisible(false);
+      return;
+    }
+    setCardVisible(true);
+    const t = setTimeout(() => setCardVisible(false), 3500);
+    return () => clearTimeout(t);
+  }, [cardText]);
+
   if (buying) {
     return <BuyCard tile={buying} me={me} onBuy={() => act("mono:buy")} onPass={() => act("mono:decline_buy")} />;
   }
@@ -351,7 +367,7 @@ function CenterPanel({
     );
   }
 
-  if (game.card && myTurn) {
+  if (game.card && myTurn && cardVisible) {
     return (
       <div className="app-mono-panel-msg">
         <span className="app-mono-panel-msg-kind">
@@ -596,7 +612,6 @@ function TileCard({ tile, st, players, game, board, mySeat, act, canManage, onCl
         {tile.type === "chest" && <p className="app-mono-deed-note">Draw a Community Chest card.</p>}
         {tile.type === "go" && <p className="app-mono-deed-note">Collect $200 as you pass.</p>}
         {tile.type === "jail" && <p className="app-mono-deed-note">Just visiting Azkaban — unless you were sent here.</p>}
-        {tile.type === "platform" && <p className="app-mono-deed-note">Platform 9¾ — a safe rest stop. Nothing happens.</p>}
         {tile.type === "auction" && <p className="app-mono-deed-note">The Diagon Alley Auction House. Nothing happens.</p>}
 
         <p className="app-mono-deed-owner">
