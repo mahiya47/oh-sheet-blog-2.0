@@ -205,6 +205,17 @@ function GameView({ room }) {
             selected={selected}
             onTileClick={setSelected}
           />
+
+          {/* Drawn cards land right on the board's centre panel, next to
+              the dice, instead of floating somewhere else on the page. */}
+          {game.card && myTurn && (
+            <div className="app-mono-card-pop">
+              <span className="app-mono-card-kind">
+                {game.card.deck === "chance" ? "❓ Chance" : "🎁 Community Chest"}
+              </span>
+              <p>{game.card.text}</p>
+            </div>
+          )}
         </div>
 
         <div className="app-mono-side">
@@ -299,16 +310,6 @@ function GameView({ room }) {
           </button>
         </div>
       </div>
-
-      {/* A drawn card, shown until the player does something else */}
-      {game.card && myTurn && (
-        <div className="app-mono-card-pop">
-          <span className="app-mono-card-kind">
-            {game.card.deck === "chance" ? "❓ Chance" : "🎁 Community Chest"}
-          </span>
-          <p>{game.card.text}</p>
-        </div>
-      )}
 
       {selected !== null && board[selected] && (
         <TitleDeed

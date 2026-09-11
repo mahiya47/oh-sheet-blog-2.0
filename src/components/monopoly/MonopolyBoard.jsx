@@ -128,14 +128,17 @@ export default function MonopolyBoard({ board, game, mySeat, onTileClick, select
 
 // A side tile's contents: an icon for the non-street squares, the name
 // wrapped to fit, and the price. Everything is centred in the space the
-// colour band leaves, and stays horizontal on all four sides.
+// colour band leaves, and stays horizontal on all four sides. Font size
+// scales down at narrow viewports via CSS (see .app-mono-tile-name) —
+// the name is never hidden outright, so every tile stays identifiable
+// on a phone.
 function TileLabel({ tile, box, mortgaged }) {
   const icon = tile.group ? null : tileIcon(tile.type);
-  // 9 characters is what actually fits across a tile at this text size —
+  // 10 characters is what actually fits across a tile at this text size —
   // more than that and names bleed into their neighbours.
-  const lines = wrapName(tile.name, 9, 2);
+  const lines = wrapName(tile.name, 10, 2);
   const LINE_H = 18;
-  const ICON_H = icon ? 40 : 0;
+  const ICON_H = icon ? 34 : 0;
   const PRICE_H = tile.price ? 20 : 0;
   const stackH = ICON_H + lines.length * LINE_H + PRICE_H;
   const cx = box.x + box.w / 2;
@@ -144,7 +147,7 @@ function TileLabel({ tile, box, mortgaged }) {
   const parts = [];
   if (icon) {
     parts.push(
-      <text key="icon" className="app-mono-tile-icon" x={cx} y={y + ICON_H / 2} textAnchor="middle">
+      <text key="icon" className="app-mono-tile-icon" x={cx} y={y + ICON_H / 2 + 8} textAnchor="middle">
         {icon}
       </text>
     );
@@ -173,22 +176,11 @@ function TileLabel({ tile, box, mortgaged }) {
       </text>
     );
   }
-  return (
-    <>
-      {/* On a phone the names are hidden, so the icon has to carry the
-          tile on its own — it gets its own centred copy there. */}
-      {icon && (
-        <text className="app-mono-tile-icon app-mono-icon-solo" x={cx} y={box.y + box.h / 2 + 11} textAnchor="middle">
-          {icon}
-        </text>
-      )}
-      <g className="app-mono-tile-text">{parts}</g>
-    </>
-  );
+  return <g className="app-mono-tile-text">{parts}</g>;
 }
 
 function CornerLabel({ tile, t }) {
-  const lines = wrapName(cornerLabel(tile.type), 8, 2);
+  const lines = wrapName(cornerLabel(tile.type), 9, 2);
   const startY = t.y + 100;
   return (
     <g>

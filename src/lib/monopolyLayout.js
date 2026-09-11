@@ -3,19 +3,21 @@
 //
 // The board itself (names, prices, rents) comes from the SERVER — it
 // arrives with the first `mono:state` push and is cached. This file only
-// works out WHERE each of the 48 tiles sits in the SVG, which is pure
+// works out WHERE each of the 40 tiles sits in the SVG, which is pure
 // geometry and never needs to agree with the server about anything.
 //
-// 48 tiles = 4 corners + 11 tiles per side. The classic anticlockwise
-// layout: GO at the bottom-right, Jail bottom-left, Free Parking
-// top-left, Go To Jail top-right.
+// 40 tiles = 4 corners + 9 tiles per side — the classic Monopoly shape.
+// Anticlockwise layout: GO at the bottom-right, Jail bottom-left, Free
+// Parking top-left, Go To Jail top-right; corners sit at indexes
+// 0 / 10 / 20 / 30.
 // ==========================================================
 
-export const BOARD_PX = 1440; // viewBox is BOARD_PX square
-const CORNER = 170;
-const TILE = 100;
-const DEPTH = 130; // how far a side tile reaches in from the edge
-export const BAND = 34; // colour stripe thickness
+export const BOARD_PX = 1320; // viewBox is BOARD_PX square
+const CORNER = 180;
+const SIDE_TILES = 9; // non-corner tiles between each pair of corners
+const TILE = (BOARD_PX - CORNER * 2) / SIDE_TILES;
+const DEPTH = 150; // how far a side tile reaches in from the edge
+export const BAND = 36; // colour stripe thickness
 
 // side: which edge the tile sits on — decides text rotation and which
 // edge the colour band hugs.
@@ -24,39 +26,39 @@ function cornerAt(i, x, y) {
 }
 
 function buildTiles() {
-  const tiles = Array.from({ length: 48 });
+  const tiles = Array.from({ length: 40 });
 
   // GO — bottom-right corner
   tiles[0] = cornerAt(0, BOARD_PX - CORNER, BOARD_PX - CORNER);
   // Bottom edge, running right to left
-  for (let k = 1; k <= 11; k++) {
+  for (let k = 1; k <= SIDE_TILES; k++) {
     const x = BOARD_PX - CORNER - k * TILE;
     const y = BOARD_PX - DEPTH;
     tiles[k] = { i: k, x, y, w: TILE, h: DEPTH, side: "bottom", cx: x + TILE / 2, cy: y + DEPTH / 2 };
   }
   // Jail — bottom-left corner
-  tiles[12] = cornerAt(12, 0, BOARD_PX - CORNER);
+  tiles[10] = cornerAt(10, 0, BOARD_PX - CORNER);
   // Left edge, running bottom to top
-  for (let k = 1; k <= 11; k++) {
+  for (let k = 1; k <= SIDE_TILES; k++) {
     const x = 0;
     const y = BOARD_PX - CORNER - k * TILE;
-    tiles[12 + k] = { i: 12 + k, x, y, w: DEPTH, h: TILE, side: "left", cx: x + DEPTH / 2, cy: y + TILE / 2 };
+    tiles[10 + k] = { i: 10 + k, x, y, w: DEPTH, h: TILE, side: "left", cx: x + DEPTH / 2, cy: y + TILE / 2 };
   }
   // Free Parking — top-left corner
-  tiles[24] = cornerAt(24, 0, 0);
+  tiles[20] = cornerAt(20, 0, 0);
   // Top edge, running left to right
-  for (let k = 1; k <= 11; k++) {
+  for (let k = 1; k <= SIDE_TILES; k++) {
     const x = CORNER + (k - 1) * TILE;
     const y = 0;
-    tiles[24 + k] = { i: 24 + k, x, y, w: TILE, h: DEPTH, side: "top", cx: x + TILE / 2, cy: y + DEPTH / 2 };
+    tiles[20 + k] = { i: 20 + k, x, y, w: TILE, h: DEPTH, side: "top", cx: x + TILE / 2, cy: y + DEPTH / 2 };
   }
   // Go To Jail — top-right corner
-  tiles[36] = cornerAt(36, BOARD_PX - CORNER, 0);
+  tiles[30] = cornerAt(30, BOARD_PX - CORNER, 0);
   // Right edge, running top to bottom
-  for (let k = 1; k <= 11; k++) {
+  for (let k = 1; k <= SIDE_TILES; k++) {
     const x = BOARD_PX - DEPTH;
     const y = CORNER + (k - 1) * TILE;
-    tiles[36 + k] = { i: 36 + k, x, y, w: DEPTH, h: TILE, side: "right", cx: x + DEPTH / 2, cy: y + TILE / 2 };
+    tiles[30 + k] = { i: 30 + k, x, y, w: DEPTH, h: TILE, side: "right", cx: x + DEPTH / 2, cy: y + TILE / 2 };
   }
 
   return tiles;
@@ -103,8 +105,8 @@ export function contentBox(t) {
   }
 }
 
-// Greedy word wrap for tile names, which have roughly 12 characters of
-// room per line at the board's text size.
+// Greedy word wrap for tile names, which have roughly this many
+// characters of room per line at the board's text size.
 export function wrapName(name, perLine = 12, maxLines = 2) {
   const words = String(name).split(" ").filter(Boolean);
   const lines = [];
@@ -126,7 +128,7 @@ export function wrapName(name, perLine = 12, maxLines = 2) {
   if (line && lines.length < maxLines) lines.push(line);
 
   // Two things can still need an ellipsis: a single word too long to fit
-  // a line ("Notification"), and words that ran out of lines entirely.
+  // a line, and words that ran out of lines entirely.
   const clipped = lines.map((l) => (l.length > perLine ? `${l.slice(0, perLine - 1)}…` : l));
   if (used < words.length && clipped.length) {
     const last = clipped[clipped.length - 1];
@@ -146,8 +148,6 @@ export const GROUP_COLORS = {
   red: "#e5484d",
   yellow: "#f5c945",
   green: "#42ad7c",
-  purple: "#ad78e0",
-  teal: "#2bbda6",
   navy: "#2f5fd8",
 };
 

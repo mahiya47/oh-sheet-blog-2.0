@@ -1,11 +1,13 @@
 import { useEffect } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { logoColor, buildFaviconHref } from "./lib/logoColor.js";
+import { useAuth } from "./context/AuthContext.jsx";
 import TopBar from "./components/TopBar.jsx";
 import SideNav from "./components/SideNav.jsx";
 import RightRail from "./components/RightRail.jsx";
 import BottomNav from "./components/BottomNav.jsx";
 import HomePage from "./pages/HomePage.jsx";
+import LandingPage from "./pages/LandingPage.jsx";
 import SearchPage from "./pages/SearchPage.jsx";
 import StoriesPage from "./pages/StoriesPage.jsx";
 import ProfilePage from "./pages/ProfilePage.jsx";
@@ -73,6 +75,12 @@ function isBarePath(pathname) {
   );
 }
 
+// Legal/info pages a logged-out visitor can still read directly — none of
+// them show posts, so there's no reason to bounce these to the landing
+// pitch too. Everything else (feed, profiles, posts, messages, arcade...)
+// is gated behind showLanding below.
+const PUBLIC_WHEN_LOGGED_OUT = new Set(["/about", "/privacy", "/rules", "/agreement", "/support"]);
+
 export default function App() {
   // Match the browser tab icon — and every "accent" highlight in the app
   // (active nav item, New Sheet button, Follow/Message buttons) — to
@@ -88,14 +96,25 @@ export default function App() {
     document.documentElement.style.setProperty("--app-accent", logoColor);
   }, []);
 
+  const { user, loading } = useAuth();
   const location = useLocation();
   const bare = isBarePath(location.pathname);
+  // Anyone not signed in gets the landing pitch instead of real content —
+  // everywhere except the bare auth screens and the public info pages
+  // above. Held off until the auth check finishes so a signed-in user
+  // reloading the page never flashes the landing page first.
+  const showLanding = !loading && !user && !bare && !PUBLIC_WHEN_LOGGED_OUT.has(location.pathname);
 
   // Lightweight built-in analytics — one ping per route change, fire and
   // forget. api.trackPageview already swallows its own errors.
   useEffect(() => {
     api.trackPageview(location.pathname);
   }, [location.pathname]);
+
+  // Still checking the token — render nothing rather than guessing which
+  // shell to show (avoids a flash of the full feed for a logged-out
+  // visitor, or a flash of the landing page for someone already signed in).
+  if (loading) return null;
 
   const routes = (
     <Routes>
@@ -151,6 +170,20 @@ export default function App() {
       <div className="app-bare-shell">
         <main className="app-bare-main">{routes}</main>
         <IncomingChallengeModal />
+        <InstallAppPrompt />
+      </div>
+    );
+  }
+
+  if (showLanding) {
+    return (
+      <div className="app-shell">
+        <TopBar />
+        <div className="app-body app-body-landing">
+          <main className="app-main">
+            <LandingPage />
+          </main>
+        </div>
         <InstallAppPrompt />
       </div>
     );

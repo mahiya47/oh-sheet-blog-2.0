@@ -225,6 +225,28 @@ ul {
   gap: 8px;
   position: relative;
 }
+/* Logged-out top bar: just Log in / Sign up (see TopBar.jsx's !user
+   branch). Sign up borrowed .app-auth-submit's fill; Log in is its
+   flat white/black-border twin, same pairing used elsewhere in the app. */
+.app-topbar-login,
+.app-topbar-signup {
+  padding: 8px 14px;
+  border-radius: var(--app-radius-sm);
+  border: var(--app-border-w) solid var(--app-border);
+  font-weight: 700;
+  font-family: var(--app-font-display);
+  font-size: 0.85rem;
+  text-decoration: none;
+  color: var(--app-ink);
+  white-space: nowrap;
+}
+.app-topbar-login {
+  background: var(--app-surface);
+}
+.app-topbar-signup {
+  background: var(--app-accent);
+  box-shadow: var(--app-shadow);
+}
 
 .app-icon-btn {
   width: 40px;
@@ -4300,6 +4322,747 @@ a.app-auth-logo-badge:hover {
   transform: none;
   box-shadow: var(--app-shadow);
 }
+
+/* =========================================================================
+   Monopoly — had a fully working server-authoritative game engine but
+   NO styling at all (every .app-mono-* class below was previously
+   undefined), which is why tiles rendered as unstyled black-on-black
+   SVG shapes with invisible text. This section is the whole visual
+   layer: menu, lobby, board, side panel and all its sub-panels, the
+   drawn-card popup, the title deed modal, and the game-over screen.
+   ========================================================================= */
+
+/* ---- Menu (create/join) ---- */
+.app-mono-menu {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 14px;
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 20px;
+  background: var(--app-surface);
+  border: var(--app-border-w) solid var(--app-border);
+  border-radius: var(--app-radius-lg);
+}
+.app-mono-menu-blurb {
+  margin: 0;
+  font-weight: 600;
+  line-height: 1.5;
+  text-align: center;
+}
+.app-mono-offline {
+  margin: 0;
+  text-align: center;
+  font-weight: 700;
+  color: var(--app-muted);
+}
+.app-mono-primary {
+  width: 100%;
+  font-size: 1.05rem;
+}
+.app-mono-danger {
+  background: #e5484d;
+  color: #fff;
+}
+.app-mono-or {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 4px 0;
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: var(--app-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.app-mono-or::before,
+.app-mono-or::after {
+  content: "";
+  flex: 1;
+  height: var(--app-border-w);
+  background: var(--app-border);
+  opacity: 0.25;
+}
+.app-mono-join {
+  display: flex;
+  gap: 10px;
+}
+.app-mono-code-input {
+  flex: 1;
+  min-width: 0;
+  padding: 12px 14px;
+  border: var(--app-border-w) solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: var(--app-bg);
+  color: var(--app-ink);
+  font-family: var(--app-font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+/* ---- Lobby (waiting room) ---- */
+.app-mono-lobby {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 20px;
+  background: var(--app-surface);
+  border: var(--app-border-w) solid var(--app-border);
+  border-radius: var(--app-radius-lg);
+  text-align: center;
+}
+.app-mono-lobby-label {
+  margin: 0;
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: var(--app-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.app-mono-code-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 28px;
+  border: var(--app-border-w) solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: var(--app-accent);
+  font-family: var(--app-font-display);
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  cursor: pointer;
+}
+.app-mono-code-copy {
+  font-family: var(--app-font-body);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: normal;
+  color: var(--app-ink);
+  opacity: 0.7;
+}
+.app-mono-lobby-hint {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--app-muted);
+}
+.app-mono-seat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  margin-top: 6px;
+}
+.app-mono-seat {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border: var(--app-border-w) solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: var(--app-bg);
+}
+.app-mono-seat.is-empty {
+  border-style: dashed;
+  opacity: 0.55;
+}
+.app-mono-seat-dot {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--app-border-w) solid var(--app-border);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+.app-mono-seat.is-empty .app-mono-seat-dot {
+  background: transparent;
+  border-style: dashed;
+}
+.app-mono-seat-name {
+  flex: 1;
+  text-align: left;
+  font-weight: 700;
+}
+.app-mono-seat-host {
+  flex-shrink: 0;
+  padding: 3px 9px;
+  border: var(--app-border-w) solid var(--app-border);
+  border-radius: 999px;
+  background: var(--app-accent);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+/* ---- Game layout ---- */
+.app-mono-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.app-mono-board-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+}
+.app-mono-board {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.app-mono-side {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+}
+@media (min-width: 1040px) {
+  .app-mono-layout {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 24px;
+  }
+  .app-mono-board-wrap {
+    flex: 1 1 auto;
+    max-width: 760px;
+    margin: 0;
+  }
+  .app-mono-side {
+    flex: 0 0 340px;
+    max-width: 340px;
+    margin: 0;
+    position: sticky;
+    top: 90px;
+  }
+}
+
+/* ---- Board SVG ---- */
+.app-mono-felt {
+  fill: var(--app-bg-deep);
+  stroke: var(--app-border);
+  stroke-width: 8;
+}
+.app-mono-tile {
+  cursor: pointer;
+}
+.app-mono-tile-bg {
+  fill: var(--app-surface);
+  stroke: var(--app-border);
+  stroke-width: 2.5;
+}
+.app-mono-tile.is-selected .app-mono-tile-bg {
+  stroke: var(--app-accent);
+  stroke-width: 6;
+}
+.app-mono-tile.is-mortgaged .app-mono-tile-bg {
+  opacity: 0.55;
+}
+.app-mono-band {
+  stroke: var(--app-border);
+  stroke-width: 2;
+}
+.app-mono-owner {
+  stroke: var(--app-border);
+  stroke-width: 1.5;
+}
+.app-mono-tile-icon {
+  font-size: 26px;
+  fill: var(--app-ink);
+}
+.app-mono-tile-name {
+  font-family: var(--app-font-display), sans-serif;
+  font-size: 14.5px;
+  font-weight: 700;
+  fill: var(--app-ink);
+}
+.app-mono-tile-price {
+  font-family: var(--app-font-body), sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  fill: var(--app-muted);
+}
+.app-mono-mortgage-mark {
+  font-family: var(--app-font-body), sans-serif;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  fill: #e5484d;
+}
+.app-mono-corner-icon {
+  font-size: 42px;
+  fill: var(--app-ink);
+}
+.app-mono-corner-label {
+  font-family: var(--app-font-display), sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  fill: var(--app-ink);
+}
+.app-mono-center-bg {
+  fill: var(--app-surface);
+  stroke: var(--app-border);
+  stroke-width: 6;
+}
+.app-mono-center-title {
+  font-family: var(--app-font-display), sans-serif;
+  font-size: 52px;
+  font-weight: 700;
+  fill: var(--app-ink);
+}
+.app-mono-center-sub {
+  font-family: var(--app-font-display), sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  fill: var(--app-accent);
+}
+.app-mono-die rect {
+  fill: var(--app-surface);
+  stroke: var(--app-border);
+  stroke-width: 5;
+}
+.app-mono-pip {
+  fill: var(--app-ink);
+}
+.app-mono-token circle {
+  stroke: var(--app-border);
+  stroke-width: 3;
+}
+.app-mono-token.is-me circle {
+  stroke: var(--app-accent);
+  stroke-width: 5;
+}
+.app-mono-token.is-away {
+  opacity: 0.4;
+}
+.app-mono-token-label {
+  fill: #fff;
+  font-family: var(--app-font-display), sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+}
+.app-mono-house rect {
+  fill: #2f8f4e;
+  stroke: var(--app-border);
+  stroke-width: 1.2;
+}
+.app-mono-hotel rect {
+  fill: #e5484d;
+  stroke: var(--app-border);
+  stroke-width: 1.2;
+}
+
+/* Font size steps down at narrower board sizes instead of disappearing
+   outright — see the "no names on mobile" fix in MonopolyBoard.jsx. */
+@media (max-width: 480px) {
+  .app-mono-tile-name {
+    font-size: 12.5px;
+  }
+  .app-mono-tile-price {
+    font-size: 11px;
+  }
+  .app-mono-tile-icon {
+    font-size: 20px;
+  }
+}
+
+/* ---- Card popup — lands on the board's centre panel, next to the
+   dice, instead of floating elsewhere on the page. ---- */
+.app-mono-card-pop {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 62%;
+  max-width: 320px;
+  padding: 14px 16px;
+  background: var(--app-surface);
+  border: var(--app-border-w) solid var(--app-border);
+  border-radius: var(--app-radius-md);
+  text-align: center;
+  animation: app-mono-card-in 220ms ease-out both;
+}
+.app-mono-card-kind {
+  font-family: var(--app-font-display);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+.app-mono-card-pop p {
+  margin: 0;
+  font-weight: 600;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+@keyframes app-mono-card-in {
+  from { transform: translate(-50%, -50%) scale(0.85); opacity: 0; }
+  to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+/* ---- Side panel ---- */
+.app-mono-you {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: var(--app-border-w) solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: var(--app-surface);
+  flex-wrap: wrap;
+}
+.app-mono-you-dot {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--app-border-w) solid var(--app-border);
+  color: #fff;
+  font-weight: 700;
+}
+.app-mono-you-cash {
+  font-family: var(--app-font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+.app-mono-tag {
+  padding: 3px 9px;
+  border: var(--app-border-w) solid var(--app-border);
+  border-radius: 999px;
+  background: var(--app-bg);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.app-mono-tag.is-bad {
+  background: #e5484d;
+  color: #fff;
+}
+
+.app-mono-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border: var(--app-border-w) solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: var(--app-surface);
+}
+.app-mono-actions.is-urgent {
+  background: #fdeceb;
+  border-color: #e5484d;
+}
+:root[data-theme="dark"] .app-mono-actions.is-urgent {
+  background: #3a1f1f;
+}
+.app-mono-prompt {
+  margin: 0;
+  font-weight: 700;
+}
+.app-mono-actions .app-arcade-btn {
+  width: 100%;
+}
+
+.app-mono-tabs {
+  display: flex;
+  gap: 8px;
+}
+.app-mono-tab {
+  flex: 1;
+  padding: 8px 12px;
+  border: var(--app-border-w) solid var(--app-border);
+  border-radius: 999px;
+  background: var(--app-surface);
+  font-weight: 700;
+  cursor: pointer;
+}
+.app-mono-tab.is-active {
+  background: var(--app-accent);
+}
+
+.app-mono-players {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+.app-mono-player {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border: var(--app-border-w) solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: var(--app-surface);
+}
+.app-mono-player.is-turn {
+  background: var(--app-accent);
+}
+.app-mono-player.is-out {
+  opacity: 0.5;
+}
+.app-mono-player-dot {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--app-border-w) solid var(--app-border);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.75rem;
+}
+.app-mono-player-name {
+  flex: 1;
+  min-width: 0;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.app-mono-player-meta {
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--app-muted);
+}
+
+.app-mono-log {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 10px 12px;
+  border: var(--app-border-w) solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: var(--app-surface);
+}
+.app-mono-log-line {
+  margin: 0;
+  padding-bottom: 6px;
+  border-bottom: 1.5px dashed var(--app-border);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--app-muted);
+}
+.app-mono-log-line:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+/* ---- Manage panel (your properties) ---- */
+.app-mono-manage {
+  padding: 12px 14px;
+  border: var(--app-border-w) solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: var(--app-surface);
+}
+.app-mono-manage-title {
+  margin: 0 0 8px;
+  font-family: var(--app-font-display);
+  font-size: 0.95rem;
+}
+.app-mono-manage-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.app-mono-manage-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border: var(--app-border-w) solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+}
+.app-mono-manage-row.is-mortgaged {
+  opacity: 0.6;
+  border-style: dashed;
+}
+.app-mono-manage-band {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  border: 1.5px solid var(--app-border);
+}
+.app-mono-manage-name {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-align: left;
+  cursor: pointer;
+}
+.app-mono-manage-houses {
+  font-size: 0.75rem;
+  letter-spacing: -1px;
+}
+.app-mono-manage-flag {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #e5484d;
+  text-transform: uppercase;
+}
+.app-mono-manage-btns {
+  flex-shrink: 0;
+  display: flex;
+  gap: 4px;
+}
+.app-mono-manage-btns button {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--app-border-w) solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: var(--app-bg);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.app-mono-manage-btns button:hover {
+  background: var(--app-accent);
+}
+
+/* ---- Title deed modal ---- */
+.app-mono-deed-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.5);
+}
+.app-mono-deed {
+  width: 100%;
+  max-width: 340px;
+  max-height: 85vh;
+  overflow-y: auto;
+  border: var(--app-border-w) solid var(--app-border);
+  border-radius: var(--app-radius-md);
+  background: var(--app-surface);
+  display: flex;
+  flex-direction: column;
+}
+.app-mono-deed-head {
+  padding: 16px;
+  border-bottom: var(--app-border-w) solid var(--app-border);
+}
+.app-mono-deed-head h4 {
+  margin: 0;
+  font-family: var(--app-font-display);
+  font-size: 1.1rem;
+  color: #1c1810;
+  text-align: center;
+}
+.app-mono-deed-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+}
+.app-mono-deed-price {
+  margin: 0;
+  font-weight: 700;
+  text-align: center;
+}
+.app-mono-deed-rents {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+.app-mono-deed-rents td {
+  padding: 5px 4px;
+  border-bottom: 1.5px dashed var(--app-border);
+}
+.app-mono-deed-rents td:last-child {
+  text-align: right;
+  font-weight: 700;
+}
+.app-mono-deed-sep td {
+  border-top: var(--app-border-w) solid var(--app-border);
+  padding-top: 8px;
+}
+.app-mono-deed-note {
+  margin: 0;
+  font-weight: 600;
+  text-align: center;
+  color: var(--app-muted);
+}
+.app-mono-deed-owner {
+  margin: 4px 0 0;
+  padding-top: 10px;
+  border-top: var(--app-border-w) solid var(--app-border);
+  font-weight: 600;
+  text-align: center;
+  font-size: 0.85rem;
+}
+.app-mono-deed .app-arcade-btn {
+  margin: 0 16px 16px;
+}
+
+/* ---- Game over ---- */
+.app-mono-over {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: rgba(0, 0, 0, 0.6);
+}
+.app-mono-over h3 {
+  margin: 0;
+  padding: 20px 32px;
+  border: var(--app-border-w) solid var(--app-border);
+  border-radius: var(--app-radius-lg);
+  background: var(--app-surface);
+  font-family: var(--app-font-display);
+  font-size: 1.4rem;
+  text-align: center;
+}
+
 .app-arcade-dpad {
   display: grid;
   grid-template-columns: repeat(3, 44px);
@@ -5343,6 +6106,66 @@ a.app-auth-logo-badge:hover {
 .app-about-cta a {
   color: inherit;
   text-decoration: underline;
+}
+
+/* ---- Landing page (logged-out visitors) — see LandingPage.jsx and
+   App.jsx's showLanding gate. Reuses .app-about-* feature grid/CTA
+   styling so it visually matches the About page. ---- */
+.app-body-landing {
+  /* Overrides .app-body's SideNav/RightRail grid at every breakpoint —
+     there's no sidebar content to lay out here, just one centered
+     column, so !important beats the media-query grid rules directly. */
+  display: block !important;
+  max-width: 640px;
+  margin: 0 auto;
+}
+.app-landing-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  padding: 28px 12px 6px;
+}
+.app-landing-logo {
+  width: 72px;
+  height: 72px;
+  margin-bottom: 4px;
+}
+.app-landing-title {
+  margin: 0;
+  font-family: var(--app-font-display);
+  font-size: 2.1rem;
+}
+.app-landing-tagline {
+  max-width: 48ch;
+  margin: 0;
+  font-weight: 600;
+  line-height: 1.5;
+}
+.app-landing-cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+.app-landing-signup {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+.app-landing-login {
+  padding: 12px 18px;
+  border-radius: var(--app-radius-sm);
+  border: var(--app-border-w) solid var(--app-border);
+  background: var(--app-surface);
+  font-weight: 700;
+  font-family: var(--app-font-display);
+  font-size: 1rem;
+  text-decoration: none;
+  color: var(--app-ink);
+  box-shadow: var(--app-shadow);
 }
 @media (min-width: 760px) {
   .app-about-feature-grid {

@@ -44,6 +44,31 @@ export default function TopBar() {
     return () => document.removeEventListener("mousedown", onClick);
   }, []);
 
+  // Logged-out visitors get the brand mark plus Log in/Sign up only —
+  // no search, messages, notifications, home shortcut, or account menu,
+  // since none of those lead anywhere they're allowed to see (App.jsx's
+  // showLanding gate sends every real page back to the landing pitch).
+  if (!user) {
+    return (
+      <header className="app-topbar">
+        <Link to="/" className="app-topbar-brand" aria-label="Oh sheet! home">
+          <span className="app-logo-badge" style={{ background: logoColor }}>
+            <OhSheetLogo size={22} />
+          </span>
+          <span className="app-topbar-wordmark">Oh Sheet!</span>
+        </Link>
+        <div className="app-topbar-actions">
+          <Link to="/login" className="app-topbar-login">
+            Log in
+          </Link>
+          <Link to="/signup" className="app-topbar-signup">
+            Sign up
+          </Link>
+        </div>
+      </header>
+    );
+  }
+
   return (
     <header className="app-topbar">
       <Link to="/" className="app-topbar-brand" aria-label="Oh sheet! home">
