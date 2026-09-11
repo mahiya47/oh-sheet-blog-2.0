@@ -4666,7 +4666,7 @@ a.app-auth-logo-badge:hover {
 }
 .app-mono-tile-name {
   font-family: var(--app-font-display), sans-serif;
-  font-size: 18px;
+  font-size: 23px;
   font-weight: 800;
   fill: var(--app-ink);
 }
@@ -4675,7 +4675,7 @@ a.app-auth-logo-badge:hover {
 }
 .app-mono-tile-price {
   font-family: var(--app-font-body), sans-serif;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 800;
   letter-spacing: 0.02em;
   fill: var(--app-muted);
@@ -4765,13 +4765,13 @@ a.app-auth-logo-badge:hover {
    outright — see the "no names on mobile" fix in MonopolyBoard.jsx. */
 @media (max-width: 480px) {
   .app-mono-tile-name {
-    font-size: 15px;
+    font-size: 19px;
   }
   .app-mono-tile-price {
-    font-size: 12px;
+    font-size: 14px;
   }
   .app-mono-tile-icon {
-    font-size: 24px;
+    font-size: 26px;
   }
 }
 
@@ -4849,7 +4849,8 @@ a.app-auth-logo-badge:hover {
    everything like the title deed modal ---- */
 .app-mono-buy-card {
   width: 100%;
-  max-width: 320px;
+  max-width: min(320px, calc(100vw - 32px));
+  margin: 0 auto;
   padding: 22px 20px;
   display: flex;
   flex-direction: column;
@@ -5033,95 +5034,15 @@ a.app-auth-logo-badge:hover {
   padding-bottom: 0;
 }
 
-/* ---- Manage panel (your properties) ---- */
-.app-mono-manage {
-  padding: 12px 14px;
-  border: var(--app-border-w) solid var(--app-border);
-  border-radius: var(--app-radius-sm);
-  background: var(--app-surface);
-}
-.app-mono-manage-title {
-  margin: 0 0 8px;
-  font-family: var(--app-font-display);
-  font-size: 0.95rem;
-}
-.app-mono-manage-list {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.app-mono-manage-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 8px;
-  border: var(--app-border-w) solid var(--app-border);
-  border-radius: var(--app-radius-sm);
-}
-.app-mono-manage-row.is-mortgaged {
-  opacity: 0.6;
-  border-style: dashed;
-}
-.app-mono-manage-band {
-  flex-shrink: 0;
-  width: 14px;
-  height: 14px;
-  border-radius: 4px;
-  border: 1.5px solid var(--app-border);
-}
-.app-mono-manage-name {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 6px;
-  min-width: 0;
-  padding: 0;
-  border: none;
-  background: none;
-  color: inherit;
-  font-family: inherit;
-  font-weight: 700;
-  font-size: 0.85rem;
-  text-align: left;
-  cursor: pointer;
-}
-.app-mono-manage-level {
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--app-accent);
-}
-.app-mono-manage-flag {
-  font-size: 0.68rem;
-  font-weight: 700;
-  color: #e5484d;
-  text-transform: uppercase;
-}
-.app-mono-manage-btns {
-  flex-shrink: 0;
-  display: flex;
-  gap: 4px;
-}
-.app-mono-manage-btns button {
-  width: 30px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: var(--app-border-w) solid var(--app-border);
-  border-radius: var(--app-radius-sm);
-  background: var(--app-bg);
-  font-size: 0.85rem;
-  cursor: pointer;
-}
-.app-mono-manage-btns button:hover {
-  background: var(--app-accent);
-}
-
 /* ---- Title deed modal ---- */
 .app-mono-deed-backdrop {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
   z-index: 60;
   display: flex;
   align-items: center;
@@ -5131,14 +5052,24 @@ a.app-auth-logo-badge:hover {
 }
 .app-mono-deed {
   width: 100%;
-  max-width: 340px;
+  max-width: min(340px, calc(100vw - 32px));
   max-height: 85vh;
+  margin: 0 auto;
   overflow-y: auto;
   border: var(--app-border-w) solid var(--app-border);
   border-radius: var(--app-radius-md);
   background: var(--app-surface);
   display: flex;
   flex-direction: column;
+}
+.app-mono-deed-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 4px;
+}
+.app-mono-deed-actions .app-arcade-btn {
+  width: 100%;
 }
 .app-mono-deed-head {
   padding: 16px;

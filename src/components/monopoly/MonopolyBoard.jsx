@@ -150,12 +150,12 @@ export default function MonopolyBoard({ board, game, mySeat, onTileClick, select
 function TileLabel({ tile, box, mortgaged, level, rentNow, onColor }) {
   const icon = tile.group ? null : tileIcon(tile);
   const cls = onColor ? " is-on-color" : "";
-  // 9 characters is what actually fits across a tile at this larger text
+  // 8 characters is what actually fits across a tile at this larger text
   // size — more than that and names bleed into their neighbours.
-  const lines = wrapName(tile.name, 9, 2);
-  const LINE_H = 21;
+  const lines = wrapName(tile.name, 8, 2);
+  const LINE_H = 26;
   const ICON_H = icon ? 32 : 0;
-  const PRICE_H = tile.price ? 22 : 0;
+  const PRICE_H = tile.price ? 24 : 0;
   const stackH = ICON_H + PRICE_H + lines.length * LINE_H;
   const cx = box.x + box.w / 2;
   let y = box.y + (box.h - stackH) / 2;

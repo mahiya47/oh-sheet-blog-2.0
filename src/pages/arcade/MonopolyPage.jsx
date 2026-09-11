@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import MonopolyBoard from "../../components/monopoly/MonopolyBoard.jsx";
 import MultiplayerHeader from "../../components/MultiplayerHeader.jsx";
@@ -195,15 +196,6 @@ function GameView({ room }) {
     });
   }, [game.players, game.tiles, board]);
 
-  // Everything the current player owns, grouped for the manage panel.
-  const myProperties = useMemo(() => {
-    if (!board || mySeat < 0) return [];
-    return Object.entries(game.tiles)
-      .filter(([, st]) => st.owner === mySeat)
-      .map(([i, st]) => ({ index: Number(i), tile: board[Number(i)], st }))
-      .sort((a, b) => a.index - b.index);
-  }, [game.tiles, board, mySeat]);
-
   const debt = game.phase === "debt" && myTurn ? game.pending : null;
   const buying = game.phase === "buy" && myTurn ? board[game.pending?.index] : null;
 
@@ -275,18 +267,6 @@ function GameView({ room }) {
           currentConnected={current?.connected !== false}
         />
 
-        {myProperties.length > 0 && (
-          <ManagePanel
-            properties={myProperties}
-            game={game}
-            board={board}
-            mySeat={mySeat}
-            act={act}
-            canManage={myTurn && ["action", "debt"].includes(game.phase)}
-            onSelect={setSelected}
-          />
-        )}
-
         <div className="app-mono-tabs">
           <button type="button" className="app-mono-tab" onClick={() => setShowLog((v) => !v)}>
             {showLog ? "Hide history" : "Show history"}
@@ -305,26 +285,38 @@ function GameView({ room }) {
         )}
       </div>
 
-      {buying && (
-        <BuyPrompt tile={buying} me={me} onBuy={() => act("mono:buy")} onPass={() => act("mono:decline_buy")} />
-      )}
+      {buying &&
+        createPortal(
+          <BuyPrompt tile={buying} me={me} onBuy={() => act("mono:buy")} onPass={() => act("mono:decline_buy")} />,
+          document.body
+        )}
 
-      {!buying && selected !== null && board[selected] && (
-        <TitleDeed
-          tile={board[selected]}
-          st={game.tiles[selected]}
-          players={players}
-          game={game}
-          onClose={() => setSelected(null)}
-        />
-      )}
+      {!buying &&
+        selected !== null &&
+        board[selected] &&
+        createPortal(
+          <TitleDeed
+            tile={board[selected]}
+            st={game.tiles[selected]}
+            players={players}
+            game={game}
+            board={board}
+            mySeat={mySeat}
+            act={act}
+            canManage={myTurn && ["action", "debt"].includes(game.phase)}
+            onClose={() => setSelected(null)}
+          />,
+          document.body
+        )}
 
-      {game.phase === "over" && (
-        <div className="app-mono-over">
-          <h3>{game.winner === mySeat ? "You win! 🎉" : `${players[game.winner]?.name || `Seat ${game.winner + 1}`} wins!`}</h3>
-          <button type="button" className="app-arcade-btn" onClick={room.leaveRoom}>Back to arcade</button>
-        </div>
-      )}
+      {game.phase === "over" &&
+        createPortal(
+          <div className="app-mono-over">
+            <h3>{game.winner === mySeat ? "You win! 🎉" : `${players[game.winner]?.name || `Seat ${game.winner + 1}`} wins!`}</h3>
+            <button type="button" className="app-arcade-btn" onClick={room.leaveRoom}>Back to arcade</button>
+          </div>,
+          document.body
+        )}
     </div>
   );
 }
@@ -516,55 +508,6 @@ function ActionPanel({ game, me, myTurn, buying, debt, act, currentName, current
   );
 }
 
-// Your properties, with the upgrade/mortgage buttons that are legal
-// right now. Upgrading a property doesn't draw a house on the board —
-// it raises the tile's own displayed rent instead.
-function ManagePanel({ properties, game, board, mySeat, act, canManage, onSelect }) {
-  return (
-    <div className="app-mono-manage">
-      <h4 className="app-mono-manage-title">Your properties ({properties.length})</h4>
-      <div className="app-mono-manage-list">
-        {properties.map(({ index, tile, st }) => {
-          const isStreet = tile.type === "street";
-          const group = tile.group ? GROUP_COLORS[tile.group] : "#c8bda8";
-          const fullGroup = isStreet && groupComplete(game, board, tile.group, mySeat);
-          const rentNow = isStreet ? tile.rent[st.houses] : null;
-          return (
-            <div key={index} className={"app-mono-manage-row" + (st.mortgaged ? " is-mortgaged" : "")}>
-              <span className="app-mono-manage-band" style={{ background: group }} />
-              <button type="button" className="app-mono-manage-name" onClick={() => onSelect(index)}>
-                {tile.name}
-                {isStreet && st.houses > 0 && (
-                  <span className="app-mono-manage-level">
-                    Lv {st.houses} · ${rentNow} rent
-                  </span>
-                )}
-                {st.mortgaged && <span className="app-mono-manage-flag">mortgaged</span>}
-              </button>
-              {canManage && (
-                <span className="app-mono-manage-btns">
-                  {isStreet && fullGroup && !st.mortgaged && st.houses < 5 && (
-                    <button type="button" title={`Upgrade ($${tile.build})`} onClick={() => act("mono:build", { index })}>⬆</button>
-                  )}
-                  {isStreet && st.houses > 0 && (
-                    <button type="button" title="Downgrade" onClick={() => act("mono:sell_house", { index })}>⬇</button>
-                  )}
-                  {!st.mortgaged && st.houses === 0 && (
-                    <button type="button" title={`Mortgage (+$${Math.floor(tile.price / 2)})`} onClick={() => act("mono:mortgage", { index })}>💰</button>
-                  )}
-                  {st.mortgaged && (
-                    <button type="button" title={`Unmortgage (−$${Math.ceil((tile.price / 2) * 1.1)})`} onClick={() => act("mono:unmortgage", { index })}>↩</button>
-                  )}
-                </span>
-              )}
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
 // Does this player hold every street in the colour group? Only used to
 // show or hide the upgrade button — the server re-checks the real rule
 // (including even-building and mortgages) before it lets anything happen.
@@ -575,11 +518,21 @@ function groupComplete(game, board, group, seat) {
     .every((t) => game.tiles[t.i]?.owner === seat);
 }
 
-// Tap any tile to see its full title deed.
-function TitleDeed({ tile, st, players, game, onClose }) {
+// Tap any tile to see its full title deed. When it's one of your own
+// properties and it's your turn, the upgrade/mortgage actions live right
+// here too — no separate "your properties" list needed.
+function TitleDeed({ tile, st, players, game, board, mySeat, act, canManage, onClose }) {
   const owner = st?.owner ?? null;
   const ownerName = owner !== null ? players[owner]?.name || players[owner]?.username || `Seat ${owner + 1}` : null;
   const color = tile.group ? GROUP_COLORS[tile.group] : tile.type === "utility" ? HOUSE_COLORS[tile.name] : null;
+
+  const isStreet = tile.type === "street";
+  const mine = canManage && owner === mySeat;
+  const fullGroup = mine && isStreet && groupComplete(game, board, tile.group, mySeat);
+  const canUpgrade = mine && isStreet && fullGroup && !st.mortgaged && st.houses < 5;
+  const canDowngrade = mine && isStreet && st.houses > 0;
+  const canMortgage = mine && !st.mortgaged && (!isStreet || st.houses === 0);
+  const canUnmortgage = mine && st.mortgaged;
 
   return (
     <div className="app-mono-deed-backdrop" onClick={onClose} role="presentation">
@@ -627,6 +580,31 @@ function TitleDeed({ tile, st, players, game, onClose }) {
               </>
             ) : tile.price ? "Unowned" : ""}
           </p>
+
+          {(canUpgrade || canDowngrade || canMortgage || canUnmortgage) && (
+            <div className="app-mono-deed-actions">
+              {canUpgrade && (
+                <button type="button" className="app-arcade-btn app-mono-primary" onClick={() => act("mono:build", { index: tile.i })}>
+                  Upgrade (${tile.build})
+                </button>
+              )}
+              {canDowngrade && (
+                <button type="button" className="app-arcade-btn" onClick={() => act("mono:sell_house", { index: tile.i })}>
+                  Downgrade
+                </button>
+              )}
+              {canMortgage && (
+                <button type="button" className="app-arcade-btn" onClick={() => act("mono:mortgage", { index: tile.i })}>
+                  Mortgage (+${Math.floor(tile.price / 2)})
+                </button>
+              )}
+              {canUnmortgage && (
+                <button type="button" className="app-arcade-btn" onClick={() => act("mono:unmortgage", { index: tile.i })}>
+                  Unmortgage (−${Math.ceil((tile.price / 2) * 1.1)})
+                </button>
+              )}
+            </div>
+          )}
         </div>
         <button type="button" className="app-arcade-btn" onClick={onClose}>Close</button>
       </div>
