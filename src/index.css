@@ -4656,55 +4656,66 @@ a.app-auth-logo-badge:hover {
 .app-mono-tile.is-mortgaged .app-mono-tile-bg {
   opacity: 0.55;
 }
-.app-mono-band {
-  stroke: var(--app-border);
+.app-mono-owner {
+  stroke: #fff;
   stroke-width: 2;
 }
-.app-mono-owner {
-  stroke: var(--app-border);
-  stroke-width: 1.5;
-}
 .app-mono-tile-icon {
-  font-size: 26px;
+  font-size: 30px;
   fill: var(--app-ink);
 }
 .app-mono-tile-name {
   font-family: var(--app-font-display), sans-serif;
-  font-size: 14.5px;
-  font-weight: 700;
+  font-size: 18px;
+  font-weight: 800;
   fill: var(--app-ink);
+}
+.app-mono-tile-name.is-on-color {
+  fill: #fff;
 }
 .app-mono-tile-price {
   font-family: var(--app-font-body), sans-serif;
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
   fill: var(--app-muted);
+}
+.app-mono-tile-price.is-on-color {
+  fill: #fff;
+  opacity: 0.92;
 }
 .app-mono-tile-price.is-upgraded {
   fill: var(--app-accent);
 }
+.app-mono-tile-price.is-upgraded.is-on-color {
+  fill: #fff294;
+}
 .app-mono-tile-level {
   font-family: var(--app-font-body), sans-serif;
-  font-size: 9.5px;
+  font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.03em;
   fill: var(--app-muted);
 }
+.app-mono-tile-level.is-on-color {
+  fill: #fff;
+  opacity: 0.85;
+}
 .app-mono-mortgage-mark {
   font-family: var(--app-font-body), sans-serif;
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.05em;
   fill: #e5484d;
 }
 .app-mono-corner-icon {
-  font-size: 42px;
+  font-size: 46px;
   fill: var(--app-ink);
 }
 .app-mono-corner-label {
   font-family: var(--app-font-display), sans-serif;
-  font-size: 17px;
-  font-weight: 700;
+  font-size: 19px;
+  font-weight: 800;
   fill: var(--app-ink);
 }
 .app-mono-center-bg {
@@ -4754,13 +4765,13 @@ a.app-auth-logo-badge:hover {
    outright — see the "no names on mobile" fix in MonopolyBoard.jsx. */
 @media (max-width: 480px) {
   .app-mono-tile-name {
-    font-size: 12.5px;
+    font-size: 15px;
   }
   .app-mono-tile-price {
-    font-size: 11px;
+    font-size: 12px;
   }
   .app-mono-tile-icon {
-    font-size: 20px;
+    font-size: 24px;
   }
 }
 

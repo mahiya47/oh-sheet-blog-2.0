@@ -6,9 +6,11 @@
 // works out WHERE each of the 32 tiles sits in the SVG, which is pure
 // geometry and never needs to agree with the server about anything.
 //
-// 32 tiles = 4 corners + 7 tiles per side. Anticlockwise layout: START
-// at the bottom-right, Azkaban bottom-left, Platform 9¾ top-left, the
-// Auction House top-right; corners sit at indexes 0 / 8 / 16 / 24.
+// 32 tiles = 4 corners + 7 tiles per side. Clockwise layout: START at
+// the bottom-left, Azkaban top-left, Platform 9¾ top-right, the Auction
+// House bottom-right; corners sit at indexes 0 / 8 / 16 / 24. Increasing
+// index always walks clockwise: up the left side, across the top, down
+// the right side, back along the bottom.
 // ==========================================================
 
 export const BOARD_PX = 1320; // viewBox is BOARD_PX square
@@ -27,37 +29,37 @@ function cornerAt(i, x, y) {
 function buildTiles() {
   const tiles = Array.from({ length: 32 });
 
-  // START — bottom-right corner
-  tiles[0] = cornerAt(0, BOARD_PX - CORNER, BOARD_PX - CORNER);
-  // Bottom edge, running right to left
-  for (let k = 1; k <= SIDE_TILES; k++) {
-    const x = BOARD_PX - CORNER - k * TILE;
-    const y = BOARD_PX - DEPTH;
-    tiles[k] = { i: k, x, y, w: TILE, h: DEPTH, side: "bottom", cx: x + TILE / 2, cy: y + DEPTH / 2 };
-  }
-  // Azkaban — bottom-left corner
-  tiles[8] = cornerAt(8, 0, BOARD_PX - CORNER);
+  // START — bottom-left corner
+  tiles[0] = cornerAt(0, 0, BOARD_PX - CORNER);
   // Left edge, running bottom to top
   for (let k = 1; k <= SIDE_TILES; k++) {
     const x = 0;
     const y = BOARD_PX - CORNER - k * TILE;
-    tiles[8 + k] = { i: 8 + k, x, y, w: DEPTH, h: TILE, side: "left", cx: x + DEPTH / 2, cy: y + TILE / 2 };
+    tiles[k] = { i: k, x, y, w: DEPTH, h: TILE, side: "left", cx: x + DEPTH / 2, cy: y + TILE / 2 };
   }
-  // Platform 9¾ — top-left corner
-  tiles[16] = cornerAt(16, 0, 0);
+  // Azkaban — top-left corner
+  tiles[8] = cornerAt(8, 0, 0);
   // Top edge, running left to right
   for (let k = 1; k <= SIDE_TILES; k++) {
     const x = CORNER + (k - 1) * TILE;
     const y = 0;
-    tiles[16 + k] = { i: 16 + k, x, y, w: TILE, h: DEPTH, side: "top", cx: x + TILE / 2, cy: y + DEPTH / 2 };
+    tiles[8 + k] = { i: 8 + k, x, y, w: TILE, h: DEPTH, side: "top", cx: x + TILE / 2, cy: y + DEPTH / 2 };
   }
-  // Auction House — top-right corner
-  tiles[24] = cornerAt(24, BOARD_PX - CORNER, 0);
+  // Platform 9¾ — top-right corner
+  tiles[16] = cornerAt(16, BOARD_PX - CORNER, 0);
   // Right edge, running top to bottom
   for (let k = 1; k <= SIDE_TILES; k++) {
     const x = BOARD_PX - DEPTH;
     const y = CORNER + (k - 1) * TILE;
-    tiles[24 + k] = { i: 24 + k, x, y, w: DEPTH, h: TILE, side: "right", cx: x + DEPTH / 2, cy: y + TILE / 2 };
+    tiles[16 + k] = { i: 16 + k, x, y, w: DEPTH, h: TILE, side: "right", cx: x + DEPTH / 2, cy: y + TILE / 2 };
+  }
+  // Auction House — bottom-right corner
+  tiles[24] = cornerAt(24, BOARD_PX - CORNER, BOARD_PX - CORNER);
+  // Bottom edge, running right to left
+  for (let k = 1; k <= SIDE_TILES; k++) {
+    const x = BOARD_PX - CORNER - k * TILE;
+    const y = BOARD_PX - DEPTH;
+    tiles[24 + k] = { i: 24 + k, x, y, w: TILE, h: DEPTH, side: "bottom", cx: x + TILE / 2, cy: y + DEPTH / 2 };
   }
 
   return tiles;

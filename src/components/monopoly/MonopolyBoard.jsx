@@ -1,7 +1,6 @@
 import {
   BOARD_PX,
   TILES,
-  bandRect,
   ownerRect,
   contentBox,
   wrapName,
@@ -40,7 +39,6 @@ export default function MonopolyBoard({ board, game, mySeat, onTileClick, select
         const st = game.tiles[t.i];
         const owner = st?.owner ?? null;
         const ownerColor = owner !== null ? game.players[owner]?.color : null;
-        const band = bandRect(t);
         const own = ownerRect(t);
         const box = contentBox(t);
         const isCorner = t.side === "corner";
@@ -62,11 +60,14 @@ export default function MonopolyBoard({ board, game, mySeat, onTileClick, select
             }
             onClick={() => onTileClick?.(t.i)}
           >
-            <rect x={t.x} y={t.y} width={t.w} height={t.h} className="app-mono-tile-bg" />
-
-            {bandColor && band && (
-              <rect x={band.x} y={band.y} width={band.w} height={band.h} fill={bandColor} className="app-mono-band" />
-            )}
+            <rect
+              x={t.x}
+              y={t.y}
+              width={t.w}
+              height={t.h}
+              className="app-mono-tile-bg"
+              style={bandColor ? { fill: bandColor } : undefined}
+            />
 
             {ownerColor && own && (
               <rect x={own.x} y={own.y} width={own.w} height={own.h} fill={ownerColor} className="app-mono-owner" />
@@ -75,7 +76,14 @@ export default function MonopolyBoard({ board, game, mySeat, onTileClick, select
             {isCorner ? (
               <CornerLabel tile={tile} t={t} />
             ) : (
-              <TileLabel tile={tile} box={box} mortgaged={!!st?.mortgaged} level={level} rentNow={rentNow} />
+              <TileLabel
+                tile={tile}
+                box={box}
+                mortgaged={!!st?.mortgaged}
+                level={level}
+                rentNow={rentNow}
+                onColor={!!bandColor}
+              />
             )}
           </g>
         );
@@ -91,14 +99,15 @@ export default function MonopolyBoard({ board, game, mySeat, onTileClick, select
           rx="20"
           className="app-mono-center-bg"
         />
-        <text className="app-mono-center-title" x={BOARD_PX / 2} y={BOARD_PX / 2 - 60} textAnchor="middle">
+        <text className="app-mono-center-title" x={BOARD_PX / 2} y={BOARD_PX / 2 - 140} textAnchor="middle">
           OH SHEET!
         </text>
-        <text className="app-mono-center-sub" x={BOARD_PX / 2} y={BOARD_PX / 2 + 10} textAnchor="middle">
+        <text className="app-mono-center-sub" x={BOARD_PX / 2} y={BOARD_PX / 2 - 80} textAnchor="middle">
           HOGWARTS EDITION
         </text>
+        {/* Dice sit near the bottom of the centre panel, not the middle */}
         {game.dice && (
-          <g transform={`translate(${BOARD_PX / 2 - 130} ${BOARD_PX / 2 + 60})`}>
+          <g transform={`translate(${BOARD_PX / 2 - 130} ${BOARD_PX / 2 + 250})`}>
             <Die value={game.dice[0]} x={0} />
             <Die value={game.dice[1]} x={150} />
           </g>
@@ -130,22 +139,24 @@ export default function MonopolyBoard({ board, game, mySeat, onTileClick, select
   );
 }
 
-// A side tile's contents: an icon for the non-street squares, the name
-// wrapped to fit, and the price. Once a property has been upgraded, the
-// current rent replaces the price line — that's the "upgrade" the tile
-// shows, instead of drawing house/hotel pips on the board. Font size
-// scales down at narrow viewports via CSS (see .app-mono-tile-name) —
-// the name is never hidden outright, so every tile stays identifiable
-// on a phone.
-function TileLabel({ tile, box, mortgaged, level, rentNow }) {
+// A side tile's contents — matching a classic "solid colour card" board:
+// price (or, once upgraded, the current rent) sits at the top in a small
+// bold line, and the name sits big and bold below it. Non-street tiles
+// (Hogwarts Houses, Chance, Chest) get a small icon up top instead of a
+// price. Text switches to white automatically when the tile itself is
+// painted in its group colour (see `onColor`). Font size scales down at
+// narrow viewports via CSS (see .app-mono-tile-name) — the name is never
+// hidden outright, so every tile stays identifiable on a phone.
+function TileLabel({ tile, box, mortgaged, level, rentNow, onColor }) {
   const icon = tile.group ? null : tileIcon(tile);
-  // 10 characters is what actually fits across a tile at this text size —
-  // more than that and names bleed into their neighbours.
-  const lines = wrapName(tile.name, 10, 2);
-  const LINE_H = 18;
-  const ICON_H = icon ? 34 : 0;
-  const PRICE_H = tile.price ? 20 : 0;
-  const stackH = ICON_H + lines.length * LINE_H + PRICE_H;
+  const cls = onColor ? " is-on-color" : "";
+  // 9 characters is what actually fits across a tile at this larger text
+  // size — more than that and names bleed into their neighbours.
+  const lines = wrapName(tile.name, 9, 2);
+  const LINE_H = 21;
+  const ICON_H = icon ? 32 : 0;
+  const PRICE_H = tile.price ? 22 : 0;
+  const stackH = ICON_H + PRICE_H + lines.length * LINE_H;
   const cx = box.x + box.w / 2;
   let y = box.y + (box.h - stackH) / 2;
 
@@ -158,32 +169,39 @@ function TileLabel({ tile, box, mortgaged, level, rentNow }) {
     );
     y += ICON_H;
   }
+  if (tile.price) {
+    parts.push(
+      <text
+        key="price"
+        className={"app-mono-tile-price" + cls + (level > 0 ? " is-upgraded" : "")}
+        x={cx}
+        y={y + 15}
+        textAnchor="middle"
+      >
+        {level > 0 ? `RENT $${rentNow}` : `$${tile.price}`}
+      </text>
+    );
+    y += PRICE_H;
+  }
 
   lines.forEach((line, k) => {
     parts.push(
-      <text key={`n${k}`} className="app-mono-tile-name" x={cx} y={y + 14 + k * LINE_H} textAnchor="middle">
+      <text key={`n${k}`} className={"app-mono-tile-name" + cls} x={cx} y={y + 17 + k * LINE_H} textAnchor="middle">
         {line}
       </text>
     );
   });
   y += lines.length * LINE_H;
-  if (tile.price) {
-    parts.push(
-      <text key="price" className={"app-mono-tile-price" + (level > 0 ? " is-upgraded" : "")} x={cx} y={y + 15} textAnchor="middle">
-        {level > 0 ? `Rent $${rentNow}` : `$${tile.price}`}
-      </text>
-    );
-  }
   if (level > 0) {
     parts.push(
-      <text key="lvl" className="app-mono-tile-level" x={cx} y={y + 32} textAnchor="middle">
-        {level >= 5 ? "MAX LEVEL" : `Lv ${level}`}
+      <text key="lvl" className={"app-mono-tile-level" + cls} x={cx} y={y + 15} textAnchor="middle">
+        {level >= 5 ? "MAX LEVEL" : `LEVEL ${level}`}
       </text>
     );
   }
   if (mortgaged) {
     parts.push(
-      <text key="mtg" className="app-mono-mortgage-mark" x={cx} y={box.y + box.h - 5} textAnchor="middle">
+      <text key="mtg" className="app-mono-mortgage-mark" x={cx} y={box.y + box.h - 6} textAnchor="middle">
         MORTGAGED
       </text>
     );
