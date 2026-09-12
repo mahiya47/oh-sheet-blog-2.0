@@ -1,6 +1,6 @@
 const SECTIONS = [
   { id: "be-decent", label: "Be decent" },
-  { id: "dms", label: "Messages are still public rules" },
+  { id: "dms", label: "Messages are still public" },
   { id: "stories", label: "Stories" },
   { id: "no-spam", label: "No spam" },
   { id: "keep-it-legal", label: "Keep it legal" },
@@ -38,7 +38,7 @@ export default function RulesPage() {
           someone's profile, and encouraging others to harass someone are all covered by this too.
         </p>
 
-        <h3 id="dms">Messages are still public rules</h3>
+        <h3 id="dms">Messages are still public</h3>
         <p>
           A direct message being private doesn't make it a free-for-all. Everything on this page
           applies in DMs exactly as it does in the feed. If someone stops replying, blocks you, or

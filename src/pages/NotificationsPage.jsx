@@ -66,7 +66,7 @@ export default function NotificationsPage() {
   // immediately whenever you come back to the tab (which is when a stale
   // list is most obvious, and cheaper than waiting out the timer).
   const load = useCallback(async () => {
-    if (!user || document.hidden) return;
+    if (!user) return;
     try {
       const list = await api.getNotifications();
       setNotifications(list);
@@ -86,7 +86,13 @@ export default function NotificationsPage() {
   useEffect(() => {
     if (!user) return undefined;
     load();
-    const id = setInterval(load, 15000);
+    // Only the periodic timer skips while the tab is backgrounded — the
+    // initial call above and the focus/visibilitychange wake-up below
+    // always run, so a mount-while-hidden tab isn't stuck on skeletons
+    // forever with nothing to un-stick it.
+    const id = setInterval(() => {
+      if (!document.hidden) load();
+    }, 15000);
     const onWake = () => load();
     window.addEventListener("focus", onWake);
     document.addEventListener("visibilitychange", onWake);
