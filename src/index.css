@@ -1930,16 +1930,42 @@ ul {
   letter-spacing: 0.01em;
 }
 .app-settings-head {
-  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 6px 0 0;
+  padding: 10px 14px;
+  background: var(--app-navbar);
+  border: var(--app-border-w) solid var(--app-border);
+  border-radius: var(--app-radius-lg);
+  box-shadow: var(--app-shadow);
+}
+.app-settings-back {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--app-border-w) solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: var(--app-surface);
+  color: var(--app-ink);
+  box-shadow: var(--app-shadow);
+}
+.app-settings-head-text {
+  min-width: 0;
 }
 .app-settings-head .app-section-title {
-  margin-bottom: 2px;
+  margin: 0 0 1px;
 }
 .app-settings-subtitle {
   margin: 0;
-  color: var(--app-muted);
+  color: var(--app-ink);
+  opacity: 0.72;
   font-weight: 600;
-  font-size: 0.88rem;
+  font-size: 0.84rem;
+  line-height: 1.3;
 }
 .app-settings-row {
   display: flex;
@@ -2230,21 +2256,16 @@ ul {
   padding: 10px 12px 10px 16px;
   box-shadow: var(--app-shadow);
 }
-.app-settings-savebar.is-top {
-  position: sticky;
-  top: 62px;
-  z-index: 15;
-}
 .app-settings-savebar.is-dirty {
   border-color: var(--app-accent);
 }
 .app-settings-savebar-status {
+  flex: 1 1 auto;
+  min-width: 0;
   font-weight: 700;
   font-size: 0.82rem;
   color: var(--app-muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  line-height: 1.25;
 }
 .app-settings-savebar.is-dirty .app-settings-savebar-status {
   color: var(--app-ink);

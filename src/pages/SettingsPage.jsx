@@ -8,6 +8,7 @@ import { startRegistration } from "@simplewebauthn/browser";
 import { api, oauthLinkUrl } from "../lib/api.js";
 import { relativeTime } from "../lib/formatTime.js";
 import { GoogleIcon, GitHubIcon } from "../components/OAuthIcons.jsx";
+import NavIcon from "../components/NavIcons.jsx";
 import {
   AVATAR_PRESET_COLORS,
   COVER_PRESET_GRADIENTS,
@@ -668,13 +669,16 @@ export default function SettingsPage() {
 
   return (
     <div className="app-page app-settings-page">
-      <Link to="/" className="app-bare-back-link">
-        ← Back to feed
-      </Link>
-
+      {/* Back button + title + strapline in one bar, the same shape the
+          arcade game pages use. */}
       <div className="app-settings-head">
-        <h2 className="app-section-title">Settings</h2>
-        <p className="app-settings-subtitle">Manage your profile, privacy and account.</p>
+        <Link to="/" className="app-settings-back" aria-label="Back to feed">
+          <NavIcon name="back" />
+        </Link>
+        <div className="app-settings-head-text">
+          <h2 className="app-section-title">Settings</h2>
+          <p className="app-settings-subtitle">Manage your profile, privacy and account.</p>
+        </div>
       </div>
 
       <div className="app-settings-layout">
@@ -704,7 +708,7 @@ export default function SettingsPage() {
               up once something has actually changed. */}
           <div className={"app-settings-savebar is-top" + (isDirty ? " is-dirty" : "")}>
             <span className="app-settings-savebar-status">
-              {isDirty ? "Unsaved changes" : "Everything is saved"}
+              {isDirty ? "Unsaved changes" : "All saved"}
             </span>
             <button type="submit" className="app-settings-save-btn" disabled={!canSave}>
               {saving ? "Saving..." : "Save changes"}
@@ -940,7 +944,7 @@ export default function SettingsPage() {
 
           <div className={"app-settings-savebar is-bottom" + (isDirty ? " is-dirty" : "")}>
             <span className="app-settings-savebar-status">
-              {isDirty ? "Unsaved changes" : "Everything is saved"}
+              {isDirty ? "Unsaved changes" : "All saved"}
             </span>
             <button type="submit" className="app-settings-save-btn" disabled={!canSave}>
               {saving ? "Saving..." : "Save changes"}

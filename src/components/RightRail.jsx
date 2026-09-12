@@ -46,40 +46,67 @@ export default function RightRail() {
     }
   }
 
-  // The rail scrolls with the page, then parks — but WHERE it parks
-  // depends on how tall it is, and CSS can't measure that itself.
+  // Twitter-style rail. A rail short enough to fit just parks under the
+  // top bar. A rail TALLER than the screen can't do that — one end is
+  // always off-screen — so which end is showing follows the direction
+  // you're scrolling:
   //
-  //  - Shorter than the screen: park its top under the top bar.
-  //  - Taller than the screen: park it so its BOTTOM sits just above the
-  //    bottom of the screen, which means a NEGATIVE sticky top offset.
-  //    You scroll down through the whole rail, it holds there while the
-  //    feed carries on, and it lets go the instant you scroll back up —
-  //    the Twitter behaviour.
+  //  - Scrolling down, the rail slides up with the feed until its bottom
+  //    reaches the bottom of the screen, then holds there.
+  //  - Scrolling up, it slides back down until its top is under the top
+  //    bar, then holds there — so the top of the rail comes back after a
+  //    short scroll up, instead of only when you reach the top of the
+  //    whole page.
   //
-  // This has to be `top`, not `bottom`: a sticky element with only
-  // `bottom` set never engages here at all (it just scrolls away and
-  // never comes back until you return to the top of the page), which is
-  // exactly the bug this replaces.
-  //
-  // Re-measured whenever the rail's own content changes size (cards
-  // loading in) or the window resizes.
+  // CSS can't do this alone: `position: sticky` only ever honours one
+  // end, so the sticky `top` is recomputed on every scroll. (And it has
+  // to be `top` — a sticky element with only `bottom` set never engages
+  // here at all; it just scrolls away and stays away.)
   useEffect(() => {
     const el = railRef.current;
     if (!el) return;
-    const update = () => {
+
+    let lastY = window.scrollY;
+    let top = TOP_GAP;
+    let frame = 0;
+
+    const apply = () => {
+      frame = 0;
       const h = el.offsetHeight;
       if (!h) return;
-      el.style.top = Math.min(TOP_GAP, window.innerHeight - h - BOTTOM_GAP) + "px";
+
+      // Highest the rail's top edge can go: negative once the rail is
+      // taller than the screen.
+      const minTop = window.innerHeight - h - BOTTOM_GAP;
+      const y = window.scrollY;
+      const dy = y - lastY;
+      lastY = y;
+
+      if (minTop >= TOP_GAP) {
+        top = TOP_GAP;
+      } else {
+        top = Math.max(minTop, Math.min(TOP_GAP, top - dy));
+      }
+      el.style.top = top + "px";
     };
-    update();
-    window.addEventListener("resize", update);
+
+    const schedule = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(apply);
+    };
+
+    apply();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
     let ro;
     if (typeof ResizeObserver !== "undefined") {
-      ro = new ResizeObserver(update);
+      ro = new ResizeObserver(schedule);
       ro.observe(el);
     }
     return () => {
-      window.removeEventListener("resize", update);
+      if (frame) cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
       ro?.disconnect();
     };
   }, []);
