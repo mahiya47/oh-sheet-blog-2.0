@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
+import { useTheme } from "../context/ThemeContext.jsx";
 import { usePwaInstall } from "../context/PwaInstallContext.jsx";
 import { subscribeToPush, unsubscribeFromPush, getExistingPushSubscription } from "../lib/pwa.js";
 import { startRegistration } from "@simplewebauthn/browser";
@@ -41,6 +42,7 @@ function toDateInputValue(iso) {
 
 export default function SettingsPage() {
   const { user, setUser, loading, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const { canInstall, installed, promptInstall } = usePwaInstall();
   const navigate = useNavigate();
   const avatarInputRef = useRef(null);
@@ -1192,6 +1194,23 @@ export default function SettingsPage() {
 
         {activeTab === "Appearance" && (
           <div className="app-settings-content">
+            <div className="app-settings-group">
+              <h3>Appearance</h3>
+              <label className="app-settings-toggle-row">
+                <span>Dark mode</span>
+                <button
+                  type="button"
+                  className={"app-settings-switch" + (theme === "dark" ? " is-on" : "")}
+                  role="switch"
+                  aria-checked={theme === "dark"}
+                  onClick={toggleTheme}
+                >
+                  <span className="app-settings-switch-knob" />
+                </button>
+              </label>
+              <p className="app-settings-hint">Your theme preference is remembered on this device.</p>
+            </div>
+
             {(canInstall || installed) && (
               <div className="app-settings-group">
                 <h3>Install app</h3>

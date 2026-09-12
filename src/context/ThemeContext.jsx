@@ -3,39 +3,46 @@ import { createContext, useContext, useEffect, useState } from "react";
 const ThemeContext = createContext(null);
 const STORAGE_KEY = "ohsheet_theme";
 
-// DARK MODE IS OFF FOR NOW — coming back later.
-//
-// The toggle has been taken out of Settings, so the app is pinned to the
-// light theme here. A "dark" choice someone saved earlier is ignored AND
-// cleared, otherwise they'd be stuck in a theme with no switch left to
-// turn it off with.
-//
-// To bring it back: read the saved value here again (it used to accept
-// "dark"/"light" from localStorage), and put the Dark mode toggle back in
-// SettingsPage's Appearance tab. The dark palette itself is untouched —
-// it's still in index.css under :root[data-theme="dark"].
+// Light unless this device has chosen otherwise. No system-preference
+// sniffing on purpose: the choice is an explicit switch in Settings, so
+// the app shouldn't quietly go dark on someone who never asked it to.
 function getInitialTheme() {
   try {
-    if (localStorage.getItem(STORAGE_KEY) === "dark") localStorage.removeItem(STORAGE_KEY);
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored === "dark" || stored === "light") return stored;
   } catch {
-    // localStorage unavailable — nothing to clear
+    // localStorage unavailable (private window, blocked storage) — the
+    // theme just won't be remembered between visits.
   }
   return "light";
 }
 
 // The whole app is built on CSS custom properties (--app-*), so a theme
-// is just a data-theme attribute on <html>.
+// is nothing more than a data-theme attribute on <html>: everything
+// re-colours off the :root[data-theme="dark"] block in index.css.
 export function ThemeProvider({ children }) {
-  const [theme] = useState(getInitialTheme);
+  const [theme, setTheme] = useState(getInitialTheme);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
+    // Keeps the phone's own browser chrome (status bar, address bar) in
+    // step with the page instead of leaving a light strip above a dark
+    // app.
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute("content", theme === "dark" ? "#111214" : "#f5c945");
+    try {
+      localStorage.setItem(STORAGE_KEY, theme);
+    } catch {
+      // ignore — theme just won't persist across reloads
+    }
   }, [theme]);
 
-  // setTheme/toggleTheme stay on the context so nothing that still calls
-  // them breaks — they just don't do anything while dark mode is off.
+  function toggleTheme() {
+    setTheme((t) => (t === "dark" ? "light" : "dark"));
+  }
+
   return (
-    <ThemeContext.Provider value={{ theme, setTheme: () => {}, toggleTheme: () => {} }}>
+    <ThemeContext.Provider value={{ theme, setTheme, toggleTheme }}>
       {children}
     </ThemeContext.Provider>
   );

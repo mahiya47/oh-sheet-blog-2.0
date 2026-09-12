@@ -22,6 +22,14 @@
   --app-shadow: none;
   --app-shadow-lg: none;
 
+  /* Hairlines: the thin rules that separate rows inside a card (comment
+     dividers, list separators). Dark ink on light here, light on dark in
+     the dark theme — they were hardcoded dark before, which made every
+     one of them vanish once the background went black. */
+  --app-line: rgba(28, 24, 16, 0.14);
+  /* The faint dot grain on the long-form "sheet" pages. */
+  --app-grain: rgba(28, 24, 16, 0.05);
+
   /* Top bar / bottom bar tint, kept separate from --app-bg-deep (still
      used for the many subtle darker-panel spots elsewhere) so only
      these two bars pick it up. Swapped with --app-yellow below: the
@@ -71,24 +79,54 @@
    neubrutalist outline-and-offset-shadow look still reads against a
    dark surface. */
 :root[data-theme="dark"] {
-  --app-bg: #15130f;
-  --app-bg-deep: #0c0a08;
-  --app-surface: #241f17;
-  --app-ink: #f3ecdd;
-  --app-muted: #b6ac97;
-  --app-border: #f3ecdd;
+  /* ---- Dark mode: black, greys and white, with the same yellow accent
+     as the light theme ----
+
+     Built as four steps of grey rather than one flat black, so depth
+     comes from the surfaces themselves (there are no shadows in this
+     design to lean on):
+
+       bg-deep   #08090a   recessed wells, behind everything
+       bg        #111214   the page
+       surface   #1a1c1f   panels, menus, the side nav
+       card      #23262b   a post — the lightest, so it sits on top
+
+     Colour is spent entirely on the accent. Every brand hue the light
+     theme uses for large fills folds into that card grey here: a feed of
+     bright yellow blocks works on cream, but on black it glares and
+     fights the one yellow that's meant to mean "this is a control". */
+  --app-bg: #111214;
+  --app-bg-deep: #08090a;
+  --app-surface: #1a1c1f;
+  --app-ink: #eef0f2;
+  --app-muted: #9aa1a9;
+  /* Not white. The light theme's near-black border at 3px is the app's
+     signature, but the same weight in white on black glows and shreds
+     the edges of everything — a mid grey keeps the outline without the
+     halo. */
+  --app-border: #3b4046;
   --app-shadow: none;
   --app-shadow-lg: none;
+  --app-line: rgba(255, 255, 255, 0.12);
+  --app-grain: rgba(255, 255, 255, 0.045);
 
-  /* Dark mode keeps its existing bar look (not part of this reskin) —
-     just point the new var back at what the bars already used. */
-  --app-navbar: var(--app-bg-deep);
+  /* The bars sit a step ABOVE the page rather than below it, so the
+     chrome reads as a layer laid over the content. */
+  --app-navbar: #202327;
 
-  --app-yellow: #d9ad2f;
-  --app-green: #6fae6c;
-  --app-pink: #cf7fa8;
-  --app-blue: #6fa8c4;
-  --app-purple: #a488cf;
+  /* Post cards and arcade tiles — raised above the page, and the
+     lightest surface in the theme. */
+  --app-yellow: #23262b;
+  --app-green: #23262b;
+  --app-pink: #23262b;
+  --app-blue: #23262b;
+  --app-purple: #23262b;
+
+  /* Unchanged from the light theme, and that's the point: the logo
+     badge and every active control are the same yellow in both. It's
+     the only saturated colour in here, so it reads as "this does
+     something" without anything else competing. */
+  --app-accent: #F4D86B;
 
   --app-bg-pattern: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNjAiIGhlaWdodD0iMjYwIiB2aWV3Qm94PSIwIDAgMjYwIDI2MCI+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTQsMjApIHJvdGF0ZSgtOCkiIHN0cm9rZT0icmdiYSgyNDMsMjM2LDIyMSwwLjE2KSIgc3Ryb2tlLXdpZHRoPSIxLjciIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTQsMTAgUTQsMiAxMiwyIEwyNiwyIFEzNCwyIDM0LDEwIEwzNiwxOCBRMzcsMjQgMzIsMjQgUTI4LDI0IDI2LDIwIEwxMiwyMCBRMTAsMjQgNiwyNCBRMSwyNCAyLDE4IFoiLz48bGluZSB4MT0iMTAiIHkxPSI4IiB4Mj0iMTAiIHkyPSIxNCIvPjxsaW5lIHgxPSI3IiB5MT0iMTEiIHgyPSIxMyIgeTI9IjExIi8+PGNpcmNsZSBjeD0iMjciIGN5PSI4IiByPSIxLjYiLz48Y2lyY2xlIGN4PSIzMSIgY3k9IjEyIiByPSIxLjYiLz48L2c+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTIwLDgpIHJvdGF0ZSg0KSIgc3Ryb2tlPSJyZ2JhKDI0MywyMzYsMjIxLDAuMTYpIiBzdHJva2Utd2lkdGg9IjEuNyIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cG9seWxpbmUgcG9pbnRzPSI5LDAgMCw5IDksMTgiLz48cG9seWxpbmUgcG9pbnRzPSIxNSwwIDI0LDkgMTUsMTgiLz48bGluZSB4MT0iMTMuNSIgeTE9IjIxIiB4Mj0iMTAuNSIgeTI9Ii0zIi8+PC9nPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIwNSwzMCkgcm90YXRlKDYpIiBzdHJva2U9InJnYmEoMjQzLDIzNiwyMjEsMC4xNikiIHN0cm9rZS13aWR0aD0iMS43IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik0yLDE2IEwyLDExIFEyLDAgMTYsMCBRMzAsMCAzMCwxMSBMMzAsMTYiLz48cmVjdCB4PSItMSIgeT0iMTQiIHdpZHRoPSI3IiBoZWlnaHQ9IjExIiByeD0iMyIvPjxyZWN0IHg9IjI2IiB5PSIxNCIgd2lkdGg9IjciIGhlaWdodD0iMTEiIHJ4PSIzIi8+PC9nPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDYwLDc4KSByb3RhdGUoLTYpIiBzdHJva2U9InJnYmEoMjQzLDIzNiwyMjEsMC4xNikiIHN0cm9rZS13aWR0aD0iMS43IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik0zLDcgTDcsLTIgTDExLDYiLz48cGF0aCBkPSJNMjMsNyBMMTksLTIgTDE1LDYiLz48Y2lyY2xlIGN4PSIxMyIgY3k9IjEyIiByPSIxMSIvPjxjaXJjbGUgY3g9IjkiIGN5PSIxMSIgcj0iMS4xIiBmaWxsPSJyZ2JhKDI0MywyMzYsMjIxLDAuMTYpIi8+PGNpcmNsZSBjeD0iMTciIGN5PSIxMSIgcj0iMS4xIiBmaWxsPSJyZ2JhKDI0MywyMzYsMjIxLDAuMTYpIi8+PHBhdGggZD0iTTExLDE2IFExMywxOCAxNSwxNiIvPjxsaW5lIHgxPSIxIiB5MT0iMTQiIHgyPSItNSIgeTI9IjEzIi8+PGxpbmUgeDE9IjI1IiB5MT0iMTQiIHgyPSIzMSIgeTI9IjEzIi8+PC9nPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE1NSw3MCkgcm90YXRlKDEyKSIgc3Ryb2tlPSJyZ2JhKDI0MywyMzYsMjIxLDAuMTYpIiBzdHJva2Utd2lkdGg9IjEuNyIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTMsMCBMMiwxNSBMMTAsMTUgTDcsMjYgTDIwLDkgTDEyLDkgWiIvPjwvZz48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMzAsMTAwKSByb3RhdGUoMCkiIHN0cm9rZT0icmdiYSgyNDMsMjM2LDIyMSwwLjE2KSIgc3Ryb2tlLXdpZHRoPSIxLjciIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTgsMCBMOS41LDYuNSBMMTYsOCBMOS41LDkuNSBMOCwxNiBMNi41LDkuNSBMMCw4IEw2LjUsNi41IFoiLz48L2c+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTAsMTE4KSByb3RhdGUoLTQpIiBzdHJva2U9InJnYmEoMjQzLDIzNiwyMjEsMC4xNikiIHN0cm9rZS13aWR0aD0iMS43IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik0wLDEwIFExMSwtMiAyMiwxMCIvPjxwYXRoIGQ9Ik00LDE0IFExMSw2IDE4LDE0Ii8+PGNpcmNsZSBjeD0iMTEiIGN5PSIxOSIgcj0iMS40IiBmaWxsPSJyZ2JhKDI0MywyMzYsMjIxLDAuMTYpIi8+PC9nPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEwMCwxMTgpIHJvdGF0ZSgwKSIgc3Ryb2tlPSJyZ2JhKDI0MywyMzYsMjIxLDAuMTYpIiBzdHJva2Utd2lkdGg9IjEuNyIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cG9seWxpbmUgcG9pbnRzPSIwLDIgOCw5IDAsMTYiLz48bGluZSB4MT0iMTIiIHkxPSIxNiIgeDI9IjIyIiB5Mj0iMTYiLz48L2c+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTkwLDE0MCkgcm90YXRlKC0xMCkiIHN0cm9rZT0icmdiYSgyNDMsMjM2LDIyMSwwLjE2KSIgc3Ryb2tlLXdpZHRoPSIxLjciIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIiByeD0iNCIvPjxjaXJjbGUgY3g9IjUiIGN5PSI1IiByPSIxLjMiIGZpbGw9InJnYmEoMjQzLDIzNiwyMjEsMC4xNikiLz48Y2lyY2xlIGN4PSIxNSIgY3k9IjUiIHI9IjEuMyIgZmlsbD0icmdiYSgyNDMsMjM2LDIyMSwwLjE2KSIvPjxjaXJjbGUgY3g9IjEwIiBjeT0iMTAiIHI9IjEuMyIgZmlsbD0icmdiYSgyNDMsMjM2LDIyMSwwLjE2KSIvPjxjaXJjbGUgY3g9IjUiIGN5PSIxNSIgcj0iMS4zIiBmaWxsPSJyZ2JhKDI0MywyMzYsMjIxLDAuMTYpIi8+PGNpcmNsZSBjeD0iMTUiIGN5PSIxNSIgcj0iMS4zIiBmaWxsPSJyZ2JhKDI0MywyMzYsMjIxLDAuMTYpIi8+PC9nPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDMwLDE2OCkgcm90YXRlKDYpIiBzdHJva2U9InJnYmEoMjQzLDIzNiwyMjEsMC4xNikiIHN0cm9rZS13aWR0aD0iMS43IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik0yLDggTDIsMTggUTIsMjMgOSwyMyBMMTMsMjMgUTIwLDIzIDIwLDE4IEwyMCw4IFoiLz48cGF0aCBkPSJNMjAsMTAgUTI3LDEwIDI3LDE1IFEyNywyMCAyMCwxOSIvPjxwYXRoIGQ9Ik02LDQgUTgsMSA2LC0yIi8+PHBhdGggZD0iTTExLDQgUTEzLDEgMTEsLTIiLz48L2c+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTIwLDE3NSkgcm90YXRlKDApIiBzdHJva2U9InJnYmEoMjQzLDIzNiwyMjEsMC4xNikiIHN0cm9rZS13aWR0aD0iMS43IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxjaXJjbGUgY3g9IjEwIiBjeT0iMTAiIHI9IjEwIi8+PHBhdGggZD0iTTcsNS41IEwxNSwxMCBMNywxNC41IFoiLz48L2c+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjE1LDE5MCkgcm90YXRlKC02KSIgc3Ryb2tlPSJyZ2JhKDI0MywyMzYsMjIxLDAuMTYpIiBzdHJva2Utd2lkdGg9IjEuNyIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMSwxIEwyMSwxIFEyNCwxIDI0LDQgTDI0LDEzIFEyNCwxNiAyMSwxNiBMOSwxNiBMNCwyMSBMNSwxNiBMNCwxNiBRMSwxNiAxLDEzIFoiLz48bGluZSB4MT0iMTIuNSIgeTE9IjUiIHgyPSIxMi41IiB5Mj0iMTAiLz48Y2lyY2xlIGN4PSIxMi41IiBjeT0iMTMiIHI9IjAuOSIgZmlsbD0icmdiYSgyNDMsMjM2LDIyMSwwLjE2KSIvPjwvZz48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSg2MCwyMjApIHJvdGF0ZSgtNCkiIHN0cm9rZT0icmdiYSgyNDMsMjM2LDIyMSwwLjE2KSIgc3Ryb2tlLXdpZHRoPSIxLjciIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHJlY3QgeD0iNCIgeT0iMCIgd2lkdGg9IjIyIiBoZWlnaHQ9IjE1IiByeD0iMS41Ii8+PHBhdGggZD0iTTAsMTkgTDMwLDE5IEwyNywyMyBMMywyMyBaIi8+PGxpbmUgeDE9IjExIiB5MT0iMTkiIHgyPSIxOSIgeTI9IjE5Ii8+PC9nPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE2MCwyMjUpIHJvdGF0ZSgxMCkiIHN0cm9rZT0icmdiYSgyNDMsMjM2LDIyMSwwLjE2KSIgc3Ryb2tlLXdpZHRoPSIxLjciIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjE4IiBoZWlnaHQ9IjE4IiByeD0iMyIvPjxsaW5lIHgxPSI1IiB5MT0iOSIgeDI9IjEzIiB5Mj0iOSIvPjwvZz48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSg1LDIyMCkgcm90YXRlKDE0KSIgc3Ryb2tlPSJyZ2JhKDI0MywyMzYsMjIxLDAuMTYpIiBzdHJva2Utd2lkdGg9IjEuNyIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNOCwwIEw5LjUsNi41IEwxNiw4IEw5LjUsOS41IEw4LDE2IEw2LjUsOS41IEwwLDggTDYuNSw2LjUgWiIvPjwvZz48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMzUsNSkgcm90YXRlKC0yMCkiIHN0cm9rZT0icmdiYSgyNDMsMjM2LDIyMSwwLjE2KSIgc3Ryb2tlLXdpZHRoPSIxLjciIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTEzLDAgTDIsMTUgTDEwLDE1IEw3LDI2IEwyMCw5IEwxMiw5IFoiLz48L2c+PC9zdmc+");
 }
@@ -334,7 +372,7 @@ ul {
 }
 .app-burger-menu-divider {
   border: none;
-  border-top: 2px solid rgba(28, 24, 16, 0.12);
+  border-top: 2px solid var(--app-line);
   margin: 4px 2px;
 }
 .app-burger-menu-logout {
@@ -480,7 +518,7 @@ ul {
 }
 .app-drawer-divider {
   border: none;
-  border-top: 2px solid rgba(28, 24, 16, 0.12);
+  border-top: 2px solid var(--app-line);
   margin: 6px 0;
 }
 .app-drawer-logout {
@@ -521,7 +559,7 @@ ul {
 
 .app-sidenav-divider {
   border: none;
-  border-top: 2px solid rgba(28, 24, 16, 0.14);
+  border-top: 2px solid var(--app-line);
   margin: 8px 4px;
 }
 
@@ -1119,7 +1157,7 @@ ul {
 .app-card-expanded {
   margin-top: 18px;
   padding-top: 16px;
-  border-top: 2px solid rgba(28, 24, 16, 0.15);
+  border-top: 2px solid var(--app-line);
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -1156,7 +1194,7 @@ ul {
   flex-direction: column;
 }
 .app-votes-list li + li {
-  border-top: 2px solid rgba(28, 24, 16, 0.14);
+  border-top: 2px solid var(--app-line);
 }
 .app-votes-row {
   display: flex;
@@ -1231,7 +1269,7 @@ ul {
 .app-comment-replies {
   margin-top: 10px;
   padding-left: 12px;
-  border-left: 2px solid rgba(28, 24, 16, 0.16);
+  border-left: 2px solid var(--app-line);
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -1336,7 +1374,7 @@ ul {
 
 .app-trend-item {
   padding: 8px 0;
-  border-bottom: 1px solid rgba(28, 24, 16, 0.1);
+  border-bottom: 1px solid var(--app-line);
 }
 .app-trend-item:last-child {
   border-bottom: none;
@@ -3094,7 +3132,7 @@ a.app-auth-logo-badge:hover {
 .app-card-content-box {
   margin-top: 4px;
   padding: 4px;
-  border: 2px solid rgba(28, 24, 16, 0.2);
+  border: 2px solid var(--app-line);
   border-radius: 0;
   background: rgba(255, 255, 255, 0.5);
 }
@@ -4023,7 +4061,7 @@ a.app-auth-logo-badge:hover {
   align-items: center;
   justify-content: space-between;
   padding: 14px 16px;
-  border-bottom: 2px solid rgba(28, 24, 16, 0.12);
+  border-bottom: 2px solid var(--app-line);
 }
 .app-modal-head h3 {
   margin: 0;
@@ -5241,6 +5279,39 @@ body.app-body-mono-dark {
 :root[data-theme="dark"] .app-mono-panel-msg.is-urgent {
   background: #3a1f1f;
 }
+
+/* ---- Dark mode: the handful of spots that don't come from a token ---- */
+
+/* The cover strip is a two-colour gradient of brand hues, and those all
+   collapse to one grey here — so it gets its own gradient instead of a
+   flat block. */
+:root[data-theme="dark"] .app-profile-cover {
+  background: linear-gradient(135deg, #23262b, #34393f);
+}
+/* White text on the accent is unreadable; these two put dark ink back on
+   the yellow wherever it's used as a fill. */
+:root[data-theme="dark"] .app-mono-buy-buy,
+:root[data-theme="dark"] .app-topbar-signup,
+:root[data-theme="dark"] .app-arcade-btn,
+:root[data-theme="dark"] .app-comment-form button,
+:root[data-theme="dark"] .app-profile-edit,
+:root[data-theme="dark"] .app-profile-follow,
+:root[data-theme="dark"] .app-profile-message,
+:root[data-theme="dark"] .app-stat-box,
+:root[data-theme="dark"] .app-stat-box span {
+  color: #1c1810;
+}
+/* An active bottom-nav icon is a yellow chip — its glyph has to be dark
+   to show up on it. */
+:root[data-theme="dark"] .app-bottomnav-item.is-active {
+  color: #1c1810;
+}
+/* The dashed "nothing here yet" boxes read as scratches on black at the
+   light theme's contrast. */
+:root[data-theme="dark"] .app-empty {
+  border-color: #3b4046;
+  background: rgba(255, 255, 255, 0.02);
+}
 .app-mono-panel-msg-kind {
   font-family: var(--app-font-display);
   font-weight: 700;
@@ -5763,7 +5834,7 @@ body.app-body-mono-dark {
   max-width: 68ch;
   padding: 26px 20px 18px;
   background:
-    radial-gradient(circle at 1px 1px, rgba(28, 24, 16, 0.05) 1px, transparent 0) 0 0 / 18px 18px,
+    radial-gradient(circle at 1px 1px, var(--app-grain) 1px, transparent 0) 0 0 / 18px 18px,
     var(--app-surface);
   border: var(--app-border-w) solid var(--app-border);
   border-radius: var(--app-radius-lg);
@@ -6091,7 +6162,7 @@ body.app-body-mono-dark {
   display: flex;
   gap: 8px;
   padding-top: 10px;
-  border-top: 2px solid rgba(28, 24, 16, 0.12);
+  border-top: 2px solid var(--app-line);
 }
 .app-dm-compose input {
   flex: 1;
@@ -6470,7 +6541,7 @@ body.app-body-mono-dark {
 .app-ludo-cell-track,
 .app-ludo-cell-home {
   background: var(--app-bg);
-  border: 1px solid rgba(28, 24, 16, 0.12);
+  border: 1px solid var(--app-line);
 }
 .app-ludo-safe-dot {
   width: 42%;
@@ -7393,7 +7464,7 @@ body.app-body-mono-dark {
   color: inherit;
 }
 .app-story-row + .app-story-row {
-  border-top: 2px solid rgba(28, 24, 16, 0.14);
+  border-top: 2px solid var(--app-line);
 }
 .app-story-row:active {
   background: var(--app-bg-deep);
@@ -7785,7 +7856,7 @@ button.app-stories-label-toggle {
   padding: 10px 12px;
 }
 .app-dm-start-list li + li {
-  border-top: 2px solid rgba(28, 24, 16, 0.14);
+  border-top: 2px solid var(--app-line);
 }
 .app-dm-start-who {
   flex: 1;
