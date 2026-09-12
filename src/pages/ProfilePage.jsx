@@ -413,16 +413,41 @@ export default function ProfilePage() {
 
         {activeTab === "About" && (
           <div className="app-profile-about">
-            <p>{profile.bio || "This sheeter hasn't written a bio yet."}</p>
+            <p className="app-profile-about-bio">
+              {profile.bio || "This sheeter hasn't written a bio yet."}
+            </p>
 
-            {(profile.currentCity || profile.work || profile.education) && (
+            {(profile.currentCity || profile.work || profile.education || profile.gender || profile.orientation) && (
               <ul className="app-profile-about-list">
-                {profile.currentCity && <li>Lives in {profile.currentCity}</li>}
-                {profile.work && <li>Works at {profile.work}</li>}
-                {profile.education && <li>Studied at {profile.education}</li>}
-                {profile.gender && <li>{GENDER_LABELS[profile.gender] || profile.gender}</li>}
+                {profile.currentCity && (
+                  <li>
+                    <NavIcon name="pin" />
+                    <span>Lives in {profile.currentCity}</span>
+                  </li>
+                )}
+                {profile.work && (
+                  <li>
+                    <NavIcon name="briefcase" />
+                    <span>Works at {profile.work}</span>
+                  </li>
+                )}
+                {profile.education && (
+                  <li>
+                    <NavIcon name="cap" />
+                    <span>Studied at {profile.education}</span>
+                  </li>
+                )}
+                {profile.gender && (
+                  <li>
+                    <NavIcon name="user" />
+                    <span>{GENDER_LABELS[profile.gender] || profile.gender}</span>
+                  </li>
+                )}
                 {profile.orientation && (
-                  <li>{ORIENTATION_LABELS[profile.orientation] || profile.orientation}</li>
+                  <li>
+                    <NavIcon name="info" />
+                    <span>{ORIENTATION_LABELS[profile.orientation] || profile.orientation}</span>
+                  </li>
                 )}
               </ul>
             )}

@@ -89,6 +89,44 @@ export default function NavIcon({ name }) {
           />
         </svg>
       );
+    case "pin":
+      return (
+        <svg {...common}>
+          <path
+            d="M12 21s-7-6.2-7-11.2A7 7 0 0112 3a7 7 0 017 6.8C19 14.8 12 21 12 21z"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinejoin="round"
+          />
+          <circle cx="12" cy="9.8" r="2.4" stroke="currentColor" strokeWidth="1.9" />
+        </svg>
+      );
+    case "briefcase":
+      return (
+        <svg {...common}>
+          <rect x="3" y="8" width="18" height="11" rx="2" stroke="currentColor" strokeWidth="2" />
+          <path
+            d="M8.5 8V6.5A2.5 2.5 0 0111 4h2a2.5 2.5 0 012.5 2.5V8"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinejoin="round"
+          />
+          <path d="M3 13h18" stroke="currentColor" strokeWidth="1.8" />
+        </svg>
+      );
+    case "cap":
+      return (
+        <svg {...common}>
+          <path
+            d="M12 4.5L2.5 9 12 13.5 21.5 9 12 4.5z"
+            stroke="currentColor"
+            strokeWidth="1.9"
+            strokeLinejoin="round"
+          />
+          <path d="M6.5 11.3v4c0 1.5 2.5 3 5.5 3s5.5-1.5 5.5-3v-4" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+          <path d="M21 9.5v5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+        </svg>
+      );
     case "gear":
       return (
         <svg

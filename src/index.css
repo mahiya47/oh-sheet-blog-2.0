@@ -1688,11 +1688,17 @@ ul {
 .app-profile-about {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 14px;
+  background: var(--app-surface);
+  border: var(--app-border-w) solid var(--app-border);
+  border-radius: var(--app-radius-lg);
+  padding: 16px 18px;
 }
-.app-profile-about p {
+.app-profile-about-bio {
   margin: 0;
   font-weight: 600;
+  font-size: 1rem;
+  line-height: 1.55;
 }
 .app-profile-about-list {
   list-style: none;
@@ -1700,8 +1706,23 @@ ul {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  font-weight: 600;
+  gap: 8px;
+}
+.app-profile-about-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border: 2px solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: var(--app-bg);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+.app-profile-about-list li svg {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
   color: var(--app-muted);
 }
 .app-profile-social-links {
@@ -4865,7 +4886,11 @@ a.app-auth-logo-badge:hover {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  /* flex-start, not center: centering an overflowing scrollable flex
+     child hides its top portion above the scrollable area (you can
+     never scroll up far enough to see it) — that showed up as the
+     Chance card's heading getting cut off at the top. */
+  justify-content: flex-start;
   gap: 10px;
   padding: 12px;
   text-align: center;
@@ -4903,17 +4928,17 @@ a.app-auth-logo-badge:hover {
 }
 .app-mono-die-html {
   position: relative;
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   border: var(--app-border-w) solid var(--app-border);
-  border-radius: 9px;
+  border-radius: 8px;
   background: var(--app-bg);
 }
 .app-mono-pip-html {
   position: absolute;
-  width: 7px;
-  height: 7px;
-  margin: -3.5px 0 0 -3.5px;
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
   border-radius: 50%;
   background: var(--app-ink);
 }
@@ -4929,9 +4954,11 @@ a.app-auth-logo-badge:hover {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 14px;
+  /* flex-start instead of center — see the note on .app-mono-panel-idle;
+     centering an overflowing card here cut its heading off at the top. */
+  justify-content: flex-start;
+  gap: 6px;
+  padding: 10px;
   text-align: center;
   overflow-y: auto;
 }
@@ -4944,13 +4971,13 @@ a.app-auth-logo-badge:hover {
 .app-mono-panel-msg-kind {
   font-family: var(--app-font-display);
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 0.9rem;
 }
 .app-mono-panel-msg p {
   margin: 0;
   font-weight: 600;
-  font-size: 0.98rem;
-  line-height: 1.4;
+  font-size: 0.86rem;
+  line-height: 1.35;
 }
 .app-mono-panel-msg .app-arcade-btn {
   width: 100%;
