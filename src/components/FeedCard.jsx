@@ -615,10 +615,18 @@ export default function FeedCard({ post, onDeleted, initiallyExpanded = false })
               displayName.charAt(0).toUpperCase()
             )}
           </Link>
-          <Link to={`/profile/${post.author.username}`} className="app-card-name" onClick={stop}>
-            {displayName}
-          </Link>
-          <VerifiedBadge user={post.author} />
+          {/* Name and post age stack together, so the name sits a little
+              higher in the row and the age reads as a caption under it
+              instead of competing for the same line. */}
+          <div className="app-card-idbox">
+            <span className="app-card-idline">
+              <Link to={`/profile/${post.author.username}`} className="app-card-name" onClick={stop}>
+                {displayName}
+              </Link>
+              <VerifiedBadge user={post.author} />
+            </span>
+            <span className="app-card-age">{relativeTime(post.createdAt)}</span>
+          </div>
 
           <div className="app-card-tab-right">
             {!isOwnPost && (
@@ -757,7 +765,7 @@ export default function FeedCard({ post, onDeleted, initiallyExpanded = false })
 
         <button
           type="button"
-          className="app-action-btn"
+          className="app-action-btn app-action-comment"
           onClick={(e) => {
             stop(e);
             setExpanded(true);

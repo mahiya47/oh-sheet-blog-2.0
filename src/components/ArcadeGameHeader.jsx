@@ -8,7 +8,10 @@ import NavIcon from "./NavIcons.jsx";
 // score, instead of up here.
 export default function ArcadeGameHeader({ title, emoji, onShowLeaderboard }) {
   return (
-    <div className="app-arcade-game-head">
+    // `-solo` carries the dressed-up styling. The multiplayer twin
+    // (MultiplayerHeader) deliberately keeps the plain layout, so Monopoly
+    // and the other multiplayer pages look exactly as they do now.
+    <div className="app-arcade-game-head app-arcade-game-head-solo">
       <Link to="/arcade" className="app-arcade-back" aria-label="Back to Arcade">
         <NavIcon name="back" />
       </Link>

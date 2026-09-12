@@ -25,8 +25,16 @@ export default function ArcadePage() {
 
   return (
     <div className="app-page">
-      <h2 className="app-section-title">Arcade</h2>
-      <p className="app-empty">Play a game, climb the leaderboard.</p>
+      {/* Header strip instead of a bare title + one grey line — the hub is
+          the first thing you see after tapping Arcade, so it gets a bit of
+          presence. The oversized emoji is decoration only. */}
+      <div className="app-arcade-hero">
+        <h2>Arcade</h2>
+        <p>Play a game, climb the leaderboard.</p>
+        <span className="app-arcade-hero-emoji" aria-hidden="true">
+          🕹️
+        </span>
+      </div>
 
       <div className="app-arcade-grid">
         {ARCADE_GAMES.map((game) => {
@@ -40,7 +48,7 @@ export default function ArcadePage() {
               {game.multiplayer && <span className="app-arcade-tile-badge">Multiplayer</span>}
               <span className="app-arcade-tile-blurb">{game.blurb}</span>
               {best !== undefined && (
-                <span className="app-arcade-tile-best">Your best: {formatArcadeScore(best, game.unit)}</span>
+                <span className="app-arcade-tile-best">Best: {formatArcadeScore(best, game.unit)}</span>
               )}
             </Link>
           );
