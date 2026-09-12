@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import {
   BOARD_PX,
+  BOARD_PY,
   TILES,
   wrapName,
   tokenAnchor,
@@ -112,11 +113,11 @@ export default function MonopolyBoard({ board, game, mySeat, onTileClick, select
   return (
     <svg
       className="app-mono-board"
-      viewBox={`0 0 ${BOARD_PX} ${BOARD_PX}`}
+      viewBox={`0 0 ${BOARD_PX} ${BOARD_PY}`}
       role="img"
       aria-label="Monopoly board"
     >
-      <rect x="0" y="0" width={BOARD_PX} height={BOARD_PX} rx="26" className="app-mono-felt" />
+      <rect x="0" y="0" width={BOARD_PX} height={BOARD_PY} rx="26" className="app-mono-felt" />
 
       {TILES.map((t) => {
         const tile = board[t.i];
@@ -305,10 +306,12 @@ function CornerLabel({ tile, t }) {
   // "Platform 9¾") or its type can become an ordinary card tile (the old
   // Platform corner is now just a Community Chest square).
   const lines = wrapName(tile.name.toUpperCase(), 10, 2);
-  const startY = t.y + 100;
+  // Fractions of the corner's own height rather than fixed pixels, so the
+  // icon and label stay centred now that corners are taller than wide.
+  const startY = t.y + t.h * 0.56;
   return (
     <g>
-      <text className="app-mono-corner-icon" x={t.cx} y={t.y + 52} textAnchor="middle">
+      <text className="app-mono-corner-icon" x={t.cx} y={t.y + t.h * 0.29} textAnchor="middle">
         {tileIcon(tile)}
       </text>
       <g className="app-mono-tile-text">

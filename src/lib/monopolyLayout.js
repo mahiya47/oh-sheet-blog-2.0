@@ -7,64 +7,76 @@
 // geometry and never needs to agree with the server about anything.
 //
 // 30 tiles = 4 corners + 6 tiles on the top/bottom edges + 7 tiles on the
-// left/right edges (the board is slightly wider than it is tall isn't
-// the point — fewer tiles across the top/bottom just gives each one more
-// room). Clockwise layout: START at the bottom-left, Azkaban top-left,
+// left/right edges (fewer tiles across the top/bottom just gives each one
+// more room). The board is a portrait rectangle, not a square — see
+// TALLER below. Clockwise layout: START at the bottom-left, Azkaban top-left,
 // the Community Chest corner top-right, the Auction House bottom-right;
 // corners sit at indexes 0 / 8 / 15 / 23. Increasing index always walks
 // clockwise: up the left side, across the top, down the right side,
 // back along the bottom.
 // ==========================================================
 
-export const BOARD_PX = 1320; // viewBox is BOARD_PX square
-const CORNER = 180;
+// The board is NOT square: it's 20% taller than it is wide, to use the
+// screen space that was going spare underneath it. Every vertical
+// measurement below is the horizontal one times TALLER, so each tile —
+// corners included — is 20% taller while staying the same width.
+const TALLER = 1.2;
+
+export const BOARD_PX = 1320; // viewBox width
+export const BOARD_PY = BOARD_PX * TALLER; // viewBox height
+const CORNER_W = 180;
+const CORNER_H = CORNER_W * TALLER;
 const SIDE_TILES_V = 7; // non-corner tiles on the left/right (vertical) edges
 const SIDE_TILES_H = 6; // non-corner tiles on the top/bottom (horizontal) edges
-const TILE_V = (BOARD_PX - CORNER * 2) / SIDE_TILES_V; // left/right tile length
-const TILE_H = (BOARD_PX - CORNER * 2) / SIDE_TILES_H; // top/bottom tile length — bigger, since there are fewer of them
-const DEPTH = 168; // how far a side tile reaches in from the edge — bigger tiles all round, less padding
-export const BAND = 36; // colour stripe thickness
+const TILE_V = (BOARD_PY - CORNER_H * 2) / SIDE_TILES_V; // left/right tile length
+const TILE_H = (BOARD_PX - CORNER_W * 2) / SIDE_TILES_H; // top/bottom tile length — bigger, since there are fewer of them
+// How far a side tile reaches in from the edge. This is a WIDTH for the
+// left/right tiles and a HEIGHT for the top/bottom ones, so only the
+// second one grows.
+const DEPTH_H = 168;
+const DEPTH_V = DEPTH_H * TALLER;
+export const BAND = 36; // colour stripe thickness — kept as-is, so the extra height all goes to the name
 
 // side: which edge the tile sits on — decides text rotation and which
 // edge the colour band hugs.
 function cornerAt(i, x, y) {
-  return { i, x, y, w: CORNER, h: CORNER, side: "corner", cx: x + CORNER / 2, cy: y + CORNER / 2 };
+  return { i, x, y, w: CORNER_W, h: CORNER_H, side: "corner", cx: x + CORNER_W / 2, cy: y + CORNER_H / 2 };
 }
 
 function buildTiles() {
   const tiles = Array.from({ length: 30 });
 
   // START — bottom-left corner
-  tiles[0] = cornerAt(0, 0, BOARD_PX - CORNER);
+  tiles[0] = cornerAt(0, 0, BOARD_PY - CORNER_H);
   // Left edge, running bottom to top — 7 tiles
   for (let k = 1; k <= SIDE_TILES_V; k++) {
     const x = 0;
-    const y = BOARD_PX - CORNER - k * TILE_V;
-    tiles[k] = { i: k, x, y, w: DEPTH, h: TILE_V, side: "left", cx: x + DEPTH / 2, cy: y + TILE_V / 2 };
+    const y = BOARD_PY - CORNER_H - k * TILE_V;
+    tiles[k] = { i: k, x, y, w: DEPTH_H, h: TILE_V, side: "left", cx: x + DEPTH_H / 2, cy: y + TILE_V / 2 };
   }
   // Azkaban — top-left corner
   tiles[8] = cornerAt(8, 0, 0);
   // Top edge, running left to right — 6 tiles
   for (let k = 1; k <= SIDE_TILES_H; k++) {
-    const x = CORNER + (k - 1) * TILE_H;
+    const x = CORNER_W + (k - 1) * TILE_H;
     const y = 0;
-    tiles[8 + k] = { i: 8 + k, x, y, w: TILE_H, h: DEPTH, side: "top", cx: x + TILE_H / 2, cy: y + DEPTH / 2 };
+    tiles[8 + k] = { i: 8 + k, x, y, w: TILE_H, h: DEPTH_V, side: "top", cx: x + TILE_H / 2, cy: y + DEPTH_V / 2 };
   }
   // Community Chest — top-right corner (was Platform 9¾, now just a card tile)
-  tiles[15] = cornerAt(15, BOARD_PX - CORNER, 0);
+  tiles[15] = cornerAt(15, BOARD_PX - CORNER_W, 0);
   // Right edge, running top to bottom — 7 tiles
   for (let k = 1; k <= SIDE_TILES_V; k++) {
-    const x = BOARD_PX - DEPTH;
-    const y = CORNER + (k - 1) * TILE_V;
-    tiles[15 + k] = { i: 15 + k, x, y, w: DEPTH, h: TILE_V, side: "right", cx: x + DEPTH / 2, cy: y + TILE_V / 2 };
+    const x = BOARD_PX - DEPTH_H;
+    const y = CORNER_H + (k - 1) * TILE_V;
+    tiles[15 + k] = { i: 15 + k, x, y, w: DEPTH_H, h: TILE_V, side: "right", cx: x + DEPTH_H / 2, cy: y + TILE_V / 2 };
   }
   // Auction House — bottom-right corner
-  tiles[23] = cornerAt(23, BOARD_PX - CORNER, BOARD_PX - CORNER);
+  tiles[23] = cornerAt(23, BOARD_PX - CORNER_W, BOARD_PY - CORNER_H);
   // Bottom edge, running right to left — 6 tiles
   for (let k = 1; k <= SIDE_TILES_H; k++) {
-    const x = BOARD_PX - CORNER - k * TILE_H;
-    const y = BOARD_PX - DEPTH;
-    tiles[23 + k] = { i: 23 + k, x, y, w: TILE_H, h: DEPTH, side: "bottom", cx: x + TILE_H / 2, cy: y + DEPTH / 2 };
+    const x = BOARD_PX - CORNER_W - k * TILE_H;
+    const y = BOARD_PY - DEPTH_V;
+    tiles[23 + k] = { i: 23 + k, x, y, w: TILE_H, h: DEPTH_V, side: "bottom", cx: x + TILE_H / 2, cy: y + DEPTH_V / 2 };
   }
 
   return tiles;
@@ -189,8 +201,9 @@ export function tokenAnchor(t) {
     case "left": return { x: t.x + t.w - BAND / 2 - 2, y: t.cy };
     case "right": return { x: t.x + BAND / 2 + 2, y: t.cy };
     // On a corner the icon and label take the top two-thirds, so tokens
-    // sit in the space below them.
-    default: return { x: t.cx, y: t.y + 142 };
+    // sit in the space below them. Kept as a fraction of the corner's own
+    // height so it still lands correctly now corners are taller.
+    default: return { x: t.cx, y: t.y + t.h * 0.79 };
   }
 }
 
