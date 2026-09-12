@@ -685,13 +685,17 @@ function DiceRow({ dice }) {
 // The unowned-property decision — buy it, or pass and leave it on the
 // market.
 function BuyCard({ tile, me, onBuy, onPass }) {
-  const color = tile.group ? GROUP_COLORS[tile.group] : tile.type === "utility" ? HOUSE_COLORS[tile.name] : null;
+  // Street groups are strong colours that read fine as text. The Hogwarts
+  // Houses all share an off-white band colour, which is meant to be a
+  // BACKGROUND — used as text on the white card it was nearly invisible,
+  // so those fall back to the normal ink colour instead.
+  const titleColor = tile.group ? GROUP_COLORS[tile.group] : "var(--app-ink)";
   const rentText = tile.type === "utility" ? "4× dice" : tile.rent ? `$${tile.rent[0]}` : "—";
   const sellPrice = Math.floor((tile.price || 0) / 2);
 
   return (
     <div className="app-mono-panel-buy">
-      <h4 className="app-mono-buy-title" style={{ color: color || "var(--app-accent)" }}>{tile.name}</h4>
+      <h4 className="app-mono-buy-title" style={{ color: titleColor }}>{tile.name}</h4>
       <div className="app-mono-buy-icon">{buyIcon(tile)}</div>
       <div className="app-mono-buy-grid">
         <div><span>Price</span><strong>${tile.price}</strong></div>

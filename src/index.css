@@ -4854,10 +4854,10 @@ a.app-auth-logo-badge:hover {
 }
 .app-mono-center-panel {
   position: absolute;
-  left: 25%;
-  top: 25%;
-  width: 50%;
-  height: 50%;
+  left: 15%;
+  top: 15%;
+  width: 70%;
+  height: 70%;
   z-index: 4;
   display: flex;
   flex-direction: column;
@@ -4899,11 +4899,23 @@ a.app-auth-logo-badge:hover {
 .app-mono-panel-prompt {
   margin: 0;
   font-weight: 800;
-  font-size: 0.95rem;
+  font-size: 0.82rem;
 }
 .app-mono-roll-btn {
   padding: 12px 28px;
   font-size: 1rem;
+}
+/* The centre panel is a fixed slice of the board, so everything inside it
+   runs a size down from the page defaults — that keeps a long card, a
+   trade list or a vote fitting without scrolling. Scoped to the panel so
+   buttons elsewhere on the site are untouched. */
+.app-mono-center-panel .app-arcade-btn {
+  font-size: 0.78rem;
+  padding: 7px 14px;
+}
+.app-mono-center-panel .app-mono-roll-btn {
+  padding: 9px 22px;
+  font-size: 0.88rem;
 }
 .app-mono-panel-subrow {
   display: flex;
@@ -4911,14 +4923,14 @@ a.app-auth-logo-badge:hover {
 }
 .app-mono-jail-tally {
   margin: 0;
-  font-size: 0.8rem;
+  font-size: 0.72rem;
   font-weight: 700;
   color: var(--app-ink-soft, var(--app-ink));
   opacity: 0.75;
 }
 .app-mono-panel-note {
   margin: 0;
-  font-size: 0.86rem;
+  font-size: 0.76rem;
   font-weight: 600;
   opacity: 0.7;
 }
@@ -5012,18 +5024,18 @@ a.app-auth-logo-badge:hover {
   flex: 1;
   min-height: 0;
   width: 100%;
-  padding: 14px;
+  padding: 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   text-align: center;
   overflow-y: auto;
 }
 .app-mono-buy-title {
   margin: 0;
   font-family: var(--app-font-display);
-  font-size: 1.15rem;
+  font-size: 0.95rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -5040,7 +5052,7 @@ a.app-auth-logo-badge:hover {
   gap: 2px;
 }
 .app-mono-buy-grid span {
-  font-size: 0.65rem;
+  font-size: 0.58rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.03em;
@@ -5048,11 +5060,11 @@ a.app-auth-logo-badge:hover {
 }
 .app-mono-buy-grid strong {
   font-family: var(--app-font-display);
-  font-size: 1rem;
+  font-size: 0.85rem;
 }
 .app-mono-buy-icon {
   padding: 2px 0;
-  font-size: 34px;
+  font-size: 26px;
   line-height: 1;
 }
 .app-mono-buy-btns {
@@ -5063,11 +5075,11 @@ a.app-auth-logo-badge:hover {
 .app-mono-buy-pass,
 .app-mono-buy-buy {
   flex: 1;
-  padding: 12px;
+  padding: 9px;
   border: var(--app-border-w) solid var(--app-border);
   border-radius: 999px;
   font-weight: 800;
-  font-size: 0.9rem;
+  font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 0.03em;
   cursor: pointer;
@@ -5114,13 +5126,13 @@ a.app-auth-logo-badge:hover {
   cursor: pointer;
 }
 .app-mono-panel-tile-head {
-  padding: 12px 30px 12px 12px;
+  padding: 9px 30px 9px 10px;
   border-bottom: var(--app-border-w) solid var(--app-border);
 }
 .app-mono-panel-tile-head h4 {
   margin: 0;
   font-family: var(--app-font-display);
-  font-size: 1rem;
+  font-size: 0.88rem;
   color: #1c1810;
   text-align: center;
 }
@@ -5136,8 +5148,9 @@ a.app-auth-logo-badge:hover {
 .app-mono-panel-tile-body {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 12px;
+  gap: 6px;
+  padding: 10px;
+  font-size: 0.82rem;
 }
 .app-mono-deed-price {
   margin: 0;
@@ -5147,7 +5160,7 @@ a.app-auth-logo-badge:hover {
 .app-mono-deed-rents {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.78rem;
+  font-size: 0.7rem;
 }
 .app-mono-deed-rents td {
   padding: 4px;
