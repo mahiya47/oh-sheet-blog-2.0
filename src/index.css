@@ -29,6 +29,8 @@
   --app-line: rgba(28, 24, 16, 0.14);
   /* The faint dot grain on the long-form "sheet" pages. */
   --app-grain: rgba(28, 24, 16, 0.05);
+  /* Outline around a post's caption + photo/video. */
+  --app-media-frame: rgba(255, 255, 255, 0.5);
 
   /* Top bar / bottom bar tint, kept separate from --app-bg-deep (still
      used for the many subtle darker-panel spots elsewhere) so only
@@ -109,6 +111,9 @@
   --app-shadow-lg: none;
   --app-line: rgba(255, 255, 255, 0.12);
   --app-grain: rgba(255, 255, 255, 0.045);
+  /* Same white outline, well down in strength — at the light theme's
+     50% it's a glaring box on a dark card. */
+  --app-media-frame: rgba(255, 255, 255, 0.16);
 
   /* The bars sit a step ABOVE the page rather than below it, so the
      chrome reads as a layer laid over the content. */
@@ -3129,12 +3134,13 @@ a.app-auth-logo-badge:hover {
 }
 
 /* Bordered content-box treatment applied to every post's own text/media. */
+/* The caption and the media are outlined rather than boxed in: the pale
+   fill that used to sit behind them is now the border colour, so the
+   frame is there without a second panel laid over the card. */
 .app-card-content-box {
   margin-top: 4px;
   padding: 4px;
-  border: 2px solid var(--app-line);
-  border-radius: 0;
-  background: rgba(255, 255, 255, 0.5);
+  border: 2px solid var(--app-media-frame);
 }
 .app-card-content-box .app-card-text {
   margin-top: 0;
@@ -5288,22 +5294,9 @@ body.app-body-mono-dark {
 :root[data-theme="dark"] .app-profile-cover {
   background: linear-gradient(135deg, #23262b, #34393f);
 }
-/* White text on the accent is unreadable; these two put dark ink back on
-   the yellow wherever it's used as a fill. */
-:root[data-theme="dark"] .app-mono-buy-buy,
-:root[data-theme="dark"] .app-topbar-signup,
-:root[data-theme="dark"] .app-arcade-btn,
-:root[data-theme="dark"] .app-comment-form button,
-:root[data-theme="dark"] .app-profile-edit,
-:root[data-theme="dark"] .app-profile-follow,
-:root[data-theme="dark"] .app-profile-message,
-:root[data-theme="dark"] .app-stat-box,
+/* The stat box's label is a child element with its own colour, so the
+   blanket accent rule at the foot of this file doesn't reach it. */
 :root[data-theme="dark"] .app-stat-box span {
-  color: #1c1810;
-}
-/* An active bottom-nav icon is a yellow chip — its glyph has to be dark
-   to show up on it. */
-:root[data-theme="dark"] .app-bottomnav-item.is-active {
   color: #1c1810;
 }
 /* The dashed "nothing here yet" boxes read as scratches on black at the
@@ -7896,4 +7889,100 @@ button.app-stories-label-toggle {
 }
 .app-dm-start-btn:active {
   transform: scale(0.97);
+}
+
+/* ---- Dark mode: anything sitting ON the accent ----
+   The accent stays the same yellow in both themes, so in dark mode
+   the app's near-white ink would land on a bright yellow fill and be
+   unreadable. Every surface painted with the accent puts dark ink
+   back on top — labels, the letter in an avatar circle, and icons
+   (which draw with currentColor, so setting the colour is enough).
+   Generated from every rule in this file whose background is the
+   accent, rather than listed by hand, so none get missed.
+   The ghost in the logo badge isn't here: it's drawn with its own
+   fixed ink (LOGO_INK in logoMark.js), so it's already dark. */
+:root[data-theme="dark"] .app-admin-btn,
+:root[data-theme="dark"] .app-admin-row-dp,
+:root[data-theme="dark"] .app-admin-sparkline-fill,
+:root[data-theme="dark"] .app-admin-status-filter .app-admin-btn-ghost.is-active,
+:root[data-theme="dark"] .app-admin-tab.is-active,
+:root[data-theme="dark"] .app-arcade-btn,
+:root[data-theme="dark"] .app-arcade-champs-dp,
+:root[data-theme="dark"] .app-arcade-lb-btn,
+:root[data-theme="dark"] .app-arcade-stat-pill,
+:root[data-theme="dark"] .app-arcade-tile-badge.is-new,
+:root[data-theme="dark"] .app-auth-footer a:hover,
+:root[data-theme="dark"] .app-auth-submit,
+:root[data-theme="dark"] .app-bottomnav-create,
+:root[data-theme="dark"] .app-bottomnav-dp-fallback,
+:root[data-theme="dark"] .app-bottomnav-item.is-active,
+:root[data-theme="dark"] .app-burger-menu a:hover,
+:root[data-theme="dark"] .app-camera-primary,
+:root[data-theme="dark"] .app-card-edit-actions button[type="submit"],
+:root[data-theme="dark"] .app-card-follow.is-following,
+:root[data-theme="dark"] .app-card-more-menu button:hover,
+:root[data-theme="dark"] .app-card-more:hover,
+:root[data-theme="dark"] .app-card-tagged-dp,
+:root[data-theme="dark"] .app-card-voters-toggle:active,
+:root[data-theme="dark"] .app-challenge-accept,
+:root[data-theme="dark"] .app-challenge-avatar,
+:root[data-theme="dark"] .app-comment-form button,
+:root[data-theme="dark"] .app-composer button,
+:root[data-theme="dark"] .app-composer-attach:hover,
+:root[data-theme="dark"] .app-composer-trigger-plus,
+:root[data-theme="dark"] .app-create-attach:hover:not(:disabled),
+:root[data-theme="dark"] .app-create-post-btn,
+:root[data-theme="dark"] .app-crossword-cell.is-selected,
+:root[data-theme="dark"] .app-dm-bubble.is-mine,
+:root[data-theme="dark"] .app-dm-compose button,
+:root[data-theme="dark"] .app-dm-conv-row.is-unread,
+:root[data-theme="dark"] .app-dm-start-btn,
+:root[data-theme="dark"] .app-drawer-dp,
+:root[data-theme="dark"] .app-drawer-item.is-active,
+:root[data-theme="dark"] .app-leaderboard-dp,
+:root[data-theme="dark"] .app-legal-nav a:hover,
+:root[data-theme="dark"] .app-modal-user-dp,
+:root[data-theme="dark"] .app-mono-buy-buy,
+:root[data-theme="dark"] .app-mono-code-display,
+:root[data-theme="dark"] .app-mono-corner-pill,
+:root[data-theme="dark"] .app-mono-seat-host,
+:root[data-theme="dark"] .app-mono-turn-bar.is-you,
+:root[data-theme="dark"] .app-notfound-home,
+:root[data-theme="dark"] .app-notif-dp-system,
+:root[data-theme="dark"] .app-notif-item.is-unread,
+:root[data-theme="dark"] .app-profile-avatar,
+:root[data-theme="dark"] .app-profile-edit,
+:root[data-theme="dark"] .app-profile-message,
+:root[data-theme="dark"] .app-profile-more-menu button:hover,
+:root[data-theme="dark"] .app-profile-social-icons a:hover,
+:root[data-theme="dark"] .app-profile-tab.is-active,
+:root[data-theme="dark"] .app-richtext-btn.is-active,
+:root[data-theme="dark"] .app-richtext-btn:hover,
+:root[data-theme="dark"] .app-settings-2fa-form code,
+:root[data-theme="dark"] .app-settings-avatar-picker,
+:root[data-theme="dark"] .app-settings-row-btn:hover,
+:root[data-theme="dark"] .app-settings-session-badge,
+:root[data-theme="dark"] .app-settings-tab.is-active,
+:root[data-theme="dark"] .app-sidenav-item.is-active,
+:root[data-theme="dark"] .app-sidenav-new,
+:root[data-theme="dark"] .app-social-btn:hover,
+:root[data-theme="dark"] .app-stat-box,
+:root[data-theme="dark"] .app-stories-fab,
+:root[data-theme="dark"] .app-story-add-badge,
+:root[data-theme="dark"] .app-story-caption-pos.is-selected,
+:root[data-theme="dark"] .app-story-row-plus,
+:root[data-theme="dark"] .app-story-tab.is-active,
+:root[data-theme="dark"] .app-sudoku-cell.is-selected,
+:root[data-theme="dark"] .app-suggest-dp,
+:root[data-theme="dark"] .app-support-quicklinks a:hover,
+:root[data-theme="dark"] .app-support-submit,
+:root[data-theme="dark"] .app-tagpicker-chip,
+:root[data-theme="dark"] .app-tagpicker-item.is-selected,
+:root[data-theme="dark"] .app-topbar-signup,
+:root[data-theme="dark"] .app-tour-dot.is-active,
+:root[data-theme="dark"] .app-trend-dp,
+:root[data-theme="dark"] .app-vote-btn.is-down,
+:root[data-theme="dark"] .app-vote-btn.is-up,
+:root[data-theme="dark"] .app-votes-dp {
+  color: #1c1810;
 }
