@@ -451,13 +451,20 @@ function DefaultCard({ game, me, myTurn, mySeat, players, act, currentName, curr
     );
   }
 
-  // A pending Jail vote takes over the panel for the jailed player
-  // themself and for every eligible voter — whether or not it's currently
-  // their turn — so nobody's turn can proceed until the table has
-  // decided. See nextTurn's resolveJailVote safety net on the server too,
-  // for when a voter goes quiet instead of actually voting.
+  // A pending Jail vote takes over the panel for anyone who still owes a
+  // vote — whether or not it's currently their turn — so the table can't
+  // move on before it's settled.
+  //
+  // The jailed player sees it too, but ONLY while they're idle, never
+  // during their own turn. They have nothing to vote on, and taking their
+  // turn controls away deadlocks the game: ending their turn is what
+  // eventually lets the server's resolveJailVote safety net fire, so if
+  // they can't end it and nobody votes, the game freezes for good. That's
+  // exactly what happened after acknowledging a "go to Azkaban" card.
   const jv = game.jailVote;
-  if (jv && (mySeat === jv.seat || jv.eligible.includes(mySeat))) {
+  const iStillOweAVote = jv && jv.eligible.includes(mySeat) && jv.votes[mySeat] === undefined;
+  const watchingVoteOnMe = jv && mySeat === jv.seat && !myTurn;
+  if (iStillOweAVote || watchingVoteOnMe) {
     return <JailVoteCard jv={jv} players={players} mySeat={mySeat} act={act} dice={dice} />;
   }
 
@@ -484,6 +491,9 @@ function DefaultCard({ game, me, myTurn, mySeat, players, act, currentName, curr
         <p className="app-mono-panel-prompt">
           {inJail ? `In Azkaban — turn ${me.jailTurns + 1} of 4.` : "Your turn!"}
         </p>
+        {jv && jv.seat === mySeat && (
+          <p className="app-mono-panel-note">The table is still voting on freeing you.</p>
+        )}
         <button type="button" className="app-arcade-btn app-mono-primary app-mono-roll-btn" onClick={() => act("mono:roll")}>
           🎲 Roll
         </button>
