@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { NotificationsSkeleton } from "../components/Skeletons.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
@@ -18,7 +18,25 @@ const VERBS = {
   dm: "sent you a message",
   report_reply: "replied to your report",
   support_reply: "replied to your support ticket",
+  // Rows carried over from the old site, whose reactions were emoji names
+  // rather than up/down votes. Without these they'd fall through to the
+  // placeholder and read as "<name> did something".
+  like: "reacted to your sheet",
+  heart: "reacted to your sheet",
+  laugh: "reacted to your sheet",
+  love: "reacted to your sheet",
+  wow: "reacted to your sheet",
+  sad: "reacted to your sheet",
+  angry: "reacted to your sheet",
+  downvote: "downvoted your sheet",
 };
+
+// Anything still unrecognised says something plausible rather than "did
+// something": if it points at a post it was about that post, otherwise
+// it was about the reader.
+function verbFor(n) {
+  return VERBS[n.type] || (n.postId ? "interacted with your sheet" : "sent you a notification");
+}
 
 // These are sent by the admin panel but should never show the admin's own
 // name to the recipient — they're presented as coming from "System".
@@ -42,23 +60,42 @@ export default function NotificationsPage() {
     }
   }, [loading, user, navigate]);
 
+  // The list used to be fetched once, when the page mounted, and never
+  // again — so a notification arriving while you sat on the page only
+  // turned up if you reloaded. It now refreshes on a timer, and
+  // immediately whenever you come back to the tab (which is when a stale
+  // list is most obvious, and cheaper than waiting out the timer).
+  const load = useCallback(async () => {
+    if (!user || document.hidden) return;
+    try {
+      const list = await api.getNotifications();
+      setNotifications(list);
+      setError("");
+      // Clear the bell badge while this page is open — the items below
+      // keep showing which ones were unread on this visit (using the
+      // `read` flag from this fetch), but the count elsewhere in the app
+      // should read zero, same as opening Messages.
+      if (list.some((n) => !n.read)) {
+        api.markAllNotificationsRead().then(refresh).catch(() => {});
+      }
+    } catch (err) {
+      setError(err.message);
+    }
+  }, [user, refresh]);
+
   useEffect(() => {
-    if (!user) return;
-    api
-      .getNotifications()
-      .then((list) => {
-        setNotifications(list);
-        // Clear the bell badge the moment this page is opened — the items
-        // below keep showing which ones were unread on this visit (using
-        // the `read` flag from this fetch), but the count elsewhere in the
-        // app should already read zero, same as opening Messages.
-        if (list.some((n) => !n.read)) {
-          api.markAllNotificationsRead().then(refresh).catch(() => {});
-        }
-      })
-      .catch((err) => setError(err.message));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+    if (!user) return undefined;
+    load();
+    const id = setInterval(load, 15000);
+    const onWake = () => load();
+    window.addEventListener("focus", onWake);
+    document.addEventListener("visibilitychange", onWake);
+    return () => {
+      clearInterval(id);
+      window.removeEventListener("focus", onWake);
+      document.removeEventListener("visibilitychange", onWake);
+    };
+  }, [user, load]);
 
   async function handleMarkAllRead() {
     try {
@@ -174,7 +211,7 @@ export default function NotificationsPage() {
                     )}
                   </span>
                   <span className="app-notif-text">
-                    <strong>{name}</strong> {VERBS[n.type] || "did something"}
+                    <strong>{name}</strong> {verbFor(n)}
                     {n.postSnippet && <span className="app-notif-snippet"> — "{n.postSnippet}"</span>}
                     {isSystem && n.message && <span className="app-notif-snippet"> — "{n.message}"</span>}
                   </span>

@@ -27,9 +27,25 @@ export function NotificationProvider({ children }) {
 
   useEffect(() => {
     refresh();
-    if (!user) return;
-    const id = setInterval(refresh, 20000);
-    return () => clearInterval(id);
+    if (!user) return undefined;
+    // A timer alone meant the badge could sit up to 20 seconds behind, and
+    // kept polling in a background tab for no one. This checks a little
+    // more often, skips the check while the tab is hidden, and refreshes
+    // the moment you come back to it — so returning to the app shows a
+    // current count straight away instead of after the next tick.
+    const id = setInterval(() => {
+      if (!document.hidden) refresh();
+    }, 15000);
+    const onWake = () => {
+      if (!document.hidden) refresh();
+    };
+    window.addEventListener("focus", onWake);
+    document.addEventListener("visibilitychange", onWake);
+    return () => {
+      clearInterval(id);
+      window.removeEventListener("focus", onWake);
+      document.removeEventListener("visibilitychange", onWake);
+    };
   }, [user, refresh]);
 
   return (

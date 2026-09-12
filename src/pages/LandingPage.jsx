@@ -16,20 +16,20 @@ const HIGHLIGHTS = [
   {
     emoji: "💬",
     color: "blue",
-    title: "Direct messages",
-    blurb: "Slide into someone's DMs for a private, one-on-one conversation away from the main feed.",
+    title: "Messages & stories",
+    blurb: "Private one-on-one DMs, plus stories that quietly disappear after 24 hours.",
   },
   {
     emoji: "🕹️",
     color: "pink",
     title: "Arcade & daily puzzles",
-    blurb: "Six classic single-player games, plus a daily Sudoku and Crossword to keep your streak alive.",
+    blurb: "Six single-player games with their own leaderboards, plus a daily Sudoku and Crossword to keep your streak alive.",
   },
   {
-    emoji: "⚔️",
+    emoji: "🎲",
     color: "purple",
-    title: "Challenge a friend",
-    blurb: "Live real-time matches — Rock Paper Scissors, Tic-Tac-Toe, Snake & Ladder, Ludo.",
+    title: "Play your friends",
+    blurb: "Live matches — Monopoly, Ludo, Snake & Ladder, Tic-Tac-Toe and Rock Paper Scissors.",
   },
 ];
 
@@ -38,25 +38,27 @@ export default function LandingPage() {
     <div className="app-page app-landing-page">
       <div className="app-landing-hero">
         <span className="app-auth-logo-badge app-landing-logo" style={{ background: logoColor }}>
-          <OhSheetLogo size={34} />
+          <OhSheetLogo size={40} />
         </span>
         <h1 className="app-landing-title">Oh Sheet!</h1>
+        <p className="app-landing-kicker">Post it. Play it. Keep up with your people.</p>
         <p className="app-landing-tagline">
           A place to post whatever's on your mind — a thought, a photo, a video, a hashtag rabbit
           hole — and see what your people are up to. Part social feed, part arcade, part group
           chat with your closest sheeters.
         </p>
         <div className="app-landing-cta-row">
-          <Link to="/signup" className="app-auth-submit app-landing-signup">
-            Sign up
+          <Link to="/signup" className="app-landing-signup">
+            Create an account
           </Link>
           <Link to="/login" className="app-landing-login">
             Log in
           </Link>
         </div>
+        <p className="app-landing-note">Free to join · No ads · No algorithm deciding for you</p>
       </div>
 
-      <h3 className="app-about-subtitle">What you'll find inside</h3>
+      <h3 className="app-about-subtitle app-landing-subtitle">What you'll find inside</h3>
       <div className="app-about-feature-grid">
         {HIGHLIGHTS.map((f) => (
           <div className={`app-about-feature app-card-${f.color}`} key={f.title}>
@@ -69,11 +71,13 @@ export default function LandingPage() {
         ))}
       </div>
 
-      <div className="app-about-cta">
+      <div className="app-about-cta app-landing-outro">
         <p>
-          Free to join, built and run by one person as a personal project.{" "}
+          Oh Sheet! is a real, working blog — built and run by one person, not a company.
+        </p>
+        <p>
           <Link to="/signup">Create an account</Link> to start posting, or{" "}
-          <Link to="/about">learn more about Oh Sheet!</Link>.
+          <Link to="/about">read more about it first</Link>.
         </p>
       </div>
     </div>
