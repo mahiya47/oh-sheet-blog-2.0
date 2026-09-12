@@ -19,6 +19,17 @@ const TOKEN_COLORS = ["#2f6fed", "#e5484d", "#43a047", "#f5c945"]; // blue, red,
 const CORNER_CLASS = ["is-tl", "is-tr", "is-bl", "is-br"];
 const MAX_LEVEL = 3;
 
+// Black or white, whichever actually reads on a given token colour — the
+// turn bar wears the current player's colour, and yellow needs dark text
+// where blue needs light. Same rule the board uses for its tiles.
+function contrastText(hex) {
+  const h = String(hex || "").replace("#", "");
+  if (h.length !== 6) return "var(--app-ink)";
+  const [r, g, b] = [0, 2, 4].map((i) => parseInt(h.substring(i, i + 2), 16) / 255);
+  const lin = (c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+  return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b) > 0.55 ? "#1c1810" : "#ffffff";
+}
+
 // Full names don't fit anywhere in this UI — corners, turn banners, the
 // title deed — so every player-facing label uses first name only.
 function firstName(full) {
@@ -180,6 +191,14 @@ function GameView({ room }) {
   const { game, players, board, mySeat, act } = room;
   const [selected, setSelected] = useState(null);
 
+  // The board is played on a dark grey page. That has to reach the whole
+  // screen, not just this component's own box, so it goes on <body> and
+  // comes back off when you leave the game.
+  useEffect(() => {
+    document.body.classList.add("app-body-mono-dark");
+    return () => document.body.classList.remove("app-body-mono-dark");
+  }, []);
+
   const me = mySeat >= 0 ? game.players[mySeat] : null;
   const myTurn = me && game.turn === mySeat && game.phase !== "over";
   const current = game.players[game.turn];
@@ -206,7 +225,16 @@ function GameView({ room }) {
     <div className="app-page app-mono-page">
       <MultiplayerHeader title={GAME.label} emoji={GAME.emoji} onBack={room.leaveRoom} />
 
-      <div className={"app-mono-turn-bar" + (myTurn && game.phase !== "over" ? " is-you" : "")}>
+      {/* The bar wears the current player's own token colour, so whose go
+          it is reads at a glance without looking at the name. */}
+      <div
+        className={"app-mono-turn-bar" + (myTurn && game.phase !== "over" ? " is-you" : "")}
+        style={
+          game.phase === "over"
+            ? undefined
+            : { background: current?.color, color: contrastText(current?.color) }
+        }
+      >
         {game.phase === "over" ? "Game over" : myTurn ? "Your turn!" : `${currentName}'s turn`}
       </div>
 

@@ -152,22 +152,27 @@ export function wrapName(name, perLine = 12, maxLines = 2) {
 // group keys (still "red", "yellow", etc. — that's just internal naming
 // carried over from the character groupings) map to these instead. Rich,
 // saturated tones rather than muted ones — vibrant, just not primary.
+// Board order, going round from GO: brown, purple, pink, orange, then
+// four pale shades. The board sits on a dark grey page now, so the back
+// half of the board deliberately goes light — and none of the pale ones
+// borrow a player's token colour (blue, red, green, yellow), so a tile
+// can never be mistaken for someone's piece.
 export const GROUP_COLORS = {
   brown: "#8b5a2b",
   lightblue: "#9b6fd6", // vivid purple
   pink: "#ec5f98", // hot pink
   orange: "#f2851f",
-  red: "#c2185b", // magenta/fuchsia
-  yellow: "#b8752f", // amber/copper
-  green: "#5b4a6f", // deep plum-grey
-  navy: "#6b3a2a", // mahogany
+  red: "#e0cba4", // beige
+  yellow: "#c9e8c2", // very light green
+  green: "#bfdcf5", // very light blue
+  navy: "#d9c6f2", // light lilac
 };
 
 // The 4 Hogwarts Houses stand in for utilities. Unlike the streets, all
-// 4 share the SAME colour — an off-white — rather than each getting its
-// own, so they read as a distinct "neutral" category on the board (and
-// stay well clear of the red/yellow/green/blue token colours).
-const HOUSE_COLOR = "#f6f3ea";
+// 4 share the SAME colour — a pale blush — rather than each getting its
+// own, so they read as a distinct category on the board (and stay well
+// clear of the red/yellow/green/blue token colours).
+const HOUSE_COLOR = "#f2ccd4"; // pale blush — the last of the light shades
 export const HOUSE_COLORS = {
   "Gryffindor Tower": HOUSE_COLOR,
   "Hufflepuff Basement": HOUSE_COLOR,

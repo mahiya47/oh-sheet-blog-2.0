@@ -4770,10 +4770,14 @@ a.app-auth-logo-badge:hover {
    changed the corner card's height every turn and made the card visibly
    jump position (worst on the bottom two corners, anchored by their
    bottom edge). Pink/accent when it's you, plain otherwise. ---- */
+/* Background and text colour are set inline per turn (MonopolyPage) to
+   the current player's token colour — these are just the shape and the
+   fallback before that lands. */
 .app-mono-turn-bar {
   width: fit-content;
   max-width: calc(100% - 4px);
-  margin: 6px auto 0;
+  margin: 0 auto;
+  border: var(--app-border-w) solid var(--app-border);
   padding: 7px 18px;
   border-radius: 999px;
   background: var(--app-bg-deep);
@@ -5023,8 +5027,41 @@ a.app-auth-logo-badge:hover {
    15.15%..84.85%) and shows exactly one thing at a time: roll/end-turn,
    a buy decision, a tapped property, a drawn card, a debt, or a quick
    flash of the latest thing that happened. ---- */
+/* ---- Monopoly: dark grey table ----
+   The board is played on a dark page so the tiles and tokens pop off it.
+   The class goes on <body> (MonopolyPage adds it while the board is up)
+   so the dark reaches the whole screen, not just the page box. Note it
+   does NOT touch --app-ink: the board's SVG text is filled from that
+   variable, and flipping it would turn every tile name white on a pale
+   tile. Only the handful of labels that actually sit on the dark are
+   recoloured, below. */
+body.app-body-mono-dark {
+  background-color: #2e2f33;
+  background-image: none;
+}
 .app-mono-page {
-  background: #ffffff;
+  background: transparent;
+  /* Tighter than the usual page rhythm — the header, the whose-turn bar
+     and the board are one unit and shouldn't drift apart. */
+  gap: 8px;
+}
+.app-mono-page .app-arcade-game-head {
+  margin-bottom: 0;
+}
+/* Everything on this page that sits directly on the dark grey rather
+   than on a card of its own. */
+.app-mono-page .app-mono-corner-name,
+.app-mono-page .app-mono-corner-cash,
+.app-mono-page .app-mono-log,
+.app-mono-page .app-empty {
+  color: #ececee;
+}
+.app-mono-page .app-empty {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+.app-mono-page .app-mono-corner-avatar {
+  border-color: rgba(255, 255, 255, 0.45);
 }
 .app-mono-center-panel {
   position: absolute;
