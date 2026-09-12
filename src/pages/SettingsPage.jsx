@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useTheme } from "../context/ThemeContext.jsx";
 import { usePwaInstall } from "../context/PwaInstallContext.jsx";
@@ -68,7 +68,25 @@ export default function SettingsPage() {
   const avatarInputRef = useRef(null);
   const coverInputRef = useRef(null);
 
-  const [activeTab, setActiveTab] = useState("Profile");
+  // Search results link straight to a tab (/settings?tab=Account), so the
+  // tab comes from the URL and the URL follows the tab.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabFromUrl = searchParams.get("tab");
+  const [activeTab, setActiveTab] = useState(() =>
+    TABS.includes(tabFromUrl) ? tabFromUrl : "Profile",
+  );
+
+  useEffect(() => {
+    if (tabFromUrl && TABS.includes(tabFromUrl) && tabFromUrl !== activeTab) {
+      setActiveTab(tabFromUrl);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tabFromUrl]);
+
+  function selectTab(tab) {
+    setActiveTab(tab);
+    setSearchParams(tab === "Profile" ? {} : { tab }, { replace: true });
+  }
 
   // Profile tab
   const [name, setName] = useState("");
@@ -689,7 +707,7 @@ export default function SettingsPage() {
               type="button"
               className={"app-settings-tab" + (activeTab === tab ? " is-active" : "")}
               aria-current={activeTab === tab ? "page" : undefined}
-              onClick={() => setActiveTab(tab)}
+              onClick={() => selectTab(tab)}
             >
               <span className="app-settings-tab-icon" aria-hidden="true">
                 {TAB_ICONS[tab]}

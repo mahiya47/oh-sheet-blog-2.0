@@ -3351,6 +3351,88 @@ a.app-auth-logo-badge:hover {
 }
 
 /* ---- Search page ---- */
+/* Search > "Go to" — pages, settings and games matched in the browser. */
+.app-search-jump {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.app-search-jump-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: var(--app-surface);
+  border: var(--app-border-w) solid var(--app-border);
+  border-radius: var(--app-radius-md);
+  box-shadow: var(--app-shadow);
+  color: var(--app-ink);
+  text-decoration: none;
+  transition: background 0.15s ease, transform 0.12s ease;
+}
+.app-search-jump-item:hover {
+  background: var(--app-accent);
+}
+.app-search-jump-item:active {
+  transform: translateY(1px);
+}
+.app-search-jump-icon {
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--app-radius-sm);
+  background: var(--app-bg);
+  border: 1px solid var(--app-line);
+  font-size: 1.05rem;
+}
+.app-search-jump-item:hover .app-search-jump-icon {
+  background: var(--app-surface);
+}
+.app-search-jump-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.app-search-jump-label {
+  font-family: var(--app-font-display);
+  font-weight: 800;
+  font-size: 0.95rem;
+  line-height: 1.2;
+}
+.app-search-jump-hint {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--app-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.app-search-jump-item:hover .app-search-jump-hint {
+  color: inherit;
+  opacity: 0.75;
+}
+.app-search-jump-group {
+  flex: 0 0 auto;
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--app-line);
+  background: var(--app-bg);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--app-muted);
+}
+.app-search-jump-item:hover .app-search-jump-group {
+  background: var(--app-surface);
+  color: var(--app-ink);
+}
+
 .app-search-people {
   list-style: none;
   margin: 12px 0 0;
@@ -8356,6 +8438,7 @@ button.app-stories-label-toggle {
 :root[data-theme="dark"] .app-create-post-btn,
 :root[data-theme="dark"] .app-crossword-cell.is-selected,
 :root[data-theme="dark"] .app-crossword-clue-item.is-active,
+:root[data-theme="dark"] .app-search-jump-item:hover,
 :root[data-theme="dark"] .app-settings-leave-save,
 :root[data-theme="dark"] .app-settings-save-btn:not(:disabled),
 :root[data-theme="dark"] .app-crossword-nav:hover:not(:disabled),

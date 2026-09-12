@@ -1,9 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import FeedCard from "../components/FeedCard.jsx";
 import { api } from "../lib/api.js";
+import { useAuth } from "../context/AuthContext.jsx";
+import { searchDestinations } from "../lib/siteSearchIndex.js";
+import { ADMIN_USERNAME } from "../lib/adminUser.js";
 
 export default function SearchPage() {
+  const { user } = useAuth();
   const [query, setQuery] = useState("");
   const [users, setUsers] = useState([]);
   const [tags, setTags] = useState([]);
@@ -42,7 +46,16 @@ export default function SearchPage() {
     return () => clearTimeout(handle);
   }, [query]);
 
-  const hasResults = users.length > 0 || tags.length > 0 || posts.length > 0;
+  // Pages, settings and games are matched right here in the browser, so
+  // they show up the instant you type instead of waiting on the network.
+  const isAdmin = (user?.username || "").toLowerCase() === ADMIN_USERNAME;
+  const destinations = useMemo(
+    () => searchDestinations(query, { isAdmin }),
+    [query, isAdmin],
+  );
+
+  const hasResults =
+    destinations.length > 0 || users.length > 0 || tags.length > 0 || posts.length > 0;
 
   return (
     <div className="app-page">
@@ -53,7 +66,7 @@ export default function SearchPage() {
           autoFocus
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search sheets or people..."
+          placeholder="Search sheets, people, pages, settings, games..."
         />
       </form>
 
@@ -61,10 +74,32 @@ export default function SearchPage() {
         <p className="app-empty">Keep typing — at least 2 characters.</p>
       )}
 
+      {destinations.length > 0 && (
+        <>
+          <h3 className="app-section-title">Go to</h3>
+          <ul className="app-search-jump">
+            {destinations.map((d) => (
+              <li key={d.to + d.label}>
+                <Link to={d.to} className="app-search-jump-item">
+                  <span className="app-search-jump-icon" aria-hidden="true">
+                    {d.emoji}
+                  </span>
+                  <span className="app-search-jump-text">
+                    <span className="app-search-jump-label">{d.label}</span>
+                    <span className="app-search-jump-hint">{d.hint}</span>
+                  </span>
+                  <span className="app-search-jump-group">{d.group}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+
       {loading && <p className="app-empty">Searching...</p>}
 
       {!loading && searched && !hasResults && (
-        <p className="app-empty">No sheets, sheeters, or tags match "{query.trim()}".</p>
+        <p className="app-empty">Nothing matches "{query.trim()}" — no sheets, sheeters, tags, pages or games.</p>
       )}
 
       {users.length > 0 && (
