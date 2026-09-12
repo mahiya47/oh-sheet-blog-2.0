@@ -73,7 +73,7 @@ export default function AboutPage() {
           hashtag rabbit hole — and see what your people are up to.
         </p>
         <p>
-          It's part social feed, part arcade, part group chat with your closest sheeters. Follow
+          It's part social feed, part arcade, part DMs with your closest sheeters. Follow
           people, post sheets, climb the leaderboard, keep a puzzle streak alive, and challenge a
           friend to a quick game when you need a break from scrolling.
         </p>

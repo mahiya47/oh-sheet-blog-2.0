@@ -44,8 +44,8 @@ export default function LandingPage() {
         <p className="app-landing-kicker">Post it. Play it. Keep up with your people.</p>
         <p className="app-landing-tagline">
           A place to post whatever's on your mind — a thought, a photo, a video, a hashtag rabbit
-          hole — and see what your people are up to. Part social feed, part arcade, part group
-          chat with your closest sheeters.
+          hole — and see what your people are up to. Part social feed, part arcade, part DMs with
+          your closest sheeters.
         </p>
         <div className="app-landing-cta-row">
           <Link to="/signup" className="app-landing-signup">

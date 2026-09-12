@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import ArcadeGameHeader from "../../components/ArcadeGameHeader.jsx";
 import ScoreModal from "../../components/ScoreModal.jsx";
 import { getGameMeta } from "../../lib/arcadeGames.js";
@@ -722,11 +722,13 @@ function sameDownWord(puzzle, r, c, selectedR) {
   return true;
 }
 
-const KEYBOARD_ROWS = [
-  ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
-  ["A", "S", "D", "F", "G", "H", "J", "K", "L"],
-  ["Z", "X", "C", "V", "B", "N", "M"],
-];
+
+// The hidden input always holds this one sentinel character. Typing appends
+// to it (so we can read the new letter) and Backspace deletes it (so we can
+// detect a delete even on Android keyboards, which don't reliably report a
+// "Backspace" keydown when the field is empty). After every event we put the
+// sentinel back and park the caret at the end.
+const SENTINEL = " ";
 
 export default function CrosswordPage() {
   const { user, loading: authLoading } = useAuth();
@@ -743,11 +745,14 @@ export default function CrosswordPage() {
   const [gameState, setGameState] = useState("playing");
   const [timer, setTimer] = useState(0);
   const [showLb, setShowLb] = useState(false);
+  const [cellSize, setCellSize] = useState(34);
 
   const timerRef = useRef(null);
   const selectedRef = useRef(selected);
   const directionRef = useRef(direction);
   const gridRef = useRef(grid);
+  const inputRef = useRef(null);
+  const scrollRef = useRef(null);
 
   useEffect(() => {
     selectedRef.current = selected;
@@ -777,7 +782,41 @@ export default function CrosswordPage() {
     return () => clearInterval(timerRef.current);
   }, [gameState]);
 
+  // The board now fills whatever width it's given instead of sitting at a
+  // fixed 34px — the on-screen keypad used to eat the bottom half of the
+  // screen, and that space belongs to the grid.
+  useEffect(() => {
+    const measure = () => {
+      const el = scrollRef.current;
+      if (!el) return;
+      const avail = el.clientWidth - 8;
+      if (avail <= 0) return;
+      setCellSize(Math.max(22, Math.min(48, Math.floor(avail / puzzle.cols))));
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, [puzzle.cols]);
+
   const isOpen = useCallback((r, c) => isOpenStatic(puzzle, r, c), [puzzle]);
+
+  // Focusing the off-screen input is what raises the phone's own keyboard.
+  // It has to happen inside the tap handler or mobile browsers ignore it.
+  const focusInput = useCallback(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    el.value = SENTINEL;
+    try {
+      el.focus({ preventScroll: true });
+      el.setSelectionRange(SENTINEL.length, SENTINEL.length);
+    } catch {
+      /* older browsers */
+    }
+  }, []);
+
+  useEffect(() => {
+    if (gameState !== "playing") inputRef.current?.blur();
+  }, [gameState]);
 
   const validateGrid = useCallback(
     (currentGrid) => {
@@ -840,36 +879,46 @@ export default function CrosswordPage() {
     [gameState, isOpen, validateGrid, advance, solvedKey, timer],
   );
 
+  // Arrow keys hop to the next open cell in that direction, skipping blocks.
+  const step = useCallback(
+    (dr, dc, dir) => {
+      const { r, c } = selectedRef.current;
+      let nr = r + dr;
+      let nc = c + dc;
+      while (nr >= 0 && nr < puzzle.rows && nc >= 0 && nc < puzzle.cols && !isOpen(nr, nc)) {
+        nr += dr;
+        nc += dc;
+      }
+      if (isOpen(nr, nc)) {
+        setSelected({ r: nr, c: nc });
+        setDirection(dir);
+      }
+    },
+    [puzzle, isOpen],
+  );
+
+  const arrowKey = useCallback(
+    (key) => {
+      if (key === "ArrowRight") step(0, 1, "across");
+      else if (key === "ArrowLeft") step(0, -1, "across");
+      else if (key === "ArrowDown") step(1, 0, "down");
+      else if (key === "ArrowUp") step(-1, 0, "down");
+      else return false;
+      return true;
+    },
+    [step],
+  );
+
+  // Desktop players who never tap a cell still get a working keyboard. When
+  // the hidden input has focus its own handlers take over, so this bails out
+  // to avoid entering every letter twice.
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (gameState !== "playing") return;
-      const { r, c } = selectedRef.current;
+      if (inputRef.current && document.activeElement === inputRef.current) return;
 
-      const step = (dr, dc, dir) => {
-        let nr = r + dr;
-        let nc = c + dc;
-        while (nr >= 0 && nr < puzzle.rows && nc >= 0 && nc < puzzle.cols && !isOpen(nr, nc)) {
-          nr += dr;
-          nc += dc;
-        }
-        if (isOpen(nr, nc)) {
-          setSelected({ r: nr, c: nc });
-          setDirection(dir);
-        }
-      };
-
-      if (e.key === "ArrowRight") {
+      if (arrowKey(e.key)) {
         e.preventDefault();
-        step(0, 1, "across");
-      } else if (e.key === "ArrowLeft") {
-        e.preventDefault();
-        step(0, -1, "across");
-      } else if (e.key === "ArrowDown") {
-        e.preventDefault();
-        step(1, 0, "down");
-      } else if (e.key === "ArrowUp") {
-        e.preventDefault();
-        step(-1, 0, "down");
       } else if (e.key === "Backspace" || e.key === "Delete") {
         e.preventDefault();
         handleInput("DEL");
@@ -879,56 +928,184 @@ export default function CrosswordPage() {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [gameState, puzzle, isOpen, handleInput]);
+  }, [gameState, arrowKey, handleInput]);
+
+  function onHiddenKeyDown(e) {
+    if (gameState !== "playing") return;
+    const k = e.key;
+    if (arrowKey(k)) {
+      e.preventDefault();
+    } else if (k === "Backspace" || k === "Delete") {
+      e.preventDefault();
+      handleInput("DEL");
+    } else if (k === "Enter") {
+      e.preventDefault();
+      setDirection((prev) => (prev === "across" ? "down" : "across"));
+    } else if (/^[a-zA-Z]$/.test(k)) {
+      // preventDefault keeps the value at the sentinel, so onInput won't
+      // fire and we can't double-enter the letter.
+      e.preventDefault();
+      handleInput(k.toUpperCase());
+    }
+  }
+
+  // Soft keyboards that don't report a usable `key` land here instead.
+  function onHiddenInput(e) {
+    const el = e.target;
+    const v = el.value;
+    if (v.length > SENTINEL.length) {
+      const ch = v.slice(-1);
+      if (/^[a-zA-Z]$/.test(ch)) handleInput(ch.toUpperCase());
+    } else if (v.length < SENTINEL.length) {
+      handleInput("DEL");
+    }
+    el.value = SENTINEL;
+    try {
+      el.setSelectionRange(SENTINEL.length, SENTINEL.length);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  function hasWord(r, c, dir) {
+    return dir === "across" ? isOpen(r, c - 1) || isOpen(r, c + 1) : isOpen(r - 1, c) || isOpen(r + 1, c);
+  }
 
   function handleCellClick(r, c) {
     if (!isOpen(r, c)) return;
     if (selected.r === r && selected.c === c) {
-      setDirection((prev) => (prev === "across" ? "down" : "across"));
+      setDirection((prev) => {
+        const flipped = prev === "across" ? "down" : "across";
+        return hasWord(r, c, flipped) ? flipped : prev;
+      });
     } else {
       setSelected({ r, c });
+      if (!hasWord(r, c, direction)) setDirection(direction === "across" ? "down" : "across");
     }
+    focusInput();
   }
 
-  function getActiveClue() {
-    const { r, c } = selected;
-    let sr = r,
-      sc = c;
+  // Every numbered start, split by direction — the clue lists below the
+  // board, and the ‹ › clue stepper, both read from this.
+  const entries = useMemo(() => {
+    const across = [];
+    const down = [];
+    for (const [key, num] of Object.entries(puzzle.numbers)) {
+      const [r, c] = key.split(",").map(Number);
+      if (puzzle.clues.across[num]) across.push({ num, r, c, dir: "across", clue: puzzle.clues.across[num] });
+      if (puzzle.clues.down[num]) down.push({ num, r, c, dir: "down", clue: puzzle.clues.down[num] });
+    }
+    across.sort((a, b) => a.num - b.num);
+    down.sort((a, b) => a.num - b.num);
+    return { across, down };
+  }, [puzzle]);
+
+  function wordCells(entry) {
+    const cells = [];
+    let r = entry.r;
+    let c = entry.c;
+    while (isOpen(r, c)) {
+      cells.push([r, c]);
+      if (entry.dir === "across") c += 1;
+      else r += 1;
+    }
+    return cells;
+  }
+
+  function entryFilled(entry) {
+    return wordCells(entry).every(([r, c]) => grid[r][c]);
+  }
+
+  function activeEntry() {
+    let sr = selected.r;
+    let sc = selected.c;
     if (direction === "across") {
       while (isOpen(sr, sc - 1)) sc -= 1;
     } else {
       while (isOpen(sr - 1, sc)) sr -= 1;
     }
     const num = puzzle.numbers[`${sr},${sc}`];
-    if (!num) return "";
-    const clueText = direction === "across" ? puzzle.clues.across[num] : puzzle.clues.down[num];
-    return clueText ? `${num} ${direction === "across" ? "Across" : "Down"}: ${clueText}` : "";
+    if (!num) return null;
+    const clue = direction === "across" ? puzzle.clues.across[num] : puzzle.clues.down[num];
+    if (!clue) return null;
+    return { num, r: sr, c: sc, dir: direction, clue };
   }
 
-  const CELL_SIZE = 34;
+  function jumpToClue(entry) {
+    setDirection(entry.dir);
+    setSelected({ r: entry.r, c: entry.c });
+    focusInput();
+  }
+
+  function goClue(delta) {
+    const list = entries[direction];
+    if (!list.length) return;
+    const active = activeEntry();
+    const i = active ? list.findIndex((e) => e.num === active.num) : -1;
+    const next = i < 0 ? 0 : (i + delta + list.length) % list.length;
+    jumpToClue(list[next]);
+  }
+
+  const active = gameState === "playing" ? activeEntry() : null;
 
   return (
     <div className="app-page app-arcade-page">
       <ArcadeGameHeader title={GAME.label} emoji={GAME.emoji} onShowLeaderboard={() => setShowLb(true)} />
 
-      <div className="app-arcade-board">
+      <div className="app-arcade-board app-crossword-board">
         <div className="app-arcade-stats-row">
           <span className="app-arcade-stat-pill">⏱ {timer}s</span>
           <span className="app-arcade-stat-pill">🔥 {best ?? 0} day streak</span>
         </div>
 
-        <div className="app-crossword-clue-banner">
-          {gameState === "playing" ? getActiveClue() : "🎉 Today's puzzle complete!"}
+        <div className="app-crossword-cluebar">
+          <button
+            type="button"
+            className="app-crossword-nav"
+            aria-label="Previous clue"
+            disabled={gameState !== "playing"}
+            onPointerDown={(e) => e.preventDefault()}
+            onClick={() => goClue(-1)}
+          >
+            ‹
+          </button>
+
+          <div className="app-crossword-clue-banner">
+            {gameState !== "playing" ? (
+              <span className="app-crossword-clue-text">🎉 Today's puzzle complete!</span>
+            ) : active ? (
+              <>
+                <span className="app-crossword-clue-tag">
+                  {active.num} {active.dir === "across" ? "Across" : "Down"}
+                </span>
+                <span className="app-crossword-clue-text">{active.clue}</span>
+              </>
+            ) : (
+              <span className="app-crossword-clue-text">Tap a square to start</span>
+            )}
+          </div>
+
+          <button
+            type="button"
+            className="app-crossword-nav"
+            aria-label="Next clue"
+            disabled={gameState !== "playing"}
+            onPointerDown={(e) => e.preventDefault()}
+            onClick={() => goClue(1)}
+          >
+            ›
+          </button>
         </div>
 
-        <div className="app-crossword-scroll">
+        <div className="app-crossword-scroll" ref={scrollRef}>
           <div
             className="app-crossword-grid"
             style={{
-              gridTemplateColumns: `repeat(${puzzle.cols}, ${CELL_SIZE}px)`,
-              gridTemplateRows: `repeat(${puzzle.rows}, ${CELL_SIZE}px)`,
-              width: puzzle.cols * CELL_SIZE,
-              height: puzzle.rows * CELL_SIZE,
+              gridTemplateColumns: `repeat(${puzzle.cols}, ${cellSize}px)`,
+              gridTemplateRows: `repeat(${puzzle.rows}, ${cellSize}px)`,
+              width: puzzle.cols * cellSize,
+              height: puzzle.rows * cellSize,
+              fontSize: Math.round(cellSize * 0.5),
             }}
           >
             {grid.map((row, r) =>
@@ -965,20 +1142,86 @@ export default function CrosswordPage() {
           </div>
         </div>
 
+        {/* Off-screen, but really focused — this is what opens the phone's
+            own keyboard when a square is tapped. */}
+        <input
+          ref={inputRef}
+          className="app-crossword-hidden-input"
+          type="text"
+          defaultValue={SENTINEL}
+          inputMode="text"
+          enterKeyHint="next"
+          autoCapitalize="characters"
+          autoCorrect="off"
+          autoComplete="off"
+          spellCheck={false}
+          tabIndex={-1}
+          aria-label="Type a letter for the selected square"
+          onKeyDown={onHiddenKeyDown}
+          onInput={onHiddenInput}
+        />
+
         {gameState === "playing" && (
-          <div className="app-crossword-keyboard">
-            {KEYBOARD_ROWS.map((row, i) => (
-              <div key={i} className="app-crossword-keyboard-row">
-                {i === 2 && (
-                  <button type="button" className="app-arcade-btn app-crossword-key app-crossword-key-wide" onClick={() => handleInput("DEL")}>
-                    ⌫
-                  </button>
-                )}
-                {row.map((letter) => (
-                  <button key={letter} type="button" className="app-arcade-btn app-crossword-key" onClick={() => handleInput(letter)}>
-                    {letter}
-                  </button>
-                ))}
+          <div className="app-crossword-tools">
+            <button
+              type="button"
+              className="app-crossword-tool"
+              onPointerDown={(e) => e.preventDefault()}
+              onClick={() => {
+                setDirection((prev) => (prev === "across" ? "down" : "across"));
+                focusInput();
+              }}
+            >
+              ⇄ {direction === "across" ? "Across" : "Down"}
+            </button>
+            <button
+              type="button"
+              className="app-crossword-tool"
+              onPointerDown={(e) => e.preventDefault()}
+              onClick={() => {
+                handleInput("DEL");
+                focusInput();
+              }}
+            >
+              ⌫ Delete
+            </button>
+            <button
+              type="button"
+              className="app-crossword-tool"
+              onPointerDown={(e) => e.preventDefault()}
+              onClick={focusInput}
+            >
+              ⌨ Keyboard
+            </button>
+          </div>
+        )}
+
+        {gameState === "playing" && (
+          <div className="app-crossword-cluelists">
+            {["across", "down"].map((dir) => (
+              <div key={dir} className="app-crossword-cluelist">
+                <h4>{dir === "across" ? "Across" : "Down"}</h4>
+                <ul>
+                  {entries[dir].map((en) => {
+                    const isActive = !!active && active.dir === dir && active.num === en.num;
+                    return (
+                      <li key={`${dir}-${en.num}`}>
+                        <button
+                          type="button"
+                          className={
+                            "app-crossword-clue-item" +
+                            (isActive ? " is-active" : "") +
+                            (entryFilled(en) ? " is-filled" : "")
+                          }
+                          onClick={() => jumpToClue(en)}
+                        >
+                          <span className="app-crossword-clue-n">{en.num}</span>
+                          <span className="app-crossword-clue-c">{en.clue}</span>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
               </div>
             ))}
           </div>

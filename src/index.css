@@ -5721,32 +5721,80 @@ body.app-body-mono-dark {
 }
 
 /* ---- Crossword ---- */
-.app-crossword-clue-banner {
+.app-crossword-board {
+  gap: 12px;
+}
+.app-crossword-cluebar {
   width: 100%;
-  max-width: 480px;
-  min-height: 2.4em;
+  max-width: 560px;
   display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+.app-crossword-nav {
+  flex: 0 0 auto;
+  width: 40px;
+  border: 2px solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: var(--app-surface);
+  color: var(--app-ink);
+  font-family: var(--app-font-display);
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.app-crossword-nav:hover:not(:disabled) {
+  background: var(--app-accent);
+}
+.app-crossword-nav:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.app-crossword-clue-banner {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 3.2em;
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 2px;
   text-align: center;
   background: var(--app-bg);
   border: 2px solid var(--app-border);
   border-radius: var(--app-radius-sm);
-  padding: 8px 14px;
+  padding: 8px 12px;
+}
+.app-crossword-clue-tag {
+  font-family: var(--app-font-display);
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--app-muted);
+}
+.app-crossword-clue-text {
   font-weight: 700;
-  font-size: 0.92rem;
+  font-size: 0.95rem;
+  line-height: 1.25;
 }
 .app-crossword-scroll {
   width: 100%;
-  max-width: 480px;
-  max-height: 60vh;
+  max-width: 560px;
+  max-height: 62vh;
   overflow: auto;
+  display: flex;
+  justify-content: center;
   border: 2px solid var(--app-border);
   border-radius: var(--app-radius-sm);
   background: var(--app-surface);
+  padding: 3px;
 }
 .app-crossword-grid {
   display: grid;
+  flex: 0 0 auto;
 }
 .app-crossword-cell-block {
   background: var(--app-ink);
@@ -5785,30 +5833,131 @@ body.app-body-mono-dark {
   font-weight: 700;
   opacity: 0.7;
 }
-.app-crossword-keyboard {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  width: 100%;
-  max-width: 480px;
+/* The on-screen A-Z keypad is gone: tapping a square focuses this
+   off-screen field instead, which is what raises the phone's own
+   keyboard. It has to stay focusable and non-display:none for that to
+   work, so it's parked at 1px with a transparent caret. font-size 16px
+   stops iOS zooming the page in when it takes focus. */
+.app-crossword-hidden-input {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  outline: none;
+  opacity: 0.01;
+  font-size: 16px;
+  background: transparent;
+  color: transparent;
+  caret-color: transparent;
+  z-index: -1;
 }
-.app-crossword-keyboard-row {
+.app-crossword-tools {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
-  gap: 5px;
+  gap: 8px;
+  width: 100%;
+  max-width: 560px;
 }
-.app-crossword-key {
-  flex: 1;
-  max-width: 34px;
-  padding: 10px 0;
+.app-crossword-tool {
+  flex: 1 1 auto;
+  min-width: 100px;
+  padding: 10px 14px;
+  border: 2px solid var(--app-border);
   border-radius: var(--app-radius-sm);
-  font-size: 0.85rem;
+  background: var(--app-surface);
+  color: var(--app-ink);
+  font-family: var(--app-font-display);
+  font-size: 0.82rem;
   font-weight: 800;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.12s ease;
 }
-.app-crossword-key-wide {
-  max-width: 60px;
-  flex: 1.6;
-  font-size: 0.75rem;
+.app-crossword-tool:hover {
+  background: var(--app-accent);
+}
+.app-crossword-tool:active {
+  transform: translateY(1px);
+}
+.app-crossword-cluelists {
+  width: 100%;
+  max-width: 560px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+.app-crossword-cluelist {
+  border: 2px solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: var(--app-surface);
+  padding: 10px 10px 6px;
+}
+.app-crossword-cluelist h4 {
+  margin: 0 0 6px;
+  font-family: var(--app-font-display);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--app-muted);
+}
+.app-crossword-cluelist ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 200px;
+  overflow-y: auto;
+}
+.app-crossword-clue-item {
+  width: 100%;
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  text-align: left;
+  background: none;
+  border: 0;
+  border-radius: var(--app-radius-sm);
+  padding: 6px 8px;
+  color: var(--app-ink);
+  font: inherit;
+  font-size: 0.86rem;
+  line-height: 1.3;
+  cursor: pointer;
+}
+.app-crossword-clue-item:hover {
+  background: var(--app-bg);
+}
+.app-crossword-clue-item.is-active {
+  background: var(--app-accent);
+  font-weight: 700;
+}
+.app-crossword-clue-item.is-filled .app-crossword-clue-c {
+  opacity: 0.45;
+  text-decoration: line-through;
+}
+.app-crossword-clue-item.is-active.is-filled .app-crossword-clue-c {
+  opacity: 0.75;
+}
+.app-crossword-clue-n {
+  flex: 0 0 auto;
+  min-width: 1.5em;
+  font-family: var(--app-font-display);
+  font-weight: 800;
+  font-size: 0.78rem;
+  color: var(--app-muted);
+}
+.app-crossword-clue-item.is-active .app-crossword-clue-n {
+  color: inherit;
+}
+
+@media (min-width: 620px) {
+  .app-crossword-cluelists {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 @media (min-width: 1040px) {
@@ -6770,6 +6919,11 @@ body.app-body-mono-dark {
 .app-landing-login {
   flex: 1;
   min-width: 132px;
+  /* Links are inline by default, so the label sits on its text baseline
+     and rides high in the box — these centre it on both axes. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 13px 18px;
   border-radius: var(--app-radius-sm);
   border: var(--app-border-w) solid var(--app-border);
@@ -8024,6 +8178,9 @@ button.app-stories-label-toggle {
 :root[data-theme="dark"] .app-create-attach:hover:not(:disabled),
 :root[data-theme="dark"] .app-create-post-btn,
 :root[data-theme="dark"] .app-crossword-cell.is-selected,
+:root[data-theme="dark"] .app-crossword-clue-item.is-active,
+:root[data-theme="dark"] .app-crossword-nav:hover:not(:disabled),
+:root[data-theme="dark"] .app-crossword-tool:hover,
 :root[data-theme="dark"] .app-dm-bubble.is-mine,
 :root[data-theme="dark"] .app-dm-compose button,
 :root[data-theme="dark"] .app-dm-conv-row.is-unread,
