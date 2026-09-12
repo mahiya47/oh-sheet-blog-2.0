@@ -36,12 +36,17 @@
   --app-blue: #f5bb65;
   --app-purple: #f5bb65;
 
-  /* The "accent" color — used for active-nav highlights, the New Sheet
-     button, and the Follow/Message buttons on a profile. This is the real
-     value: nothing overrides it at runtime any more. The logo badge is
-     deliberately NOT tied to it (see logoColor.js) — it keeps its own
-     yellow while everything else uses this. */
-  --app-accent: var(--app-yellow);
+  /* The "accent" — everything interactive that lights up: the open/active
+     nav icon, hover fills, Follow, the saved bookmark, the Comment button,
+     an upvote or downvote, the New Sheet button, Follow/Message on a
+     profile. This is the LOGO's yellow, so the badge in the top bar and
+     every active control are the same colour.
+     Keep in sync with `logoColor` in lib/logoColor.js, which paints the
+     badge itself and the browser-tab icon.
+     Note this is deliberately NOT --app-yellow: that one (a touch warmer)
+     is the fill for post cards and other large surfaces, where the logo
+     yellow would be too much. */
+  --app-accent: #F4D86B;
 
   /* Hand-drawn doodle tile (stars, hearts, squiggles, scribbles, sparkles)
      used as the page background instead of a flat fill — swapped for a
@@ -740,8 +745,12 @@ ul {
   margin-top: 2px;
 }
 @media (min-width: 760px) {
+  /* The stories rule already carries the whole gap (its margin-bottom is
+     the feed's own 14px gap), so the feed adds nothing on top — the first
+     post sits the same distance below the line as posts sit from each
+     other. */
   .app-home-page > .app-feed {
-    margin-top: 22px;
+    margin-top: 0;
   }
 }
 
@@ -876,7 +885,7 @@ ul {
   height: 16px;
 }
 .app-card-follow.is-following {
-  background: var(--app-navbar);
+  background: var(--app-accent);
 }
 /* Groups the Follow chip and the 3-dot menu together, flush against the
    right edge of the header row. */
@@ -907,7 +916,7 @@ ul {
   height: 16px;
 }
 .app-card-more:hover {
-  background: var(--app-navbar);
+  background: var(--app-accent);
 }
 .app-card-more-menu {
   position: absolute;
@@ -953,10 +962,10 @@ ul {
   color: var(--app-ink);
   transition: background 120ms ease, padding-left 120ms ease, color 120ms ease;
 }
-/* Hover slides the label in slightly and paints the bar colour behind it
-   — enough movement to feel responsive without shifting the menu. */
+/* Hover slides the label in slightly and paints the accent behind it —
+   enough movement to feel responsive without shifting the menu. */
 .app-card-more-menu button:hover {
-  background: var(--app-navbar);
+  background: var(--app-accent);
   padding-left: 16px;
 }
 .app-card-more-menu button:active {
@@ -1067,7 +1076,7 @@ ul {
   background: var(--app-accent);
 }
 .app-vote-btn.is-down {
-  background: var(--app-blue);
+  background: var(--app-accent);
 }
 .app-vote-btn:disabled {
   opacity: 0.5;
@@ -1102,8 +1111,8 @@ ul {
   background: var(--app-surface);
 }
 .app-action-btn.is-active svg path {
-  fill: var(--app-navbar);
-  stroke: var(--app-navbar);
+  fill: var(--app-accent);
+  stroke: var(--app-accent);
 }
 
 /* ---- Expanded post: date/time, upvote/downvote list, comments ---- */
@@ -1295,7 +1304,7 @@ ul {
 .app-comment-form button {
   border: 2px solid var(--app-border);
   border-radius: var(--app-radius-sm);
-  background: var(--app-navbar);
+  background: var(--app-accent);
   padding: 0 14px;
   font-weight: 700;
   font-size: 0.82rem;
@@ -1528,14 +1537,20 @@ ul {
   flex-shrink: 0;
   vertical-align: middle;
 }
+/* The circle itself is painted by a gradient inside the SVG (see
+   VerifiedBadge.jsx). These are the flat fallbacks, matching the middle
+   of each gradient. */
 .app-verified-badge--blue {
-  color: #3897f0;
+  color: #2f8ae8;
 }
 .app-verified-badge--creator {
-  color: #d4af37;
+  color: #ffc21c;
 }
 .app-verified-badge--rainbow {
   color: inherit;
+}
+.app-verified-badge--bot {
+  color: #35b79c;
 }
 .app-profile-username .app-verified-badge {
   margin-left: 6px;
@@ -1598,7 +1613,7 @@ ul {
   justify-content: center;
   gap: 2px;
   flex: 1;
-  background: var(--app-surface);
+  background: var(--app-accent);
   border: 2px solid var(--app-border);
   border-radius: var(--app-radius-sm);
   padding: 6px 6px;
@@ -1608,7 +1623,10 @@ ul {
 }
 .app-stat-box span {
   font-size: 0.72rem;
-  color: var(--app-muted);
+  /* On the accent fill the muted grey washes out — the label needs the
+     normal ink, just lighter in weight than the number above it. */
+  color: var(--app-ink);
+  opacity: 0.72;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.02em;
@@ -1667,11 +1685,12 @@ ul {
   font-weight: 700;
   font-size: 0.92rem;
   cursor: pointer;
-  background: var(--app-surface);
+  background: var(--app-accent);
   box-shadow: var(--app-shadow);
 }
 .app-profile-edit:hover {
-  background: var(--app-accent);
+  transform: translate(-1px, -1px);
+  box-shadow: var(--app-shadow-lg);
 }
 
 .app-profile-more-wrap {
@@ -2234,21 +2253,28 @@ ul {
     gap: 24px;
   }
 
+  /* The rail rides along with the page rather than being a little
+     scrolling box of its own (that box is what put a second scrollbar on
+     screen, and meant the bottom of the rail could only be reached by
+     scrolling inside it).
+     Default — a rail short enough to fit on screen — parks under the top
+     bar. RightRail.jsx measures it and adds .is-tall when it isn't. */
   .app-rightrail {
     display: flex;
     position: sticky;
     top: 90px;
     align-self: start;
     height: fit-content;
-    /* When the rail's own content (suggestions + trending + arcade
-       champions) is taller than the space below the sticky offset, let
-       it scroll internally instead of just sitting pinned — without
-       this, anything past the bottom of the viewport was reachable only
-       by scrolling the entire feed to its end, since a sticky element
-       doesn't release until its container does. */
-    max-height: calc(100vh - 100px);
-    overflow-y: auto;
-    scrollbar-width: thin;
+  }
+  /* Taller than the screen: anchor the BOTTOM edge instead. Scrolling
+     down walks through the whole rail and then holds it against the
+     bottom of the screen while the feed carries on; scrolling up lets go
+     immediately, so you never have to run back to the top of the feed to
+     see the start of the rail again. `top: auto` is what hands control
+     to `bottom` — sticky obeys top first if both are set. */
+  .app-rightrail.is-tall {
+    top: auto;
+    bottom: 18px;
   }
 }
 
@@ -6095,12 +6121,19 @@ body.app-body-mono-dark {
    Snake & Ladder, Ludo (challenge-a-friend + live socket play)
    ========================================================== */
 
-/* Pinned to the tile's top-right corner, opposite the emoji badge, so it
-   never pushes the name and blurb around. */
-.app-arcade-tile-badge {
+/* Pinned to the tile's top-right corner, opposite the emoji badge, so
+   they never push the name and blurb around. A tile can carry more than
+   one (Monopoly is both new and multiplayer), so they stack. */
+.app-arcade-tile-badges {
   position: absolute;
   top: 12px;
   right: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+.app-arcade-tile-badge {
   font-weight: 800;
   font-size: 0.6rem;
   text-transform: uppercase;
@@ -6109,6 +6142,23 @@ body.app-body-mono-dark {
   border: 2px solid var(--app-border);
   border-radius: 999px;
   padding: 2px 8px;
+  white-space: nowrap;
+}
+/* The one badge meant to catch your eye, so it takes the accent and a
+   slow pulse rather than sitting quietly like the others. */
+.app-arcade-tile-badge.is-new {
+  background: var(--app-accent);
+  box-shadow: var(--app-shadow);
+  animation: app-badge-new 2.4s ease-in-out infinite;
+}
+@keyframes app-badge-new {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-arcade-tile-badge.is-new {
+    animation: none;
+  }
 }
 
 .app-mp-subtitle {
@@ -6526,6 +6576,16 @@ body.app-body-mono-dark {
 .app-about-cta p {
   margin: 0;
   font-weight: 700;
+  line-height: 1.55;
+}
+.app-about-cta p + p {
+  margin-top: 10px;
+}
+.app-about-cta a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
 }
 .app-about-cta a {
   color: inherit;
@@ -6984,7 +7044,9 @@ body.app-body-mono-dark {
   gap: 14px;
   overflow-x: auto;
   padding: 4px 2px 14px;
-  margin-bottom: 10px;
+  /* Matches .app-feed's gap, so the space under the line reads as one
+     more step in the same rhythm as the posts below it. */
+  margin-bottom: 14px;
   border-bottom: var(--app-border-w) solid var(--app-border);
 }
 .app-story-circle {

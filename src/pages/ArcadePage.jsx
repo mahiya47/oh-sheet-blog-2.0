@@ -45,7 +45,10 @@ export default function ArcadePage() {
                 {game.emoji}
               </span>
               <span className="app-arcade-tile-label">{game.label}</span>
-              {game.multiplayer && <span className="app-arcade-tile-badge">Multiplayer</span>}
+              <span className="app-arcade-tile-badges">
+                {game.isNew && <span className="app-arcade-tile-badge is-new">New</span>}
+                {game.multiplayer && <span className="app-arcade-tile-badge">Multiplayer</span>}
+              </span>
               <span className="app-arcade-tile-blurb">{game.blurb}</span>
               {best !== undefined && (
                 <span className="app-arcade-tile-best">Best: {formatArcadeScore(best, game.unit)}</span>

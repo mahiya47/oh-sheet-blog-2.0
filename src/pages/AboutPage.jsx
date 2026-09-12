@@ -94,9 +94,20 @@ export default function AboutPage() {
 
       <div className="app-about-cta">
         <p>
-          Oh Sheet! is built and run by one person as a personal project, not a company — so if
-          something looks off, or you've got an idea for what's next, head over to{" "}
-          <a href="/support">Support</a> and say hi. We'd love to hear from you.
+          Oh Sheet! isn't a demo or a weekend side project — it's a real, working blog, built and
+          run by one person rather than a company.
+        </p>
+        <p>
+          Every part of it — the feed, the arcade, the messages, the server it all runs on — was
+          written by me, Sourabh Mahiya, and it lives on my GitHub at{" "}
+          <a href="https://github.com/mahiya47" target="_blank" rel="noreferrer">
+            github.com/mahiya47
+          </a>
+          .
+        </p>
+        <p>
+          So if something looks off, or you've got an idea for what's next, head over to{" "}
+          <a href="/support">Support</a> and say hi — I'd love to hear from you.
         </p>
       </div>
     </div>

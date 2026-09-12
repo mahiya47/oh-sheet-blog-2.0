@@ -2,6 +2,16 @@
 // the shared game header, the champions widget, and each game's own page.
 export const ARCADE_GAMES = [
   {
+    slug: "monopoly",
+    label: "Monopoly",
+    emoji: "🏠",
+    color: "green",
+    blurb: "Buy the board, charge rent, bankrupt your friends. 2 to 4 players.",
+    multiplayer: true,
+    // Sits first in the hub and wears a "New" flag there.
+    isNew: true,
+  },
+  {
     slug: "snake",
     label: "Snake",
     emoji: "🐍",
@@ -103,14 +113,6 @@ export const ARCADE_GAMES = [
     emoji: "🔴",
     color: "blue",
     blurb: "Roll the dice, race your tokens home, and send your opponent back to base.",
-    multiplayer: true,
-  },
-  {
-    slug: "monopoly",
-    label: "Monopoly",
-    emoji: "🏠",
-    color: "green",
-    blurb: "Buy the board, charge rent, bankrupt your friends. Up to 8 players.",
     multiplayer: true,
   },
 ];

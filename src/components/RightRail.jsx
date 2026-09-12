@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import { api } from "../lib/api.js";
@@ -6,8 +6,13 @@ import ArcadeChampions from "./ArcadeChampions.jsx";
 
 const MAX_ITEMS = 5;
 
+// Distance the rail keeps from the top of the screen when it's short
+// enough to park there (clears the sticky top bar).
+const TOP_GAP = 90;
+
 export default function RightRail() {
   const { user } = useAuth();
+  const railRef = useRef(null);
   const [people, setPeople] = useState([]);
   const [followedIds, setFollowedIds] = useState(() => new Set());
   const [requestedIds, setRequestedIds] = useState(() => new Set());
@@ -39,8 +44,40 @@ export default function RightRail() {
     }
   }
 
+  // The rail scrolls with the page, then parks — but WHICH edge it parks
+  // on depends on how tall it is, and CSS can't measure that itself.
+  //
+  //  - Taller than the screen: park its BOTTOM at the bottom of the
+  //    screen, so you scroll down through the whole rail and it holds
+  //    there while the feed keeps going (and releases the instant you
+  //    scroll back up). That's the Twitter behaviour.
+  //  - Shorter than the screen: parking the bottom would leave it
+  //    dangling at the bottom with a gap above it, so it parks its top
+  //    under the top bar instead.
+  //
+  // Re-measured whenever the rail's own content changes size (cards
+  // loading in) or the window resizes.
+  useEffect(() => {
+    const el = railRef.current;
+    if (!el) return;
+    const update = () => {
+      el.classList.toggle("is-tall", el.scrollHeight > window.innerHeight - TOP_GAP);
+    };
+    update();
+    window.addEventListener("resize", update);
+    let ro;
+    if (typeof ResizeObserver !== "undefined") {
+      ro = new ResizeObserver(update);
+      ro.observe(el);
+    }
+    return () => {
+      window.removeEventListener("resize", update);
+      ro?.disconnect();
+    };
+  }, []);
+
   return (
-    <aside className="app-rightrail">
+    <aside className="app-rightrail" ref={railRef}>
       <div className="app-rail-card">
         <h2>People you might know</h2>
         {people.length ? (
