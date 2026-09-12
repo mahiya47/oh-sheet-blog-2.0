@@ -29,8 +29,11 @@
   --app-line: rgba(28, 24, 16, 0.14);
   /* The faint dot grain on the long-form "sheet" pages. */
   --app-grain: rgba(28, 24, 16, 0.05);
-  /* Outline around a post's caption + photo/video. */
-  --app-media-frame: rgba(255, 255, 255, 0.5);
+  /* The frame around a post's caption + photo/video. Light mode keeps
+     the original filled panel; dark mode drops the fill and shows the
+     outline only (see the dark block). */
+  --app-media-frame: var(--app-line);
+  --app-media-fill: rgba(255, 255, 255, 0.5);
 
   /* Top bar / bottom bar tint, kept separate from --app-bg-deep (still
      used for the many subtle darker-panel spots elsewhere) so only
@@ -111,9 +114,10 @@
   --app-shadow-lg: none;
   --app-line: rgba(255, 255, 255, 0.12);
   --app-grain: rgba(255, 255, 255, 0.045);
-  /* Same white outline, well down in strength — at the light theme's
-     50% it's a glaring box on a dark card. */
+  /* Outline only, no fill — a pale panel over a dark card just muddies
+     it, and the border alone frames the photo cleanly. */
   --app-media-frame: rgba(255, 255, 255, 0.16);
+  --app-media-fill: transparent;
 
   /* The bars sit a step ABOVE the page rather than below it, so the
      chrome reads as a layer laid over the content. */
@@ -422,7 +426,9 @@ ul {
   z-index: 95;
   display: flex;
   flex-direction: column;
-  padding: 18px 16px 20px;
+  /* Tight enough that the whole menu — down to Log out at the bottom —
+     fits on a short phone screen without having to scroll for it. */
+  padding: 14px 14px 16px;
   overflow-y: auto;
   transform: translateX(-100%);
   transition: transform 0.22s ease;
@@ -436,8 +442,8 @@ ul {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  padding-bottom: 14px;
-  margin-bottom: 8px;
+  padding-bottom: 10px;
+  margin-bottom: 4px;
   border-bottom: var(--app-border-w) solid var(--app-border);
 }
 .app-drawer-profile {
@@ -499,14 +505,14 @@ ul {
 .app-drawer-list {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  margin: 6px 0;
+  gap: 0;
+  margin: 2px 0;
 }
 .app-drawer-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 8px;
+  padding: 7px 8px;
   border-radius: var(--app-radius-sm);
   font-weight: 700;
   font-size: 0.95rem;
@@ -524,10 +530,17 @@ ul {
 .app-drawer-divider {
   border: none;
   border-top: 2px solid var(--app-line);
-  margin: 6px 0;
+  margin: 4px 0;
 }
+/* Last item in the menu, and the one people go looking for — given a
+   tint so it reads as its own thing rather than trailing off the end of
+   the list. */
 .app-drawer-logout {
   color: #c0392b;
+  background: rgba(192, 57, 43, 0.08);
+}
+.app-drawer-logout:hover {
+  background: rgba(192, 57, 43, 0.16);
 }
 
 /* ---- Side nav (tablet/desktop only — see breakpoints below) ---- */
@@ -3134,13 +3147,15 @@ a.app-auth-logo-badge:hover {
 }
 
 /* Bordered content-box treatment applied to every post's own text/media. */
-/* The caption and the media are outlined rather than boxed in: the pale
-   fill that used to sit behind them is now the border colour, so the
-   frame is there without a second panel laid over the card. */
+/* Frames the caption and the photo/video together. Light mode fills it
+   (as it always did); dark mode leaves it as an outline, where a pale
+   panel over a dark card only muddies the picture. */
 .app-card-content-box {
   margin-top: 4px;
   padding: 4px;
   border: 2px solid var(--app-media-frame);
+  border-radius: 10px;
+  background: var(--app-media-fill);
 }
 .app-card-content-box .app-card-text {
   margin-top: 0;
