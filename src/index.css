@@ -26,9 +26,9 @@
      used for the many subtle darker-panel spots elsewhere) so only
      these two bars pick it up. Swapped with --app-yellow below: the
      bar tint and the accent/card color trade places on request. */
-  --app-navbar: #F4D86B;
+  --app-navbar: #B7A793;
 
-  --app-yellow: #B7A793;
+  --app-yellow: #F4D86B;
   /* Every other stray brand color folds into the one accent color too —
      nothing else on the site keeps its own separate hue now. */
   --app-green: #F4D86B;

@@ -4,7 +4,7 @@
 // favicon so it matches the badge in the top bar.
 import { buildBadgeSVG, APP_ICON_COLOR } from "./logoMark.js";
 
-export const logoColor = "#B7A793";
+export const logoColor = "#F4D86B";
 
 // The color baked into the STATIC app icon files — the default favicon
 // (before JS swaps it), apple-touch-icon, the manifest icons, and the
