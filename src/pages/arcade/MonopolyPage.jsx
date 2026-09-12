@@ -9,7 +9,6 @@ import { GROUP_COLORS, HOUSE_COLORS } from "../../lib/monopolyLayout.js";
 import { useMonopolyRoom } from "../../lib/useMonopolyRoom.js";
 
 const GAME = getGameMeta("monopoly");
-const JAIL_FINE = 50;
 const MIN_PLAYERS = 2;
 const MAX_PLAYERS = 4;
 // Seat order matches the 4 HUD corners: top-left, top-right, bottom-left,
@@ -384,6 +383,17 @@ function CenterPanel({
     );
   }
 
+  // Diagon Alley trade — an offer waiting on its target owner's answer
+  // takes over the panel for everyone (the game pauses until they
+  // respond); the offering player picking properties in the first place
+  // only takes over the panel for them, same as a buy decision does.
+  if (game.trade) {
+    return <TradeResponseCard trade={game.trade} board={board} players={players} mySeat={mySeat} act={act} />;
+  }
+  if (myTurn && game.phase === "trade_offer") {
+    return <TradeOfferCard game={game} mySeat={mySeat} board={board} players={players} act={act} />;
+  }
+
   if (debt) {
     return (
       <div className="app-mono-panel-msg is-urgent">
@@ -441,17 +451,17 @@ function DefaultCard({ game, me, myTurn, mySeat, players, act, currentName, curr
     );
   }
 
-  // Anyone not currently rolling/acting spends that dead time on a
-  // pending Jail vote, if there is one — it replaces the plain "waiting"
-  // message since they have nothing else to do anyway. The current actor
-  // never sees this in place of their own roll/end-turn buttons, so a
-  // slow or absent voter can never block the game (see nextTurn's
-  // resolveJailVote safety net on the server, too).
+  // A pending Jail vote takes over the panel for the jailed player
+  // themself and for every eligible voter — whether or not it's currently
+  // their turn — so nobody's turn can proceed until the table has
+  // decided. See nextTurn's resolveJailVote safety net on the server too,
+  // for when a voter goes quiet instead of actually voting.
+  const jv = game.jailVote;
+  if (jv && (mySeat === jv.seat || jv.eligible.includes(mySeat))) {
+    return <JailVoteCard jv={jv} players={players} mySeat={mySeat} act={act} dice={dice} />;
+  }
+
   if (!myTurn) {
-    const jv = game.jailVote;
-    if (jv) {
-      return <JailVoteCard jv={jv} players={players} mySeat={mySeat} act={act} dice={dice} />;
-    }
     return (
       <div className="app-mono-panel-idle">
         {dice && <DiceRow dice={dice} />}
@@ -472,26 +482,16 @@ function DefaultCard({ game, me, myTurn, mySeat, players, act, currentName, curr
       <div className="app-mono-panel-idle">
         {dice && <DiceRow dice={dice} />}
         <p className="app-mono-panel-prompt">
-          {inJail ? `In Azkaban — turn ${me.jailTurns + 1} of 3.` : "Your turn!"}
+          {inJail ? `In Azkaban — turn ${me.jailTurns + 1} of 4.` : "Your turn!"}
         </p>
         <button type="button" className="app-arcade-btn app-mono-primary app-mono-roll-btn" onClick={() => act("mono:roll")}>
           🎲 Roll
         </button>
-        {inJail && (
+        {inJail && me.getOut > 0 && (
           <div className="app-mono-panel-subrow">
-            <button
-              type="button"
-              className="app-arcade-btn"
-              disabled={me.cash < JAIL_FINE}
-              onClick={() => act("mono:jail_pay")}
-            >
-              Pay ${JAIL_FINE}
+            <button type="button" className="app-arcade-btn" onClick={() => act("mono:jail_card")}>
+              Use card
             </button>
-            {me.getOut > 0 && (
-              <button type="button" className="app-arcade-btn" onClick={() => act("mono:jail_card")}>
-                Use card
-              </button>
-            )}
           </div>
         )}
       </div>
@@ -551,6 +551,108 @@ function JailVoteCard({ jv, players, mySeat, act, dice }) {
         </div>
       )}
       {!isJailed && hasVoted && <p className="app-mono-panel-note">You voted — waiting on the table.</p>}
+    </div>
+  );
+}
+
+// Properties a seat could put into (or receive from) a Diagon Alley trade
+// — theirs, and with no upgrades built on them.
+function ownedTradeable(game, seat) {
+  return Object.entries(game.tiles)
+    .filter(([, st]) => st.owner === seat && st.houses === 0)
+    .map(([idx]) => Number(idx))
+    .sort((a, b) => a - b);
+}
+
+// Landing on Diagon Alley: pick one of your own properties, then pick
+// anyone else's, in two local steps — nothing goes to the server until
+// both are chosen, so backing out beforehand is free.
+function TradeOfferCard({ game, mySeat, board, players, act }) {
+  const [offerIndex, setOfferIndex] = useState(null);
+  const myProps = ownedTradeable(game, mySeat);
+
+  if (offerIndex === null) {
+    return (
+      <div className="app-mono-panel-idle">
+        <p className="app-mono-panel-prompt">Diagon Alley — pick one of your properties to offer in trade.</p>
+        <div className="app-mono-trade-list">
+          {myProps.map((idx) => (
+            <button key={idx} type="button" className="app-arcade-btn" onClick={() => setOfferIndex(idx)}>
+              {board[idx].name}
+            </button>
+          ))}
+        </div>
+        <button type="button" className="app-arcade-btn app-mono-danger" onClick={() => act("mono:trade_cancel")}>
+          Skip trading
+        </button>
+      </div>
+    );
+  }
+
+  const others = game.players
+    .filter((p) => p.seat !== mySeat && !p.bankrupt)
+    .map((p) => ({ seat: p.seat, props: ownedTradeable(game, p.seat) }))
+    .filter((o) => o.props.length > 0);
+
+  return (
+    <div className="app-mono-panel-idle">
+      <p className="app-mono-panel-prompt">Offering {board[offerIndex].name} — pick a property you want for it.</p>
+      <div className="app-mono-trade-list">
+        {others.map((o) => (
+          <div key={o.seat} className="app-mono-trade-group">
+            <p className="app-mono-panel-note">
+              {firstName(players[o.seat]?.name || players[o.seat]?.username || `Seat ${o.seat + 1}`)}
+            </p>
+            {o.props.map((idx) => (
+              <button
+                key={idx}
+                type="button"
+                className="app-arcade-btn"
+                onClick={() => act("mono:trade_propose", { offerIndex, targetIndex: idx })}
+              >
+                {board[idx].name}
+              </button>
+            ))}
+          </div>
+        ))}
+      </div>
+      <button type="button" className="app-arcade-btn" onClick={() => setOfferIndex(null)}>
+        Back
+      </button>
+    </div>
+  );
+}
+
+// A trade offer awaiting its target owner's answer — everyone else just
+// watches (the game pauses) until they accept or deny.
+function TradeResponseCard({ trade, board, players, mySeat, act }) {
+  const isResponder = mySeat === trade.targetSeat;
+  const offererName = firstName(players[trade.seat]?.name || players[trade.seat]?.username || `Seat ${trade.seat + 1}`);
+  const responderName = firstName(
+    players[trade.targetSeat]?.name || players[trade.targetSeat]?.username || `Seat ${trade.targetSeat + 1}`,
+  );
+
+  return (
+    <div className="app-mono-panel-idle">
+      <p className="app-mono-panel-prompt">
+        {isResponder
+          ? `${offererName} offers ${board[trade.offerIndex].name} for your ${board[trade.targetIndex].name}. Accept and you both collect $100.`
+          : `Waiting for ${responderName} to accept or deny a trade with ${offererName}.`}
+      </p>
+      {isResponder && (
+        <div className="app-mono-panel-subrow">
+          <button
+            type="button"
+            className="app-arcade-btn app-mono-primary"
+            onClick={() => act("mono:trade_respond", { choice: "accept" })}
+          >
+            Accept
+          </button>
+          <button type="button" className="app-arcade-btn" onClick={() => act("mono:trade_respond", { choice: "deny" })}>
+            Deny
+          </button>
+        </div>
+      )}
     </div>
   );
 }
