@@ -82,9 +82,10 @@ function isBarePath(pathname) {
 const PUBLIC_WHEN_LOGGED_OUT = new Set(["/about", "/privacy", "/rules", "/agreement", "/support"]);
 
 export default function App() {
-  // Match the browser tab icon — and every "accent" highlight in the app
-  // (active nav item, New Sheet button, Follow/Message buttons) — to
-  // this reload's random logo color.
+  // Keep the browser tab icon matching the logo badge. The accent colour
+  // is deliberately NOT set from the logo any more: the badge keeps its
+  // own yellow while every accent surface (cards, buttons, active nav)
+  // uses --app-accent from index.css.
   useEffect(() => {
     let link = document.querySelector('link[rel="icon"]');
     if (!link) {
@@ -93,7 +94,6 @@ export default function App() {
       document.head.appendChild(link);
     }
     link.href = buildFaviconHref(logoColor);
-    document.documentElement.style.setProperty("--app-accent", logoColor);
   }, []);
 
   const { user, loading } = useAuth();

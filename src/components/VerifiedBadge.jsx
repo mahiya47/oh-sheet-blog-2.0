@@ -1,17 +1,28 @@
 import { useId } from "react";
 
-// Small tick badge shown next to a display name.
+// Small tick badge shown next to a display name — only for accounts that
+// have actually proved who they are. That means one of:
+//   - they confirmed their email address, or
+//   - they signed up with Google or GitHub, or
+//   - they linked Google or GitHub to an existing account.
+// All three set emailVerified on the server (see passport.js — every OAuth
+// path flips it on), so that single flag is the whole check. Accounts that
+// signed up with an email they never confirmed get no badge.
+//
+// Colours:
 // - Gold: the creator account (id 5, @SourabhMahiya).
 // - Rainbow: anyone who set their orientation to something other than
 //   "straight" AND opted in via the showOrientation toggle (backend already
 //   nulls out orientation for anyone who didn't opt in, so the check here
 //   is just a safety net, not the actual privacy gate).
-// - Blue: everyone else.
+// - Blue: every other verified account.
 export default function VerifiedBadge({ user, size = 14, className = "" }) {
   const gradId = useId();
   if (!user) return null;
 
   const isCreator = user.id === 5 && user.username === "SourabhMahiya";
+  // The creator keeps the gold tick regardless; everyone else earns it.
+  if (!isCreator && !user.emailVerified) return null;
   const isRainbow = !isCreator && !!user.showOrientation && !!user.orientation && user.orientation !== "straight";
   const variant = isCreator ? "creator" : isRainbow ? "rainbow" : "blue";
   const label = isCreator ? "Creator" : "Verified";

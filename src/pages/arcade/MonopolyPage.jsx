@@ -11,6 +11,8 @@ import { useMonopolyRoom } from "../../lib/useMonopolyRoom.js";
 const GAME = getGameMeta("monopoly");
 const MIN_PLAYERS = 2;
 const MAX_PLAYERS = 4;
+// Turns you sit out in Azkaban before walking free (matches the server).
+const JAIL_TURNS = 4;
 // Seat order matches the 4 HUD corners: top-left, top-right, bottom-left,
 // bottom-right — same order the server assigns TOKEN_COLORS in.
 const TOKEN_COLORS = ["#2f6fed", "#e5484d", "#43a047", "#f5c945"]; // blue, red, green, yellow
@@ -453,19 +455,20 @@ function DefaultCard({ game, me, myTurn, mySeat, players, act, currentName, curr
 
   // A pending Jail vote takes over the panel for anyone who still owes a
   // vote — whether or not it's currently their turn — so the table can't
-  // move on before it's settled.
-  //
-  // The jailed player sees it too, but ONLY while they're idle, never
-  // during their own turn. They have nothing to vote on, and taking their
-  // turn controls away deadlocks the game: ending their turn is what
-  // eventually lets the server's resolveJailVote safety net fire, so if
-  // they can't end it and nobody votes, the game freezes for good. That's
-  // exactly what happened after acknowledging a "go to Azkaban" card.
+  // move on before it's settled. The jailed player isn't one of them:
+  // they have nothing to vote on, and they get the countdown card below
+  // instead (which also shows how the vote on them is going).
   const jv = game.jailVote;
   const iStillOweAVote = jv && jv.eligible.includes(mySeat) && jv.votes[mySeat] === undefined;
-  const watchingVoteOnMe = jv && mySeat === jv.seat && !myTurn;
-  if (iStillOweAVote || watchingVoteOnMe) {
+  if (iStillOweAVote) {
     return <JailVoteCard jv={jv} players={players} mySeat={mySeat} act={act} dice={dice} />;
+  }
+
+  // Locked up: no roll, no actions, no End turn — the server serves your
+  // time for you and skips your turns. All you get is the countdown (and
+  // a Get Out of Jail Free card, if you're holding one).
+  if (me && me.jailTurns >= 0) {
+    return <JailedCard me={me} jv={jv} mySeat={mySeat} act={act} />;
   }
 
   if (!myTurn) {
@@ -482,28 +485,14 @@ function DefaultCard({ game, me, myTurn, mySeat, players, act, currentName, curr
     );
   }
 
-  const inJail = me.jailTurns >= 0;
-
   if (game.phase === "roll") {
     return (
       <div className="app-mono-panel-idle">
         {dice && <DiceRow dice={dice} />}
-        <p className="app-mono-panel-prompt">
-          {inJail ? `In Azkaban — turn ${me.jailTurns + 1} of 4.` : "Your turn!"}
-        </p>
-        {jv && jv.seat === mySeat && (
-          <p className="app-mono-panel-note">The table is still voting on freeing you.</p>
-        )}
+        <p className="app-mono-panel-prompt">Your turn!</p>
         <button type="button" className="app-arcade-btn app-mono-primary app-mono-roll-btn" onClick={() => act("mono:roll")}>
           🎲 Roll
         </button>
-        {inJail && me.getOut > 0 && (
-          <div className="app-mono-panel-subrow">
-            <button type="button" className="app-arcade-btn" onClick={() => act("mono:jail_card")}>
-              Use card
-            </button>
-          </div>
-        )}
       </div>
     );
   }
@@ -525,6 +514,40 @@ function DefaultCard({ game, me, myTurn, mySeat, players, act, currentName, curr
       ) : (
         <button type="button" className="app-arcade-btn app-mono-primary app-mono-roll-btn" onClick={() => act("mono:end_turn")}>
           End turn
+        </button>
+      )}
+    </div>
+  );
+}
+
+// What you see for the whole time you're locked up: the countdown, and
+// nothing else to press. Your turns are served and skipped by the server,
+// so there's no roll and no End turn here by design — you're out when the
+// table votes you free, when you play a Get Out of Jail Free card, or
+// when your time is up.
+function JailedCard({ me, jv, mySeat, act }) {
+  const served = Math.min(me.jailTurns, JAIL_TURNS);
+  const left = Math.max(0, JAIL_TURNS - served);
+  const votedOnMe = jv && jv.seat === mySeat;
+  const freeCount = votedOnMe ? Object.values(jv.votes).filter((v) => v === "free").length : 0;
+  const keepCount = votedOnMe ? Object.values(jv.votes).filter((v) => v === "keep").length : 0;
+
+  return (
+    <div className="app-mono-panel-idle">
+      <span className="app-mono-panel-msg-kind">🏰 In Azkaban</span>
+      <p className="app-mono-panel-prompt">
+        {left > 0 ? `${left} turn${left === 1 ? "" : "s"} to go` : "You walk free on your next turn"}
+      </p>
+      <p className="app-mono-panel-note">Your turns are skipped until then.</p>
+      {votedOnMe && (
+        <>
+          <p className="app-mono-panel-note">The table is voting on freeing you.</p>
+          <p className="app-mono-jail-tally">🔓 {freeCount} to free · 🔒 {keepCount} to keep</p>
+        </>
+      )}
+      {me.getOut > 0 && (
+        <button type="button" className="app-arcade-btn app-mono-primary" onClick={() => act("mono:jail_card")}>
+          Use Get Out of Jail Free
         </button>
       )}
     </div>

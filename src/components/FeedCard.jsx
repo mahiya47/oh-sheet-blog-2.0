@@ -765,7 +765,7 @@ export default function FeedCard({ post, onDeleted, initiallyExpanded = false })
 
         <button
           type="button"
-          className="app-action-btn app-action-comment"
+          className="app-action-btn"
           onClick={(e) => {
             stop(e);
             setExpanded(true);

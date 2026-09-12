@@ -25,7 +25,14 @@ export default function MultiplayerHeader({ title, emoji, subtitle, action, onBa
       <h2 className="app-section-title app-arcade-game-title">
         <span aria-hidden="true">{emoji}</span> {title}
       </h2>
-      {action && <span className="app-mp-head-action">{action}</span>}
+      {/* Something always sits opposite the back button so the centred
+          title stays centred — the single-player header has its trophy
+          there, this one has the action or an empty slot the same size. */}
+      {action ? (
+        <span className="app-mp-head-action">{action}</span>
+      ) : (
+        <span className="app-mp-head-spacer" aria-hidden="true" />
+      )}
       {subtitle && <span className="app-mp-subtitle">{subtitle}</span>}
     </div>
   );

@@ -126,7 +126,7 @@ export default function SupportPage() {
   return (
     <div className="app-page">
       <h2 className="app-section-title">Support</h2>
-      <p className="app-empty">
+      <p className="app-page-lede">
         Answers to the questions we get most, and a direct line to us for everything else.
       </p>
 

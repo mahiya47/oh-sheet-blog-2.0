@@ -28,19 +28,19 @@
      bar tint and the accent/card color trade places on request. */
   --app-navbar: #B7A793;
 
-  --app-yellow: #F4D86B;
+  --app-yellow: #f5bb65;
   /* Every other stray brand color folds into the one accent color too —
      nothing else on the site keeps its own separate hue now. */
-  --app-green: #F4D86B;
-  --app-pink: #F4D86B;
-  --app-blue: #F4D86B;
-  --app-purple: #F4D86B;
+  --app-green: #f5bb65;
+  --app-pink: #f5bb65;
+  --app-blue: #f5bb65;
+  --app-purple: #f5bb65;
 
   /* The "accent" color — used for active-nav highlights, the New Sheet
-     button, and the Follow/Message buttons on a profile. Re-set as an
-     inline style on <html> at load time (see logoColor.js/App.jsx) to
-     match that reload's random logo color; this value is just the
-     fallback before JS runs. */
+     button, and the Follow/Message buttons on a profile. This is the real
+     value: nothing overrides it at runtime any more. The logo badge is
+     deliberately NOT tied to it (see logoColor.js) — it keeps its own
+     yellow while everything else uses this. */
   --app-accent: var(--app-yellow);
 
   /* Hand-drawn doodle tile (stars, hearts, squiggles, scribbles, sparkles)
@@ -745,9 +745,18 @@ ul {
   }
 }
 
+/* "Nothing here yet" messages used to sit straight on the doodle
+   background and read like leftover text. A dashed placeholder box says
+   "this space is waiting to be filled" instead. */
 .app-empty {
+  margin: 0;
+  padding: 16px;
   color: var(--app-muted);
   font-weight: 600;
+  text-align: center;
+  background: var(--app-surface);
+  border: 2px dashed var(--app-border);
+  border-radius: var(--app-radius-md);
 }
 
 /* ---- Feed card ---- */
@@ -1096,11 +1105,6 @@ ul {
   fill: var(--app-navbar);
   stroke: var(--app-navbar);
 }
-/* Comment is the one action worth nudging people towards, so it wears the
-   bar colour as a fill instead of sitting flat like share/save. */
-.app-action-comment {
-  background: var(--app-navbar);
-}
 
 /* ---- Expanded post: date/time, upvote/downvote list, comments ---- */
 .app-card-expanded {
@@ -1291,7 +1295,7 @@ ul {
 .app-comment-form button {
   border: 2px solid var(--app-border);
   border-radius: var(--app-radius-sm);
-  background: var(--app-accent);
+  background: var(--app-navbar);
   padding: 0 14px;
   font-weight: 700;
   font-size: 0.82rem;
@@ -4385,16 +4389,15 @@ a.app-auth-logo-badge:hover {
 }
 
 /* Shared header strip every arcade game page renders above its board. */
+/* The bar every game page wears above its board — single-player
+   (ArcadeGameHeader) and multiplayer (MultiplayerHeader) alike, so they
+   read as the same app. Stays wrap-able: the multiplayer version drops a
+   full-width status subtitle onto a second line. */
 .app-arcade-game-head {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 6px 8px;
-}
-/* Single-player pages only (ArcadeGameHeader). The multiplayer twin keeps
-   the plain strip, so Monopoly's header is untouched. */
-.app-arcade-game-head-solo {
-  flex-wrap: nowrap;
   margin: 6px 0 12px;
   padding: 8px 10px;
   background: var(--app-navbar);
@@ -4402,12 +4405,8 @@ a.app-auth-logo-badge:hover {
   border-radius: var(--app-radius-lg);
   box-shadow: var(--app-shadow);
 }
-.app-arcade-game-head-solo .app-arcade-game-title {
-  text-align: center;
-  font-size: 1.05rem;
-}
-.app-arcade-game-head-solo .app-arcade-back:hover,
-.app-arcade-game-head-solo .app-arcade-lb-btn:hover {
+.app-arcade-game-head .app-arcade-back:hover,
+.app-arcade-game-head .app-arcade-lb-btn:hover {
   transform: translate(-1px, -1px);
   box-shadow: var(--app-shadow-lg);
 }
@@ -4432,6 +4431,8 @@ a.app-auth-logo-badge:hover {
   margin: 0;
   flex: 1;
   min-width: 0;
+  text-align: center;
+  font-size: 1.05rem;
 }
 /* Icon-only now — the trophy alone reads as "Leaderboard", so this is
    sized to match the back button instead of a wide text pill. */
@@ -4800,6 +4801,12 @@ a.app-auth-logo-badge:hover {
 }
 .app-mp-head-action {
   margin-left: auto;
+}
+/* Empty counterweight to the back button, so a header with no action
+   button still centres its title. Matches .app-arcade-back's width. */
+.app-mp-head-spacer {
+  width: 32px;
+  flex-shrink: 0;
 }
 .app-mono-leave-btn {
   display: flex;
@@ -5680,30 +5687,84 @@ a.app-auth-logo-badge:hover {
 }
 
 /* ---- Legal pages (Privacy policy / Rules / Agreement) ---- */
-.app-legal-content {
-  max-width: 62ch;
+/* ---- Long-form pages: Rules, Privacy, Agreement, About, Support ----
+   These used to be bare paragraphs sitting straight on the doodle
+   background, which is what made them read as unfinished. Now the writing
+   sits on a "sheet": a paper card with a highlighter stripe along the top
+   and a faint dot grain, so a wall of text looks like a printed page
+   instead of loose text on wallpaper. */
+.app-legal-content,
+.app-about-hero,
+.app-doc-sheet {
+  position: relative;
+  max-width: 68ch;
+  padding: 26px 20px 18px;
+  background:
+    radial-gradient(circle at 1px 1px, rgba(28, 24, 16, 0.05) 1px, transparent 0) 0 0 / 18px 18px,
+    var(--app-surface);
+  border: var(--app-border-w) solid var(--app-border);
+  border-radius: var(--app-radius-lg);
+  box-shadow: var(--app-shadow-lg);
+  overflow: hidden;
+}
+/* Highlighter stripe across the top edge of every sheet. */
+.app-legal-content::before,
+.app-about-hero::before,
+.app-doc-sheet::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 8px;
+  background: var(--app-accent);
+  border-bottom: 2px solid var(--app-border);
 }
 .app-legal-content p {
   margin: 0 0 14px;
   font-weight: 600;
-  line-height: 1.5;
+  line-height: 1.6;
 }
+/* Each section is marked with a short accent bar, so you can scan the
+   page by its headings instead of reading every block. */
 .app-legal-content h3 {
+  position: relative;
+  padding-left: 15px;
   font-family: var(--app-font-display);
-  font-size: 1.05rem;
-  margin: 20px 0 6px;
+  font-size: 1.1rem;
+  margin: 26px 0 8px;
+}
+.app-legal-content h3::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.25em;
+  width: 6px;
+  height: 0.9em;
+  border-radius: 3px;
+  background: var(--app-accent);
+  border: 1.5px solid var(--app-border);
 }
 .app-legal-content h3:first-of-type {
-  margin-top: 4px;
+  margin-top: 18px;
 }
 .app-legal-content a {
   color: inherit;
   text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
 }
+/* Dated stamp, set apart from the writing like a note in the margin. */
 .app-legal-updated {
+  display: inline-block;
+  margin: 0 0 12px !important;
+  padding: 3px 10px;
+  border: 2px solid var(--app-border);
+  border-radius: 999px;
+  background: var(--app-bg);
   color: var(--app-muted);
-  font-weight: 600 !important;
-  font-size: 0.85rem;
+  font-weight: 700 !important;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 /* ---- Support contact form ---- */
@@ -6015,9 +6076,10 @@ a.app-auth-logo-badge:hover {
 
 .app-mp-subtitle {
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: var(--app-muted);
   width: 100%;
+  text-align: center;
 }
 
 .app-mp-waiting {
@@ -6361,9 +6423,6 @@ a.app-auth-logo-badge:hover {
 }
 
 /* ---- About page (redesign) ---- */
-.app-about-hero {
-  max-width: 62ch;
-}
 .app-about-hero p {
   margin: 0 0 14px;
   font-weight: 600;
@@ -6376,8 +6435,17 @@ a.app-auth-logo-badge:hover {
 }
 .app-about-subtitle {
   font-family: var(--app-font-display);
-  font-size: 1.05rem;
+  font-size: 1.15rem;
   margin: 30px 0 4px;
+}
+/* The heading above a sheet reads as the document's title, so it gets
+   more weight than a normal section label and a rule under it. */
+.app-page:has(.app-legal-content) > .app-section-title,
+.app-page:has(.app-about-hero) > .app-section-title {
+  font-size: 1.65rem;
+  margin: 4px 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 3px solid var(--app-border);
 }
 .app-about-feature-grid {
   display: grid;
@@ -6517,14 +6585,42 @@ a.app-auth-logo-badge:hover {
   color: inherit;
   background: var(--app-surface);
 }
+.app-legal-nav a {
+  transition: background 120ms ease, transform 120ms ease, box-shadow 120ms ease;
+}
 .app-legal-nav a:hover {
   background: var(--app-accent);
+  transform: translate(-1px, -1px);
+  box-shadow: var(--app-shadow);
 }
 .app-legal-content h3 {
   scroll-margin-top: 90px;
 }
+/* A page's opening line — the one-sentence "what this page is". Same
+   panel as a legal page's intro, for pages that aren't one. */
+.app-page-lede {
+  margin: 0;
+  padding: 13px 15px;
+  background: var(--app-surface);
+  border: var(--app-border-w) solid var(--app-border);
+  border-radius: var(--app-radius-md);
+  box-shadow: var(--app-shadow);
+  font-weight: 700;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  max-width: 68ch;
+}
+
+/* The opening line gets its own tinted panel — it's the summary, so it
+   shouldn't look like just another paragraph. */
 .app-legal-intro {
   font-style: normal;
+  padding: 13px 15px;
+  background: var(--app-bg);
+  border: 2px solid var(--app-border);
+  border-radius: var(--app-radius-md);
+  font-weight: 700 !important;
+  font-size: 0.95rem;
 }
 
 /* ---- Support page (redesign): categorized FAQ accordion ---- */
