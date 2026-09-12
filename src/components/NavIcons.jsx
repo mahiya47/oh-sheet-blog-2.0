@@ -57,6 +57,38 @@ export default function NavIcon({ name }) {
           />
         </svg>
       );
+    case "user-plus":
+      return (
+        <svg {...common}>
+          <circle cx="9" cy="8" r="3.4" stroke="currentColor" strokeWidth="2.2" />
+          <path
+            d="M2.5 20c1.2-4 4-6 6.5-6s5.3 2 6.5 6"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+          />
+          <path d="M18 7.5v6M15 10.5h6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+        </svg>
+      );
+    case "user-check":
+      return (
+        <svg {...common}>
+          <circle cx="9" cy="8" r="3.4" stroke="currentColor" strokeWidth="2.2" />
+          <path
+            d="M2.5 20c1.2-4 4-6 6.5-6s5.3 2 6.5 6"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+          />
+          <path
+            d="M14.7 12.7l2 2 4-4"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      );
     case "gear":
       return (
         <svg

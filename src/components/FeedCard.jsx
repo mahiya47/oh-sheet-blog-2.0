@@ -619,19 +619,17 @@ export default function FeedCard({ post, onDeleted, initiallyExpanded = false })
             {displayName}
           </Link>
           <VerifiedBadge user={post.author} />
-          <span className="app-card-dot">·</span>
-          <Link to={`/post/${post.id}`} className="app-card-time" onClick={stop}>
-            {relativeTime(post.createdAt)}
-          </Link>
 
           <div className="app-card-tab-right">
             {!isOwnPost && (
               <button
                 type="button"
-                className="app-card-follow"
+                className={"app-card-follow" + (following ? " is-following" : "")}
+                aria-label={following ? "Following" : "Follow"}
+                title={following ? "Following" : "Follow"}
                 onClick={handleToggleFollow}
               >
-                {following ? "Following" : "Follow"}
+                <NavIcon name={following ? "user-check" : "user-plus"} />
               </button>
             )}
 

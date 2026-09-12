@@ -294,7 +294,7 @@ function CloseIcon() {
 
 function SearchIcon() {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
       <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2.4" />
       <path d="M21 21l-4.3-4.3" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
     </svg>
@@ -302,7 +302,7 @@ function SearchIcon() {
 }
 function ChatIcon() {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
       <path
         d="M4 5h16v11H8l-4 4V5z"
         stroke="currentColor"
@@ -314,7 +314,7 @@ function ChatIcon() {
 }
 function BellIcon() {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
       <path
         d="M6 10a6 6 0 1112 0c0 4 1.5 5.5 2 6H4c.5-.5 2-2 2-6z"
         stroke="currentColor"
@@ -327,7 +327,7 @@ function BellIcon() {
 }
 function HomeIcon() {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
       <path
         d="M4 11l8-6 8 6v9a1 1 0 01-1 1h-4v-6H9v6H5a1 1 0 01-1-1v-9z"
         stroke="currentColor"
@@ -339,7 +339,7 @@ function HomeIcon() {
 }
 function BurgerIcon() {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
       <path
         d="M4 6h16M4 12h16M4 18h16"
         stroke="currentColor"

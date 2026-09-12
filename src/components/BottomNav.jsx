@@ -61,79 +61,60 @@ function linkClass({ isActive }) {
   return "app-bottomnav-item" + (isActive ? " is-active" : "");
 }
 
-// A friendlier, rounder cottage — soft arched roof instead of a sharp
-// peak, plus a little door for detail, matching the brand's playful,
-// hand-drawn feel better than a generic house glyph.
+// Solid, filled glyphs (instead of thin line art) — bigger, bolder, and
+// easier to read at a glance; all four tab icons share one size so the
+// bar reads as a consistent set.
 function HomeIcon() {
   return (
-    <svg width="29" height="29" viewBox="0 0 24 24" fill="none">
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
       <path
-        d="M2.6 12.2 Q12 2.2 21.4 12.2"
-        stroke="currentColor"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        d="M12 3.2 3 11h2.3v9h5.2v-5.8h3v5.8h5.2v-9H21z"
+        fill="currentColor"
       />
-      <path
-        d="M4.6 10.8V19.4a1 1 0 001 1h12.8a1 1 0 001-1v-8.6"
-        stroke="currentColor"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <rect x="9.8" y="14" width="4.4" height="6.4" rx="1.3" fill="currentColor" />
     </svg>
   );
 }
 
-// A rounded speech bubble with a typing-dots detail, easier to read at
-// a glance than a plain rectangle.
+// A solid speech bubble with a tail, easier to read at a glance than a
+// thin outline.
 function ChatIcon() {
   return (
-    <svg width="29" height="29" viewBox="0 0 24 24" fill="none">
-      <rect x="1.8" y="3.2" width="20.4" height="14.4" rx="6.6" stroke="currentColor" strokeWidth="2.4" />
-      <path d="M6 17.4L6 21.8L10.4 17.6Z" fill="currentColor" />
-      <circle cx="8" cy="10.4" r="1.35" fill="currentColor" />
-      <circle cx="12" cy="10.4" r="1.35" fill="currentColor" />
-      <circle cx="16" cy="10.4" r="1.35" fill="currentColor" />
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M4 5.6A2.6 2.6 0 016.6 3h10.8A2.6 2.6 0 0120 5.6v7.8a2.6 2.6 0 01-2.6 2.6H10L5.1 19.6A.6.6 0 014 19.1V5.6z"
+        fill="currentColor"
+      />
     </svg>
   );
 }
 
-// Stories: a ring around a filled dot — the same "unwatched story"
-// shape the stories bar uses, so the tab reads as what it opens.
+// Stories: a filled ring (donut shape) — the same "unwatched story" idea
+// the stories bar uses, now solid instead of dashed-outline.
 function StoriesIcon() {
   return (
-    <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
-      <circle
-        cx="12"
-        cy="12"
-        r="9"
-        stroke="currentColor"
-        strokeWidth="2.2"
-        strokeLinecap="round"
-        strokeDasharray="7 3.4"
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M12 3a9 9 0 100 18 9 9 0 000-18zm0 4.6a4.4 4.4 0 110 8.8 4.4 4.4 0 010-8.8z"
+        fill="currentColor"
       />
-      <circle cx="12" cy="12" r="4" fill="currentColor" />
     </svg>
   );
 }
 function UserIcon() {
   return (
-    <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
-      <circle cx="12" cy="8" r="3.4" stroke="currentColor" strokeWidth="2.2" />
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
       <path
-        d="M5 20c1.2-4 4-6 7-6s5.8 2 7 6"
-        stroke="currentColor"
-        strokeWidth="2.2"
-        strokeLinecap="round"
+        d="M12 12a5 5 0 100-10 5 5 0 000 10zm0 2c-5.2 0-9.6 2.6-9.6 6.2V21h19.2v-.8c0-3.6-4.4-6.2-9.6-6.2z"
+        fill="currentColor"
       />
     </svg>
   );
 }
 function PlusIcon() {
   return (
-    <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
       <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" />
     </svg>
   );

@@ -9,7 +9,7 @@
    ========================================================================= */
 
 :root {
-  --app-bg: #f2e8d8;
+  --app-bg: #FFF7DD;
   --app-bg-deep: #e6d9c0;
   --app-surface: #ffffff;
   --app-ink: #1c1810;
@@ -22,7 +22,12 @@
   --app-shadow: none;
   --app-shadow-lg: none;
 
-  --app-yellow: #f5c945;
+  /* Top bar / bottom bar tint — the site's new lavender trim color,
+     kept separate from --app-bg-deep (still used for the many subtle
+     darker-panel spots elsewhere) so only these two bars pick it up. */
+  --app-navbar: #C4ADD9;
+
+  --app-yellow: #F4D86B;
   --app-green: #a3e6a1;
   --app-pink: #f6a8cd;
   --app-blue: #a3d8f2;
@@ -39,7 +44,7 @@
      used as the page background instead of a flat fill — swapped for a
      lighter-ink version below in dark mode. Generated as inline SVG so
      no image request/asset is needed. */
-  --app-bg-pattern: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNjAiIGhlaWdodD0iMjYwIiB2aWV3Qm94PSIwIDAgMjYwIDI2MCI+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTQsMjApIHJvdGF0ZSgtOCkiIHN0cm9rZT0icmdiYSgyOCwyNCwxNiwwLjIyKSIgc3Ryb2tlLXdpZHRoPSIxLjciIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTQsMTAgUTQsMiAxMiwyIEwyNiwyIFEzNCwyIDM0LDEwIEwzNiwxOCBRMzcsMjQgMzIsMjQgUTI4LDI0IDI2LDIwIEwxMiwyMCBRMTAsMjQgNiwyNCBRMSwyNCAyLDE4IFoiLz48bGluZSB4MT0iMTAiIHkxPSI4IiB4Mj0iMTAiIHkyPSIxNCIvPjxsaW5lIHgxPSI3IiB5MT0iMTEiIHgyPSIxMyIgeTI9IjExIi8+PGNpcmNsZSBjeD0iMjciIGN5PSI4IiByPSIxLjYiLz48Y2lyY2xlIGN4PSIzMSIgY3k9IjEyIiByPSIxLjYiLz48L2c+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTIwLDgpIHJvdGF0ZSg0KSIgc3Ryb2tlPSJyZ2JhKDI4LDI0LDE2LDAuMjIpIiBzdHJva2Utd2lkdGg9IjEuNyIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cG9seWxpbmUgcG9pbnRzPSI5LDAgMCw5IDksMTgiLz48cG9seWxpbmUgcG9pbnRzPSIxNSwwIDI0LDkgMTUsMTgiLz48bGluZSB4MT0iMTMuNSIgeTE9IjIxIiB4Mj0iMTAuNSIgeTI9Ii0zIi8+PC9nPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIwNSwzMCkgcm90YXRlKDYpIiBzdHJva2U9InJnYmEoMjgsMjQsMTYsMC4yMikiIHN0cm9rZS13aWR0aD0iMS43IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik0yLDE2IEwyLDExIFEyLDAgMTYsMCBRMzAsMCAzMCwxMSBMMzAsMTYiLz48cmVjdCB4PSItMSIgeT0iMTQiIHdpZHRoPSI3IiBoZWlnaHQ9IjExIiByeD0iMyIvPjxyZWN0IHg9IjI2IiB5PSIxNCIgd2lkdGg9IjciIGhlaWdodD0iMTEiIHJ4PSIzIi8+PC9nPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDYwLDc4KSByb3RhdGUoLTYpIiBzdHJva2U9InJnYmEoMjgsMjQsMTYsMC4yMikiIHN0cm9rZS13aWR0aD0iMS43IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik0zLDcgTDcsLTIgTDExLDYiLz48cGF0aCBkPSJNMjMsNyBMMTksLTIgTDE1LDYiLz48Y2lyY2xlIGN4PSIxMyIgY3k9IjEyIiByPSIxMSIvPjxjaXJjbGUgY3g9IjkiIGN5PSIxMSIgcj0iMS4xIiBmaWxsPSJyZ2JhKDI4LDI0LDE2LDAuMjIpIi8+PGNpcmNsZSBjeD0iMTciIGN5PSIxMSIgcj0iMS4xIiBmaWxsPSJyZ2JhKDI4LDI0LDE2LDAuMjIpIi8+PHBhdGggZD0iTTExLDE2IFExMywxOCAxNSwxNiIvPjxsaW5lIHgxPSIxIiB5MT0iMTQiIHgyPSItNSIgeTI9IjEzIi8+PGxpbmUgeDE9IjI1IiB5MT0iMTQiIHgyPSIzMSIgeTI9IjEzIi8+PC9nPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE1NSw3MCkgcm90YXRlKDEyKSIgc3Ryb2tlPSJyZ2JhKDI4LDI0LDE2LDAuMjIpIiBzdHJva2Utd2lkdGg9IjEuNyIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTMsMCBMMiwxNSBMMTAsMTUgTDcsMjYgTDIwLDkgTDEyLDkgWiIvPjwvZz48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMzAsMTAwKSByb3RhdGUoMCkiIHN0cm9rZT0icmdiYSgyOCwyNCwxNiwwLjIyKSIgc3Ryb2tlLXdpZHRoPSIxLjciIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTgsMCBMOS41LDYuNSBMMTYsOCBMOS41LDkuNSBMOCwxNiBMNi41LDkuNSBMMCw4IEw2LjUsNi41IFoiLz48L2c+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTAsMTE4KSByb3RhdGUoLTQpIiBzdHJva2U9InJnYmEoMjgsMjQsMTYsMC4yMikiIHN0cm9rZS13aWR0aD0iMS43IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik0wLDEwIFExMSwtMiAyMiwxMCIvPjxwYXRoIGQ9Ik00LDE0IFExMSw2IDE4LDE0Ii8+PGNpcmNsZSBjeD0iMTEiIGN5PSIxOSIgcj0iMS40IiBmaWxsPSJyZ2JhKDI4LDI0LDE2LDAuMjIpIi8+PC9nPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEwMCwxMTgpIHJvdGF0ZSgwKSIgc3Ryb2tlPSJyZ2JhKDI4LDI0LDE2LDAuMjIpIiBzdHJva2Utd2lkdGg9IjEuNyIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cG9seWxpbmUgcG9pbnRzPSIwLDIgOCw5IDAsMTYiLz48bGluZSB4MT0iMTIiIHkxPSIxNiIgeDI9IjIyIiB5Mj0iMTYiLz48L2c+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTkwLDE0MCkgcm90YXRlKC0xMCkiIHN0cm9rZT0icmdiYSgyOCwyNCwxNiwwLjIyKSIgc3Ryb2tlLXdpZHRoPSIxLjciIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIiByeD0iNCIvPjxjaXJjbGUgY3g9IjUiIGN5PSI1IiByPSIxLjMiIGZpbGw9InJnYmEoMjgsMjQsMTYsMC4yMikiLz48Y2lyY2xlIGN4PSIxNSIgY3k9IjUiIHI9IjEuMyIgZmlsbD0icmdiYSgyOCwyNCwxNiwwLjIyKSIvPjxjaXJjbGUgY3g9IjEwIiBjeT0iMTAiIHI9IjEuMyIgZmlsbD0icmdiYSgyOCwyNCwxNiwwLjIyKSIvPjxjaXJjbGUgY3g9IjUiIGN5PSIxNSIgcj0iMS4zIiBmaWxsPSJyZ2JhKDI4LDI0LDE2LDAuMjIpIi8+PGNpcmNsZSBjeD0iMTUiIGN5PSIxNSIgcj0iMS4zIiBmaWxsPSJyZ2JhKDI4LDI0LDE2LDAuMjIpIi8+PC9nPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDMwLDE2OCkgcm90YXRlKDYpIiBzdHJva2U9InJnYmEoMjgsMjQsMTYsMC4yMikiIHN0cm9rZS13aWR0aD0iMS43IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik0yLDggTDIsMTggUTIsMjMgOSwyMyBMMTMsMjMgUTIwLDIzIDIwLDE4IEwyMCw4IFoiLz48cGF0aCBkPSJNMjAsMTAgUTI3LDEwIDI3LDE1IFEyNywyMCAyMCwxOSIvPjxwYXRoIGQ9Ik02LDQgUTgsMSA2LC0yIi8+PHBhdGggZD0iTTExLDQgUTEzLDEgMTEsLTIiLz48L2c+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTIwLDE3NSkgcm90YXRlKDApIiBzdHJva2U9InJnYmEoMjgsMjQsMTYsMC4yMikiIHN0cm9rZS13aWR0aD0iMS43IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxjaXJjbGUgY3g9IjEwIiBjeT0iMTAiIHI9IjEwIi8+PHBhdGggZD0iTTcsNS41IEwxNSwxMCBMNywxNC41IFoiLz48L2c+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjE1LDE5MCkgcm90YXRlKC02KSIgc3Ryb2tlPSJyZ2JhKDI4LDI0LDE2LDAuMjIpIiBzdHJva2Utd2lkdGg9IjEuNyIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMSwxIEwyMSwxIFEyNCwxIDI0LDQgTDI0LDEzIFEyNCwxNiAyMSwxNiBMOSwxNiBMNCwyMSBMNSwxNiBMNCwxNiBRMSwxNiAxLDEzIFoiLz48bGluZSB4MT0iMTIuNSIgeTE9IjUiIHgyPSIxMi41IiB5Mj0iMTAiLz48Y2lyY2xlIGN4PSIxMi41IiBjeT0iMTMiIHI9IjAuOSIgZmlsbD0icmdiYSgyOCwyNCwxNiwwLjIyKSIvPjwvZz48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSg2MCwyMjApIHJvdGF0ZSgtNCkiIHN0cm9rZT0icmdiYSgyOCwyNCwxNiwwLjIyKSIgc3Ryb2tlLXdpZHRoPSIxLjciIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHJlY3QgeD0iNCIgeT0iMCIgd2lkdGg9IjIyIiBoZWlnaHQ9IjE1IiByeD0iMS41Ii8+PHBhdGggZD0iTTAsMTkgTDMwLDE5IEwyNywyMyBMMywyMyBaIi8+PGxpbmUgeDE9IjExIiB5MT0iMTkiIHgyPSIxOSIgeTI9IjE5Ii8+PC9nPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE2MCwyMjUpIHJvdGF0ZSgxMCkiIHN0cm9rZT0icmdiYSgyOCwyNCwxNiwwLjIyKSIgc3Ryb2tlLXdpZHRoPSIxLjciIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjE4IiBoZWlnaHQ9IjE4IiByeD0iMyIvPjxsaW5lIHgxPSI1IiB5MT0iOSIgeDI9IjEzIiB5Mj0iOSIvPjwvZz48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSg1LDIyMCkgcm90YXRlKDE0KSIgc3Ryb2tlPSJyZ2JhKDI4LDI0LDE2LDAuMjIpIiBzdHJva2Utd2lkdGg9IjEuNyIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNOCwwIEw5LjUsNi41IEwxNiw4IEw5LjUsOS41IEw4LDE2IEw2LjUsOS41IEwwLDggTDYuNSw2LjUgWiIvPjwvZz48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMzUsNSkgcm90YXRlKC0yMCkiIHN0cm9rZT0icmdiYSgyOCwyNCwxNiwwLjIyKSIgc3Ryb2tlLXdpZHRoPSIxLjciIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTEzLDAgTDIsMTUgTDEwLDE1IEw3LDI2IEwyMCw5IEwxMiw5IFoiLz48L2c+PC9zdmc+");
+  --app-bg-pattern: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNjAiIGhlaWdodD0iMjYwIiB2aWV3Qm94PSIwIDAgMjYwIDI2MCI+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTQsMjApIHJvdGF0ZSgtOCkiIHN0cm9rZT0icmdiYSgxMjAsOTAsMTUwLDAuMzUpIiBzdHJva2Utd2lkdGg9IjEuNyIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNNCwxMCBRNCwyIDEyLDIgTDI2LDIgUTM0LDIgMzQsMTAgTDM2LDE4IFEzNywyNCAzMiwyNCBRMjgsMjQgMjYsMjAgTDEyLDIwIFExMCwyNCA2LDI0IFExLDI0IDIsMTggWiIvPjxsaW5lIHgxPSIxMCIgeTE9IjgiIHgyPSIxMCIgeTI9IjE0Ii8+PGxpbmUgeDE9IjciIHkxPSIxMSIgeDI9IjEzIiB5Mj0iMTEiLz48Y2lyY2xlIGN4PSIyNyIgY3k9IjgiIHI9IjEuNiIvPjxjaXJjbGUgY3g9IjMxIiBjeT0iMTIiIHI9IjEuNiIvPjwvZz48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxMjAsOCkgcm90YXRlKDQpIiBzdHJva2U9InJnYmEoMTIwLDkwLDE1MCwwLjM1KSIgc3Ryb2tlLXdpZHRoPSIxLjciIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBvbHlsaW5lIHBvaW50cz0iOSwwIDAsOSA5LDE4Ii8+PHBvbHlsaW5lIHBvaW50cz0iMTUsMCAyNCw5IDE1LDE4Ii8+PGxpbmUgeDE9IjEzLjUiIHkxPSIyMSIgeDI9IjEwLjUiIHkyPSItMyIvPjwvZz48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMDUsMzApIHJvdGF0ZSg2KSIgc3Ryb2tlPSJyZ2JhKDEyMCw5MCwxNTAsMC4zNSkiIHN0cm9rZS13aWR0aD0iMS43IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik0yLDE2IEwyLDExIFEyLDAgMTYsMCBRMzAsMCAzMCwxMSBMMzAsMTYiLz48cmVjdCB4PSItMSIgeT0iMTQiIHdpZHRoPSI3IiBoZWlnaHQ9IjExIiByeD0iMyIvPjxyZWN0IHg9IjI2IiB5PSIxNCIgd2lkdGg9IjciIGhlaWdodD0iMTEiIHJ4PSIzIi8+PC9nPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDYwLDc4KSByb3RhdGUoLTYpIiBzdHJva2U9InJnYmEoMTIwLDkwLDE1MCwwLjM1KSIgc3Ryb2tlLXdpZHRoPSIxLjciIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTMsNyBMNywtMiBMMTEsNiIvPjxwYXRoIGQ9Ik0yMyw3IEwxOSwtMiBMMTUsNiIvPjxjaXJjbGUgY3g9IjEzIiBjeT0iMTIiIHI9IjExIi8+PGNpcmNsZSBjeD0iOSIgY3k9IjExIiByPSIxLjEiIGZpbGw9InJnYmEoMTIwLDkwLDE1MCwwLjM1KSIvPjxjaXJjbGUgY3g9IjE3IiBjeT0iMTEiIHI9IjEuMSIgZmlsbD0icmdiYSgxMjAsOTAsMTUwLDAuMzUpIi8+PHBhdGggZD0iTTExLDE2IFExMywxOCAxNSwxNiIvPjxsaW5lIHgxPSIxIiB5MT0iMTQiIHgyPSItNSIgeTI9IjEzIi8+PGxpbmUgeDE9IjI1IiB5MT0iMTQiIHgyPSIzMSIgeTI9IjEzIi8+PC9nPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE1NSw3MCkgcm90YXRlKDEyKSIgc3Ryb2tlPSJyZ2JhKDEyMCw5MCwxNTAsMC4zNSkiIHN0cm9rZS13aWR0aD0iMS43IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik0xMywwIEwyLDE1IEwxMCwxNSBMNywyNiBMMjAsOSBMMTIsOSBaIi8+PC9nPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIzMCwxMDApIHJvdGF0ZSgwKSIgc3Ryb2tlPSJyZ2JhKDEyMCw5MCwxNTAsMC4zNSkiIHN0cm9rZS13aWR0aD0iMS43IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik04LDAgTDkuNSw2LjUgTDE2LDggTDkuNSw5LjUgTDgsMTYgTDYuNSw5LjUgTDAsOCBMNi41LDYuNSBaIi8+PC9nPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEwLDExOCkgcm90YXRlKC00KSIgc3Ryb2tlPSJyZ2JhKDEyMCw5MCwxNTAsMC4zNSkiIHN0cm9rZS13aWR0aD0iMS43IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik0wLDEwIFExMSwtMiAyMiwxMCIvPjxwYXRoIGQ9Ik00LDE0IFExMSw2IDE4LDE0Ii8+PGNpcmNsZSBjeD0iMTEiIGN5PSIxOSIgcj0iMS40IiBmaWxsPSJyZ2JhKDEyMCw5MCwxNTAsMC4zNSkiLz48L2c+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTAwLDExOCkgcm90YXRlKDApIiBzdHJva2U9InJnYmEoMTIwLDkwLDE1MCwwLjM1KSIgc3Ryb2tlLXdpZHRoPSIxLjciIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBvbHlsaW5lIHBvaW50cz0iMCwyIDgsOSAwLDE2Ii8+PGxpbmUgeDE9IjEyIiB5MT0iMTYiIHgyPSIyMiIgeTI9IjE2Ii8+PC9nPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE5MCwxNDApIHJvdGF0ZSgtMTApIiBzdHJva2U9InJnYmEoMTIwLDkwLDE1MCwwLjM1KSIgc3Ryb2tlLXdpZHRoPSIxLjciIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIiByeD0iNCIvPjxjaXJjbGUgY3g9IjUiIGN5PSI1IiByPSIxLjMiIGZpbGw9InJnYmEoMTIwLDkwLDE1MCwwLjM1KSIvPjxjaXJjbGUgY3g9IjE1IiBjeT0iNSIgcj0iMS4zIiBmaWxsPSJyZ2JhKDEyMCw5MCwxNTAsMC4zNSkiLz48Y2lyY2xlIGN4PSIxMCIgY3k9IjEwIiByPSIxLjMiIGZpbGw9InJnYmEoMTIwLDkwLDE1MCwwLjM1KSIvPjxjaXJjbGUgY3g9IjUiIGN5PSIxNSIgcj0iMS4zIiBmaWxsPSJyZ2JhKDEyMCw5MCwxNTAsMC4zNSkiLz48Y2lyY2xlIGN4PSIxNSIgY3k9IjE1IiByPSIxLjMiIGZpbGw9InJnYmEoMTIwLDkwLDE1MCwwLjM1KSIvPjwvZz48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgzMCwxNjgpIHJvdGF0ZSg2KSIgc3Ryb2tlPSJyZ2JhKDEyMCw5MCwxNTAsMC4zNSkiIHN0cm9rZS13aWR0aD0iMS43IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik0yLDggTDIsMTggUTIsMjMgOSwyMyBMMTMsMjMgUTIwLDIzIDIwLDE4IEwyMCw4IFoiLz48cGF0aCBkPSJNMjAsMTAgUTI3LDEwIDI3LDE1IFEyNywyMCAyMCwxOSIvPjxwYXRoIGQ9Ik02LDQgUTgsMSA2LC0yIi8+PHBhdGggZD0iTTExLDQgUTEzLDEgMTEsLTIiLz48L2c+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTIwLDE3NSkgcm90YXRlKDApIiBzdHJva2U9InJnYmEoMTIwLDkwLDE1MCwwLjM1KSIgc3Ryb2tlLXdpZHRoPSIxLjciIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PGNpcmNsZSBjeD0iMTAiIGN5PSIxMCIgcj0iMTAiLz48cGF0aCBkPSJNNyw1LjUgTDE1LDEwIEw3LDE0LjUgWiIvPjwvZz48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMTUsMTkwKSByb3RhdGUoLTYpIiBzdHJva2U9InJnYmEoMTIwLDkwLDE1MCwwLjM1KSIgc3Ryb2tlLXdpZHRoPSIxLjciIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTEsMSBMMjEsMSBRMjQsMSAyNCw0IEwyNCwxMyBRMjQsMTYgMjEsMTYgTDksMTYgTDQsMjEgTDUsMTYgTDQsMTYgUTEsMTYgMSwxMyBaIi8+PGxpbmUgeDE9IjEyLjUiIHkxPSI1IiB4Mj0iMTIuNSIgeTI9IjEwIi8+PGNpcmNsZSBjeD0iMTIuNSIgY3k9IjEzIiByPSIwLjkiIGZpbGw9InJnYmEoMTIwLDkwLDE1MCwwLjM1KSIvPjwvZz48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSg2MCwyMjApIHJvdGF0ZSgtNCkiIHN0cm9rZT0icmdiYSgxMjAsOTAsMTUwLDAuMzUpIiBzdHJva2Utd2lkdGg9IjEuNyIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cmVjdCB4PSI0IiB5PSIwIiB3aWR0aD0iMjIiIGhlaWdodD0iMTUiIHJ4PSIxLjUiLz48cGF0aCBkPSJNMCwxOSBMMzAsMTkgTDI3LDIzIEwzLDIzIFoiLz48bGluZSB4MT0iMTEiIHkxPSIxOSIgeDI9IjE5IiB5Mj0iMTkiLz48L2c+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTYwLDIyNSkgcm90YXRlKDEwKSIgc3Ryb2tlPSJyZ2JhKDEyMCw5MCwxNTAsMC4zNSkiIHN0cm9rZS13aWR0aD0iMS43IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjMiLz48bGluZSB4MT0iNSIgeTE9IjkiIHgyPSIxMyIgeTI9IjkiLz48L2c+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNSwyMjApIHJvdGF0ZSgxNCkiIHN0cm9rZT0icmdiYSgxMjAsOTAsMTUwLDAuMzUpIiBzdHJva2Utd2lkdGg9IjEuNyIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNOCwwIEw5LjUsNi41IEwxNiw4IEw5LjUsOS41IEw4LDE2IEw2LjUsOS41IEwwLDggTDYuNSw2LjUgWiIvPjwvZz48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMzUsNSkgcm90YXRlKC0yMCkiIHN0cm9rZT0icmdiYSgxMjAsOTAsMTUwLDAuMzUpIiBzdHJva2Utd2lkdGg9IjEuNyIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTMsMCBMMiwxNSBMMTAsMTUgTDcsMjYgTDIwLDkgTDEyLDkgWiIvPjwvZz48L3N2Zz4=");
 
   --app-font-display: "Fredoka", "Nunito", system-ui, sans-serif;
   --app-font-body: "Nunito", system-ui, sans-serif;
@@ -66,6 +71,10 @@
   --app-border: #f3ecdd;
   --app-shadow: none;
   --app-shadow-lg: none;
+
+  /* Dark mode keeps its existing bar look (not part of this reskin) —
+     just point the new var back at what the bars already used. */
+  --app-navbar: var(--app-bg-deep);
 
   --app-yellow: #d9ad2f;
   --app-green: #6fae6c;
@@ -175,10 +184,10 @@ ul {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 16px;
-  /* A few tones darker than the page background instead of a hard rule
-     — the top bar reads as its own strip without a border line. */
-  background: var(--app-bg-deep);
+  padding: 8px 16px;
+  /* Lavender bar tint (the site's new top/bottom-bar trim color) instead
+     of the plain darker-page-tone strip. */
+  background: var(--app-navbar);
 }
 
 .app-logo-badge {
@@ -249,8 +258,8 @@ ul {
 }
 
 .app-icon-btn {
-  width: 40px;
-  height: 40px;
+  width: 34px;
+  height: 34px;
   flex-shrink: 0;
   border-radius: var(--app-radius-sm);
   border: var(--app-border-w) solid var(--app-border);
@@ -536,7 +545,7 @@ ul {
   display: flex;
   align-items: center;
   justify-content: space-around;
-  background: var(--app-surface);
+  background: var(--app-navbar);
   border-top: var(--app-border-w) solid var(--app-border);
   padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 0px));
 }
@@ -556,26 +565,28 @@ ul {
   border: none;
   background: none;
   border-radius: 12px;
-  color: var(--app-muted);
+  /* Solid black icons on the new lavender bar, whether active or not —
+     only the active pill's background changes. */
+  color: #000000;
 }
 .app-bottomnav-item.is-active {
-  color: var(--app-ink);
+  color: #000000;
   background: var(--app-accent);
 }
 
 /* The profile tab's photo, shown instead of the generic user icon once
    logged in — same treatment as the top-bar / drawer dp. */
 .app-bottomnav-dp-photo {
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid var(--app-border);
   display: block;
 }
 .app-bottomnav-dp-fallback {
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   border: 2px solid var(--app-border);
   background: var(--app-accent);
@@ -591,8 +602,8 @@ ul {
    it (no negative-margin "raised FAB" trick, which was spilling above
    the bar's top edge and overlapping the feed behind it). */
 .app-bottomnav-create {
-  width: 54px;
-  height: 54px;
+  width: 48px;
+  height: 48px;
   flex-shrink: 0;
   border-radius: 50%;
   display: flex;
@@ -601,7 +612,7 @@ ul {
   background: var(--app-accent);
   border: var(--app-border-w) solid var(--app-border);
   box-shadow: var(--app-shadow);
-  color: var(--app-ink);
+  color: #000000;
 }
 .app-bottomnav-create:active {
   transform: scale(0.96);
@@ -725,25 +736,22 @@ ul {
 .app-card {
   position: relative;
   border: var(--app-border-w) solid var(--app-border);
-  border-radius: 0;
+  border-radius: 16px;
+  overflow: hidden;
   padding: 10px 6px 6px;
   box-shadow: var(--app-shadow-lg);
   cursor: pointer;
 }
-.app-card-green {
-  background: var(--app-green);
-}
-.app-card-yellow {
-  background: var(--app-yellow);
-}
-.app-card-pink {
-  background: var(--app-pink);
-}
-.app-card-blue {
-  background: var(--app-blue);
-}
+/* All post cards now share one color (mustard/citrus) instead of
+   cycling through green/pink/blue/purple — those root colors stay
+   defined above since other UI (badges, gradients, the downvote
+   button, etc.) still uses them. */
+.app-card-green,
+.app-card-yellow,
+.app-card-pink,
+.app-card-blue,
 .app-card-purple {
-  background: var(--app-purple);
+  background: var(--app-yellow);
 }
 
 /* Header row now lives inside the card, below the vote/comment/save
@@ -773,15 +781,16 @@ ul {
   }
 }
 .app-card-dp {
-  width: 22px;
-  height: 22px;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
   border-radius: 50%;
   background: var(--app-ink);
   color: var(--app-surface);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.7rem;
+  font-size: 1.05rem;
 }
 .app-card-dot {
   color: var(--app-muted);
@@ -795,18 +804,28 @@ ul {
   text-decoration: underline;
 }
 /* Follow button sits in the header row, just left of the 3-dot menu —
-   same white/black-border treatment as the more button, text only
-   toggles between "Follow" and "Following". */
+   an icon toggle now (plus = Follow, check = Following) instead of a
+   text pill, same circular treatment as the more button next to it. */
 .app-card-follow {
   flex-shrink: 0;
-  padding: 5px 12px;
-  border-radius: 999px;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border-radius: var(--app-radius-sm);
   border: 2px solid var(--app-border);
   background: var(--app-surface);
   color: var(--app-ink);
-  font-weight: 700;
-  font-size: 0.74rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
+}
+.app-card-follow svg {
+  width: 16px;
+  height: 16px;
+}
+.app-card-follow.is-following {
+  background: var(--app-accent);
 }
 /* Groups the Follow chip and the 3-dot menu together, flush against the
    right edge of the header row. */
@@ -2032,7 +2051,7 @@ ul {
   }
 
   .app-topbar {
-    padding: 14px 24px;
+    padding: 11px 24px;
     gap: 16px;
   }
 
