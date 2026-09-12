@@ -570,6 +570,9 @@ ul {
   color: #000000;
 }
 .app-bottomnav-item.is-active {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
   color: #000000;
   background: var(--app-accent);
 }
