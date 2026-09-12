@@ -5,6 +5,28 @@ import { useCallback, useEffect, useRef, useState } from "react";
 // carry it into the story composer. Falls back to the OS camera/gallery
 // picker whenever getUserMedia isn't available — an insecure origin, a
 // browser without it, or the user having blocked camera access.
+// Ask the camera for a proper resolution. WITHOUT this, getUserMedia
+// hands back whatever the browser feels like — in practice 640x480 — so
+// a phone with a 12MP camera streams at VGA and the still taken from it
+// is genuinely that small and soft, however good the phone is. `ideal`
+// rather than `exact`, so a camera that can't manage this still opens,
+// just at whatever it can do.
+const CAMERA_QUALITY = { width: { ideal: 1920 }, height: { ideal: 1080 } };
+
+async function openCamera(facing) {
+  const video = { facingMode: facing, ...CAMERA_QUALITY };
+  try {
+    return await navigator.mediaDevices.getUserMedia({ video, audio: false });
+  } catch (err) {
+    // A few older browsers reject a constraint set outright instead of
+    // treating the hints as hints. Better a low-res camera than none.
+    if (err?.name === "OverconstrainedError" || err?.name === "TypeError") {
+      return navigator.mediaDevices.getUserMedia({ video: { facingMode: facing }, audio: false });
+    }
+    throw err;
+  }
+}
+
 export default function CameraCaptureModal({ onClose, onCapture }) {
   const videoRef = useRef(null);
   const streamRef = useRef(null);
@@ -35,10 +57,7 @@ export default function CameraCaptureModal({ onClose, onCapture }) {
         return;
       }
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: facing },
-          audio: false,
-        });
+        const stream = await openCamera(facing);
         if (cancelled) {
           stream.getTracks().forEach((t) => t.stop());
           return;
@@ -103,7 +122,7 @@ export default function CameraCaptureModal({ onClose, onCapture }) {
         stopStream();
       },
       "image/jpeg",
-      0.92
+      0.95
     );
   }
 

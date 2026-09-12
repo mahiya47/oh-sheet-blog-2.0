@@ -7044,9 +7044,10 @@ body.app-body-mono-dark {
   gap: 14px;
   overflow-x: auto;
   padding: 4px 2px 14px;
-  /* Matches .app-feed's gap, so the space under the line reads as one
-     more step in the same rhythm as the posts below it. */
-  margin-bottom: 14px;
+  /* Half the feed's own 14px gap — the line already reads as a divider,
+     so the first post sits tighter under it than posts do to each other.
+     (The strip only renders on desktop, so this is a desktop-only gap.) */
+  margin-bottom: 7px;
   border-bottom: var(--app-border-w) solid var(--app-border);
 }
 .app-story-circle {
