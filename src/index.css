@@ -25,7 +25,7 @@
   /* Top bar / bottom bar tint — the site's new lavender trim color,
      kept separate from --app-bg-deep (still used for the many subtle
      darker-panel spots elsewhere) so only these two bars pick it up. */
-  --app-navbar: #C4ADD9;
+  --app-navbar: #94792E;
 
   --app-yellow: #F4D86B;
   --app-green: #a3e6a1;

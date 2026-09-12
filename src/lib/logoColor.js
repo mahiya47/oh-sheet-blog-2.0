@@ -1,20 +1,10 @@
-// A random light color for the logo badge, picked once per page load —
-// reload the site and you get a different one. Also used to build the
-// live browser-tab favicon so it matches the badge in the top bar.
+// Fixed logo badge color — used to rotate randomly on every page load,
+// now pinned to the site's yellow/mustard accent instead (matches
+// --app-yellow in index.css). Also used to build the live browser-tab
+// favicon so it matches the badge in the top bar.
 import { buildBadgeSVG, APP_ICON_COLOR } from "./logoMark.js";
 
-const PALETTE = [
-  "#a3e6a1", // green
-  "#f5c945", // yellow
-  "#f6a8cd", // pink
-  "#a3d8f2", // blue
-  "#f5b97a", // orange
-  "#cdb3f2", // purple
-  "#8fe3d0", // mint
-  "#f2a6a6", // coral
-];
-
-export const logoColor = PALETTE[Math.floor(Math.random() * PALETTE.length)];
+export const logoColor = "#F4D86B";
 
 // The color baked into the STATIC app icon files — the default favicon
 // (before JS swaps it), apple-touch-icon, the manifest icons, and the
