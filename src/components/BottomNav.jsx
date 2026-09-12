@@ -66,7 +66,7 @@ function linkClass({ isActive }) {
 // bar reads as a consistent set.
 function HomeIcon() {
   return (
-    <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none">
       <path
         d="M12 3.2 3 11h2.3v9h5.2v-5.8h3v5.8h5.2v-9H21z"
         fill="currentColor"
@@ -79,7 +79,7 @@ function HomeIcon() {
 // thin outline.
 function ChatIcon() {
   return (
-    <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none">
       <path
         d="M4 5.6A2.6 2.6 0 016.6 3h10.8A2.6 2.6 0 0120 5.6v7.8a2.6 2.6 0 01-2.6 2.6H10L5.1 19.6A.6.6 0 014 19.1V5.6z"
         fill="currentColor"
@@ -92,7 +92,7 @@ function ChatIcon() {
 // "unwatched story" shape the stories bar uses.
 function StoriesIcon() {
   return (
-    <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none">
       <circle
         cx="12"
         cy="12"
@@ -108,7 +108,7 @@ function StoriesIcon() {
 }
 function UserIcon() {
   return (
-    <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none">
       <path
         d="M12 12a5 5 0 100-10 5 5 0 000 10zm0 2c-5.2 0-9.6 2.6-9.6 6.2V21h19.2v-.8c0-3.6-4.4-6.2-9.6-6.2z"
         fill="currentColor"
@@ -118,7 +118,7 @@ function UserIcon() {
 }
 function PlusIcon() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
       <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" />
     </svg>
   );

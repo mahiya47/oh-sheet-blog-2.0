@@ -22,16 +22,19 @@
   --app-shadow: none;
   --app-shadow-lg: none;
 
-  /* Top bar / bottom bar tint — the site's new lavender trim color,
-     kept separate from --app-bg-deep (still used for the many subtle
-     darker-panel spots elsewhere) so only these two bars pick it up. */
-  --app-navbar: #B7A793;
+  /* Top bar / bottom bar tint, kept separate from --app-bg-deep (still
+     used for the many subtle darker-panel spots elsewhere) so only
+     these two bars pick it up. Swapped with --app-yellow below: the
+     bar tint and the accent/card color trade places on request. */
+  --app-navbar: #F4D86B;
 
-  --app-yellow: #F4D86B;
-  --app-green: #a3e6a1;
-  --app-pink: #f6a8cd;
-  --app-blue: #a3d8f2;
-  --app-purple: #cdb3f2;
+  --app-yellow: #B7A793;
+  /* Every other stray brand color folds into the one accent color too —
+     nothing else on the site keeps its own separate hue now. */
+  --app-green: #F4D86B;
+  --app-pink: #F4D86B;
+  --app-blue: #F4D86B;
+  --app-purple: #F4D86B;
 
   /* The "accent" color — used for active-nav highlights, the New Sheet
      button, and the Follow/Message buttons on a profile. Re-set as an
@@ -547,7 +550,7 @@ ul {
   justify-content: space-around;
   background: var(--app-navbar);
   border-top: var(--app-border-w) solid var(--app-border);
-  padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 0px));
+  padding: 5px 3px calc(5px + env(safe-area-inset-bottom, 0px));
 }
 
 /* Icon-only now (no text label under each icon) — border + background
@@ -559,20 +562,20 @@ ul {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 46px;
-  height: 46px;
+  width: 37px;
+  height: 37px;
   padding: 0;
   border: none;
   background: none;
-  border-radius: 12px;
+  border-radius: 10px;
   /* Solid black icons on the new lavender bar, whether active or not —
      only the active pill's background changes. */
   color: #000000;
 }
 .app-bottomnav-item.is-active {
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
+  width: 27px;
+  height: 27px;
+  border-radius: 8px;
   color: #000000;
   background: var(--app-accent);
 }
@@ -580,16 +583,16 @@ ul {
 /* The profile tab's photo, shown instead of the generic user icon once
    logged in — same treatment as the top-bar / drawer dp. */
 .app-bottomnav-dp-photo {
-  width: 32px;
-  height: 32px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid var(--app-border);
   display: block;
 }
 .app-bottomnav-dp-fallback {
-  width: 32px;
-  height: 32px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   border: 2px solid var(--app-border);
   background: var(--app-accent);
@@ -605,8 +608,8 @@ ul {
    it (no negative-margin "raised FAB" trick, which was spilling above
    the bar's top edge and overlapping the feed behind it). */
 .app-bottomnav-create {
-  width: 42px;
-  height: 42px;
+  width: 34px;
+  height: 34px;
   flex-shrink: 0;
   border-radius: 50%;
   display: flex;
