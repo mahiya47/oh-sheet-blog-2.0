@@ -9,6 +9,8 @@ const MAX_ITEMS = 5;
 // Distance the rail keeps from the top of the screen when it's short
 // enough to park there (clears the sticky top bar).
 const TOP_GAP = 90;
+// ...and from the bottom of the screen when it's too tall to park at the top.
+const BOTTOM_GAP = 18;
 
 export default function RightRail() {
   const { user } = useAuth();
@@ -44,16 +46,20 @@ export default function RightRail() {
     }
   }
 
-  // The rail scrolls with the page, then parks — but WHICH edge it parks
-  // on depends on how tall it is, and CSS can't measure that itself.
+  // The rail scrolls with the page, then parks — but WHERE it parks
+  // depends on how tall it is, and CSS can't measure that itself.
   //
-  //  - Taller than the screen: park its BOTTOM at the bottom of the
-  //    screen, so you scroll down through the whole rail and it holds
-  //    there while the feed keeps going (and releases the instant you
-  //    scroll back up). That's the Twitter behaviour.
-  //  - Shorter than the screen: parking the bottom would leave it
-  //    dangling at the bottom with a gap above it, so it parks its top
-  //    under the top bar instead.
+  //  - Shorter than the screen: park its top under the top bar.
+  //  - Taller than the screen: park it so its BOTTOM sits just above the
+  //    bottom of the screen, which means a NEGATIVE sticky top offset.
+  //    You scroll down through the whole rail, it holds there while the
+  //    feed carries on, and it lets go the instant you scroll back up —
+  //    the Twitter behaviour.
+  //
+  // This has to be `top`, not `bottom`: a sticky element with only
+  // `bottom` set never engages here at all (it just scrolls away and
+  // never comes back until you return to the top of the page), which is
+  // exactly the bug this replaces.
   //
   // Re-measured whenever the rail's own content changes size (cards
   // loading in) or the window resizes.
@@ -61,7 +67,9 @@ export default function RightRail() {
     const el = railRef.current;
     if (!el) return;
     const update = () => {
-      el.classList.toggle("is-tall", el.scrollHeight > window.innerHeight - TOP_GAP);
+      const h = el.offsetHeight;
+      if (!h) return;
+      el.style.top = Math.min(TOP_GAP, window.innerHeight - h - BOTTOM_GAP) + "px";
     };
     update();
     window.addEventListener("resize", update);

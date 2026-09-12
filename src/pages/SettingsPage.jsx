@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useTheme } from "../context/ThemeContext.jsx";
@@ -16,6 +16,25 @@ import {
 } from "../lib/presetAssets.js";
 
 const TABS = ["Profile", "About", "Social Links", "Privacy & Safety", "Account", "Appearance"];
+
+// A glyph per tab so the sidebar scans at a glance instead of reading as
+// six lines of plain text.
+const TAB_ICONS = {
+  Profile: "\u{1F464}",
+  About: "\u{1F4DD}",
+  "Social Links": "\u{1F517}",
+  "Privacy & Safety": "\u{1F512}",
+  Account: "\u2699\uFE0F",
+  Appearance: "\u{1F3A8}",
+};
+const TAB_BLURBS = {
+  Profile: "Your photo, name and bio",
+  About: "Details shown on your profile",
+  "Social Links": "Where else people can find you",
+  "Privacy & Safety": "Who can see you, blocks and mutes",
+  Account: "Email, password, sessions and data",
+  Appearance: "Theme and app install",
+};
 
 const PRONOUN_OPTIONS = ["", "he/him", "she/her", "they/them", "other"];
 const GENDER_OPTIONS = [
@@ -80,6 +99,9 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  // Set to the path the user tried to go to while they had unsaved edits —
+  // truthy means the "unsaved changes" prompt is open.
+  const [pendingNav, setPendingNav] = useState(null);
 
   // Privacy & Safety tab
   const [isPrivate, setIsPrivate] = useState(false);
@@ -276,40 +298,156 @@ export default function SettingsPage() {
     }
   }
 
-  async function handleSave(e) {
-    e.preventDefault();
+  // Everything the Save button writes. `baseline` is the same shape rebuilt
+  // from the saved user, so a plain compare of the two tells us whether
+  // anything was actually edited — that's what enables the Save buttons and
+  // what triggers the "you haven't saved" prompt on the way out.
+  const baseline = useMemo(() => {
+    if (!user) return null;
+    return {
+      name: user.name || "",
+      username: user.username || "",
+      bio: user.bio || "",
+      avatarUrl: user.avatarUrl || null,
+      coverUrl: user.coverUrl || null,
+      birthday: toDateInputValue(user.birthday),
+      pronouns: user.pronouns || "",
+      currentCity: user.currentCity || "",
+      work: user.work || "",
+      education: user.education || "",
+      gender: user.gender || "",
+      showGender: !!user.showGender,
+      orientation: user.orientation || "",
+      showOrientation: !!user.showOrientation,
+      githubUrl: user.githubUrl || "",
+      twitterUrl: user.twitterUrl || "",
+      linkedinUrl: user.linkedinUrl || "",
+      instagramUrl: user.instagramUrl || "",
+      pinterestUrl: user.pinterestUrl || "",
+    };
+  }, [user]);
+
+  const draft = {
+    name,
+    username,
+    bio,
+    avatarUrl,
+    coverUrl,
+    birthday,
+    pronouns,
+    currentCity,
+    work,
+    education,
+    gender,
+    showGender,
+    orientation,
+    showOrientation,
+    githubUrl,
+    twitterUrl,
+    linkedinUrl,
+    instagramUrl,
+    pinterestUrl,
+  };
+  const isDirty = !!baseline && JSON.stringify(draft) !== JSON.stringify(baseline);
+  const canSave = isDirty && !saving && !uploadingAvatar && !uploadingCover;
+
+  function resetDraft() {
+    if (!baseline) return;
+    setName(baseline.name);
+    setUsername(baseline.username);
+    setBio(baseline.bio);
+    setAvatarUrl(baseline.avatarUrl);
+    setCoverUrl(baseline.coverUrl);
+    setBirthday(baseline.birthday);
+    setPronouns(baseline.pronouns);
+    setCurrentCity(baseline.currentCity);
+    setWork(baseline.work);
+    setEducation(baseline.education);
+    setGender(baseline.gender);
+    setShowGender(baseline.showGender);
+    setOrientation(baseline.orientation);
+    setShowOrientation(baseline.showOrientation);
+    setGithubUrl(baseline.githubUrl);
+    setTwitterUrl(baseline.twitterUrl);
+    setLinkedinUrl(baseline.linkedinUrl);
+    setInstagramUrl(baseline.instagramUrl);
+    setPinterestUrl(baseline.pinterestUrl);
+  }
+
+  async function saveProfile() {
     setSaving(true);
     setMessage("");
     setError("");
     try {
       const updated = await api.updateProfile({
-        name,
-        username,
-        bio,
-        avatarUrl,
-        coverUrl,
+        ...draft,
         birthday: birthday || null,
-        pronouns,
-        currentCity,
-        work,
-        education,
-        gender,
-        showGender,
-        orientation,
-        showOrientation,
-        githubUrl,
-        twitterUrl,
-        linkedinUrl,
-        instagramUrl,
-        pinterestUrl,
       });
       setUser((u) => ({ ...u, ...updated }));
       setMessage("Saved.");
+      return true;
     } catch (err) {
       setError(err.message || "Couldn't save changes");
+      return false;
     } finally {
       setSaving(false);
     }
+  }
+
+  // Saving is the end of the job, so it hands the user back to their profile
+  // rather than leaving them staring at the form they just submitted.
+  async function handleSave(e) {
+    e.preventDefault();
+    if (!canSave) return;
+    const ok = await saveProfile();
+    if (ok) navigate("/profile");
+  }
+
+  // Reload / tab close.
+  useEffect(() => {
+    if (!isDirty) return;
+    const warn = (e) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [isDirty]);
+
+  // In-app navigation: catch any internal link click (back link, navbar,
+  // drawer) before React Router sees it and ask first.
+  useEffect(() => {
+    if (!isDirty) return;
+    const intercept = (e) => {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      const anchor = e.target?.closest?.("a[href]");
+      if (!anchor) return;
+      if (anchor.target && anchor.target !== "_self") return;
+      if (anchor.hasAttribute("download")) return;
+      const href = anchor.getAttribute("href");
+      if (!href || !href.startsWith("/") || href.startsWith("//") || href === "/settings") return;
+      e.preventDefault();
+      e.stopPropagation();
+      setPendingNav(href);
+    };
+    document.addEventListener("click", intercept, true);
+    return () => document.removeEventListener("click", intercept, true);
+  }, [isDirty]);
+
+  async function handleLeaveSave() {
+    const target = pendingNav;
+    const ok = await saveProfile();
+    if (ok) {
+      setPendingNav(null);
+      navigate(target);
+    }
+  }
+
+  function handleLeaveDiscard() {
+    const target = pendingNav;
+    resetDraft();
+    setPendingNav(null);
+    navigate(target);
   }
 
   async function handleDeleteAccount() {
@@ -533,24 +671,46 @@ export default function SettingsPage() {
       <Link to="/" className="app-bare-back-link">
         ← Back to feed
       </Link>
-      <h2 className="app-section-title">Settings</h2>
+
+      <div className="app-settings-head">
+        <h2 className="app-section-title">Settings</h2>
+        <p className="app-settings-subtitle">Manage your profile, privacy and account.</p>
+      </div>
 
       <div className="app-settings-layout">
-        <div className="app-settings-tabs">
+        <nav className="app-settings-tabs" aria-label="Settings sections">
           {TABS.map((tab) => (
             <button
               key={tab}
               type="button"
               className={"app-settings-tab" + (activeTab === tab ? " is-active" : "")}
+              aria-current={activeTab === tab ? "page" : undefined}
               onClick={() => setActiveTab(tab)}
             >
-              {tab}
+              <span className="app-settings-tab-icon" aria-hidden="true">
+                {TAB_ICONS[tab]}
+              </span>
+              <span className="app-settings-tab-text">
+                <span className="app-settings-tab-name">{tab}</span>
+                <span className="app-settings-tab-blurb">{TAB_BLURBS[tab]}</span>
+              </span>
             </button>
           ))}
-        </div>
+        </nav>
 
         {["Profile", "About", "Social Links"].includes(activeTab) && (
         <form className="app-settings-content" onSubmit={handleSave}>
+          {/* Save lives at the top and the bottom of the form, and only wakes
+              up once something has actually changed. */}
+          <div className={"app-settings-savebar is-top" + (isDirty ? " is-dirty" : "")}>
+            <span className="app-settings-savebar-status">
+              {isDirty ? "Unsaved changes" : "Everything is saved"}
+            </span>
+            <button type="submit" className="app-settings-save-btn" disabled={!canSave}>
+              {saving ? "Saving..." : "Save changes"}
+            </button>
+          </div>
+
           {message && <p className="app-auth-success">{message}</p>}
           {error && <p className="app-auth-error">{error}</p>}
 
@@ -778,17 +938,14 @@ export default function SettingsPage() {
             </div>
           )}
 
-          {(activeTab === "Profile" ||
-            activeTab === "About" ||
-            activeTab === "Social Links") && (
-            <button
-              type="submit"
-              className="app-auth-submit"
-              disabled={saving || uploadingAvatar || uploadingCover}
-            >
+          <div className={"app-settings-savebar is-bottom" + (isDirty ? " is-dirty" : "")}>
+            <span className="app-settings-savebar-status">
+              {isDirty ? "Unsaved changes" : "Everything is saved"}
+            </span>
+            <button type="submit" className="app-settings-save-btn" disabled={!canSave}>
               {saving ? "Saving..." : "Save changes"}
             </button>
-          )}
+          </div>
         </form>
         )}
 
@@ -1259,6 +1416,37 @@ export default function SettingsPage() {
           </div>
         )}
       </div>
+
+      {pendingNav && (
+        <div className="app-modal-overlay" onClick={() => setPendingNav(null)}>
+          <div
+            className="app-modal app-settings-leave-modal"
+            role="dialog"
+            aria-modal="true"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3>Unsaved changes</h3>
+            <p>You've changed some settings but haven't saved them yet. Leave now and they're gone.</p>
+            {error && <p className="app-auth-error">{error}</p>}
+            <div className="app-settings-leave-actions">
+              <button
+                type="button"
+                className="app-settings-leave-save"
+                disabled={saving || uploadingAvatar || uploadingCover}
+                onClick={handleLeaveSave}
+              >
+                {saving ? "Saving..." : "Save and leave"}
+              </button>
+              <button type="button" className="app-settings-leave-discard" onClick={handleLeaveDiscard}>
+                Discard changes
+              </button>
+              <button type="button" className="app-settings-leave-stay" onClick={() => setPendingNav(null)}>
+                Keep editing
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

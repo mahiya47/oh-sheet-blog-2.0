@@ -1918,10 +1918,28 @@ ul {
   padding: 16px 18px;
   box-shadow: var(--app-shadow);
 }
+.app-settings-group {
+  padding: 18px 20px;
+}
 .app-settings-group h3 {
-  margin: 0 0 10px;
+  margin: 0 0 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--app-line);
   font-family: var(--app-font-display);
   font-size: 1rem;
+  letter-spacing: 0.01em;
+}
+.app-settings-head {
+  margin-bottom: 4px;
+}
+.app-settings-head .app-section-title {
+  margin-bottom: 2px;
+}
+.app-settings-subtitle {
+  margin: 0;
+  color: var(--app-muted);
+  font-weight: 600;
+  font-size: 0.88rem;
 }
 .app-settings-row {
   display: flex;
@@ -2003,26 +2021,57 @@ ul {
   align-items: flex-start;
 }
 .app-settings-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
   background: var(--app-surface);
   border: var(--app-border-w) solid var(--app-border);
   border-radius: var(--app-radius-md);
-  padding: 10px;
+  padding: 8px;
   box-shadow: var(--app-shadow);
   width: 100%;
 }
 .app-settings-tab {
+  display: flex;
+  align-items: center;
+  gap: 9px;
   border: none;
   background: none;
-  padding: 8px 12px;
+  padding: 9px 10px;
   border-radius: var(--app-radius-sm);
   font-weight: 700;
   font-size: 0.85rem;
   color: var(--app-muted);
   cursor: pointer;
   text-align: left;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.app-settings-tab:hover {
+  background: var(--app-bg);
+  color: var(--app-ink);
+}
+.app-settings-tab-icon {
+  flex: 0 0 auto;
+  font-size: 1rem;
+  line-height: 1;
+}
+.app-settings-tab-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.app-settings-tab-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.app-settings-tab-blurb {
+  display: none;
+  font-size: 0.72rem;
+  font-weight: 600;
+  opacity: 0.75;
+  line-height: 1.25;
 }
 .app-settings-tab.is-active {
   background: var(--app-accent);
@@ -2148,17 +2197,130 @@ ul {
   .app-settings-layout {
     flex-direction: row;
     align-items: flex-start;
+    gap: 18px;
   }
   .app-settings-tabs {
+    display: flex;
     flex-direction: column;
-    width: 190px;
+    width: 232px;
     flex-shrink: 0;
     position: sticky;
     top: 80px;
   }
   .app-settings-tab {
+    align-items: flex-start;
     text-align: left;
   }
+  .app-settings-tab-blurb {
+    display: block;
+  }
+}
+
+/* Save bar — one above the form, one below it, both driven by the same
+   dirty check so neither is clickable until something actually changed.
+   The top one sticks to the viewport while you scroll the form. */
+.app-settings-savebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--app-surface);
+  border: var(--app-border-w) solid var(--app-border);
+  border-radius: var(--app-radius-md);
+  padding: 10px 12px 10px 16px;
+  box-shadow: var(--app-shadow);
+}
+.app-settings-savebar.is-top {
+  position: sticky;
+  top: 62px;
+  z-index: 15;
+}
+.app-settings-savebar.is-dirty {
+  border-color: var(--app-accent);
+}
+.app-settings-savebar-status {
+  font-weight: 700;
+  font-size: 0.82rem;
+  color: var(--app-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.app-settings-savebar.is-dirty .app-settings-savebar-status {
+  color: var(--app-ink);
+}
+.app-settings-save-btn {
+  flex: 0 0 auto;
+  padding: 9px 18px;
+  border: var(--app-border-w) solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: var(--app-accent);
+  color: var(--app-ink);
+  font-family: var(--app-font-display);
+  font-weight: 800;
+  font-size: 0.86rem;
+  cursor: pointer;
+  transition: transform 0.12s ease, opacity 0.15s ease;
+}
+.app-settings-save-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+.app-settings-save-btn:disabled {
+  background: var(--app-bg-deep);
+  color: var(--app-muted);
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* "You haven't saved" prompt, shown when a link is clicked mid-edit. */
+.app-settings-leave-modal {
+  max-width: 360px;
+  padding: 20px;
+  gap: 6px;
+}
+.app-settings-leave-modal h3 {
+  margin: 0;
+  font-family: var(--app-font-display);
+  font-size: 1.05rem;
+}
+.app-settings-leave-modal p {
+  margin: 0;
+  color: var(--app-muted);
+  font-weight: 600;
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+.app-settings-leave-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+.app-settings-leave-actions button {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: var(--app-radius-sm);
+  border: var(--app-border-w) solid var(--app-border);
+  font-family: var(--app-font-display);
+  font-weight: 800;
+  font-size: 0.86rem;
+  cursor: pointer;
+}
+.app-settings-leave-save {
+  background: var(--app-accent);
+  color: var(--app-ink);
+}
+.app-settings-leave-save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.app-settings-leave-discard {
+  background: var(--app-surface);
+  color: #c0392b;
+}
+.app-settings-leave-stay {
+  background: var(--app-surface);
+  color: var(--app-ink);
 }
 
 /* ---- Support page ---- */
@@ -2313,24 +2475,18 @@ ul {
      scrolling box of its own (that box is what put a second scrollbar on
      screen, and meant the bottom of the rail could only be reached by
      scrolling inside it).
-     Default — a rail short enough to fit on screen — parks under the top
-     bar. RightRail.jsx measures it and adds .is-tall when it isn't. */
+     90px is only the starting value: RightRail.jsx measures the rail and
+     overwrites `top` inline — with a NEGATIVE value when the rail is
+     taller than the screen, so it parks with its bottom edge just above
+     the bottom of the screen instead of its top edge under the top bar.
+     (Doing that with `bottom` instead never engages at all — the rail
+     just scrolls away and stays away.) */
   .app-rightrail {
     display: flex;
     position: sticky;
     top: 90px;
     align-self: start;
     height: fit-content;
-  }
-  /* Taller than the screen: anchor the BOTTOM edge instead. Scrolling
-     down walks through the whole rail and then holds it against the
-     bottom of the screen while the feed carries on; scrolling up lets go
-     immediately, so you never have to run back to the top of the feed to
-     see the start of the rail again. `top: auto` is what hands control
-     to `bottom` — sticky obeys top first if both are set. */
-  .app-rightrail.is-tall {
-    top: auto;
-    bottom: 18px;
   }
 }
 
@@ -2350,7 +2506,7 @@ ul {
    holds a tab rail + form rather than a single narrow card. */
 .app-settings-page {
   width: 100%;
-  max-width: 640px;
+  max-width: 780px;
 }
 /* The whole auth screen — logo, OAuth buttons, divider, form fields,
    submit and the switch-page link — lives inside one card, the way
@@ -8179,6 +8335,8 @@ button.app-stories-label-toggle {
 :root[data-theme="dark"] .app-create-post-btn,
 :root[data-theme="dark"] .app-crossword-cell.is-selected,
 :root[data-theme="dark"] .app-crossword-clue-item.is-active,
+:root[data-theme="dark"] .app-settings-leave-save,
+:root[data-theme="dark"] .app-settings-save-btn:not(:disabled),
 :root[data-theme="dark"] .app-crossword-nav:hover:not(:disabled),
 :root[data-theme="dark"] .app-crossword-tool:hover,
 :root[data-theme="dark"] .app-dm-bubble.is-mine,
