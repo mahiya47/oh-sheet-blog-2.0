@@ -8,17 +8,10 @@ import {
   GROUP_COLORS,
   HOUSE_COLORS,
   tokenOffset,
+  planTokenHop,
 } from "../../lib/monopolyLayout.js";
 
 const MAX_LEVEL = 3;
-
-// A whole hop-across-the-board animation aims for about this long, however
-// many tiles it has to cross — few tiles (a normal dice roll) means a slow,
-// readable hop per tile; many tiles (a long card move) speeds up so it
-// never drags. Never faster than MIN_HOP_MS or slower than MAX_HOP_MS.
-const TOTAL_HOP_MS = 3400;
-const MIN_HOP_MS = 220;
-const MAX_HOP_MS = 600;
 
 // Lighten a hex colour toward white — used for the unowned price band, a
 // paler tint of the tile's group colour.
@@ -64,15 +57,7 @@ export default function MonopolyBoard({ board, game, mySeat, onTileClick, select
       if (from === to) return;
       if (timersRef.current[seat]) clearInterval(timersRef.current[seat]);
 
-      // Walk the shorter way around — except a short backward hop (like a
-      // "go back 3 spaces" card) always animates backward even when the
-      // long way forward would technically be shorter to wrap into.
-      const fwd = (to - from + total) % total;
-      const back = (from - to + total) % total;
-      const goBack = back <= 5 && back < fwd;
-      const steps = goBack ? back : fwd;
-      const dir = goBack ? -1 : 1;
-      const hopMs = Math.max(MIN_HOP_MS, Math.min(MAX_HOP_MS, Math.round(TOTAL_HOP_MS / steps)));
+      const { steps, dir, hopMs } = planTokenHop(from, to, total);
 
       let cur = from;
       let hop = 0;

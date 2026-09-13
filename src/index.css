@@ -5623,6 +5623,39 @@ body.app-body-mono-dark {
   font-weight: 700;
   font-size: 0.9rem;
 }
+.app-mono-move-path {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.app-mono-move-tile {
+  padding: 4px 10px;
+  border-radius: var(--app-radius-sm);
+  background: var(--app-bg);
+  border: var(--app-border-w) solid var(--app-border);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+.app-mono-move-tile.is-dest {
+  border-color: var(--app-accent);
+}
+.app-mono-move-arrow {
+  display: inline-block;
+  font-size: 1.2rem;
+  animation: app-mono-move-arrow-slide 0.9s ease-in-out infinite;
+}
+@keyframes app-mono-move-arrow-slide {
+  0%, 100% {
+    transform: translateX(0);
+    opacity: 0.55;
+  }
+  50% {
+    transform: translateX(6px);
+    opacity: 1;
+  }
+}
 .app-mono-panel-msg p {
   margin: 0;
   font-weight: 600;

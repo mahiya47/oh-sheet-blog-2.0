@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import MonopolyBoard from "../../components/monopoly/MonopolyBoard.jsx";
 import MultiplayerHeader from "../../components/MultiplayerHeader.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { getGameMeta } from "../../lib/arcadeGames.js";
-import { GROUP_COLORS, HOUSE_COLORS } from "../../lib/monopolyLayout.js";
+import { GROUP_COLORS, HOUSE_COLORS, planTokenHop } from "../../lib/monopolyLayout.js";
 import { useMonopolyRoom } from "../../lib/useMonopolyRoom.js";
 
 const GAME = getGameMeta("monopoly");
@@ -202,6 +202,44 @@ function GameView({ room }) {
     return () => document.body.classList.remove("app-body-mono-dark");
   }, []);
 
+  // Whoever just rolled shouldn't be offered a buy/rent decision the
+  // instant the server resolves it — read the dice, watch the token hop
+  // over, THEN decide. `moveInfo` holds the panel on a dice+move view for
+  // at least 5s, or however long the token's own hop animation on the
+  // board actually takes (see planTokenHop — same formula MonopolyBoard.jsx
+  // uses for the token itself, so the two stay roughly in sync) if that's
+  // longer, e.g. a big card-driven move across the board.
+  const [moveInfo, setMoveInfo] = useState(null);
+  const prevPosRef = useRef(game.players.map((p) => p.pos));
+  const moveTimerRef = useRef(null);
+  const posKey = game.players.map((p) => p.pos).join(",");
+
+  useEffect(() => {
+    const prev = prevPosRef.current;
+    const total = board?.length || prev.length;
+    const movedSeat = game.players.findIndex(
+      (p, seat) => prev[seat] !== undefined && prev[seat] !== p.pos
+    );
+    if (movedSeat !== -1 && total) {
+      const fromIdx = prev[movedSeat];
+      const toIdx = game.players[movedSeat].pos;
+      const { totalMs } = planTokenHop(fromIdx, toIdx, total);
+      if (moveTimerRef.current) clearTimeout(moveTimerRef.current);
+      setMoveInfo({ seat: movedSeat, fromIdx, toIdx, dice: game.dice });
+      const showMs = Math.max(5000, totalMs);
+      moveTimerRef.current = setTimeout(() => setMoveInfo(null), showMs);
+    }
+    prevPosRef.current = game.players.map((p) => p.pos);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [posKey, board]);
+
+  useEffect(
+    () => () => {
+      if (moveTimerRef.current) clearTimeout(moveTimerRef.current);
+    },
+    []
+  );
+
   const me = mySeat >= 0 ? game.players[mySeat] : null;
   const myTurn = me && game.turn === mySeat && game.phase !== "over";
   const current = game.players[game.turn];
@@ -280,6 +318,7 @@ function GameView({ room }) {
               onCloseSelected={() => setSelected(null)}
               buying={buying}
               debt={debt}
+              moveInfo={moveInfo}
               currentName={currentName}
               currentConnected={current?.connected !== false}
             />
@@ -348,7 +387,7 @@ function PlayerCorner({ seat, player, info, netWorth, isMe, isTurn, cornerClass 
 function CenterPanel({
   game, me, myTurn, players, board, mySeat, act,
   selected, onCloseSelected,
-  buying, debt,
+  buying, debt, moveInfo,
   currentName, currentConnected,
 }) {
   const [flash, setFlash] = useState(null);
@@ -362,6 +401,19 @@ function CenterPanel({
     const t = setTimeout(() => setFlash(null), 5500);
     return () => clearTimeout(t);
   }, [lastLogText]);
+
+  // The token is still hopping across the board (or hasn't been on
+  // screen for 5s yet) — hold everyone, including a buy decision, on the
+  // dice + move view until moveInfo clears. See GameView for the timing.
+  if (moveInfo) {
+    return (
+      <MovingCard
+        dice={moveInfo.dice}
+        fromTile={board[moveInfo.fromIdx]}
+        toTile={board[moveInfo.toIdx]}
+      />
+    );
+  }
 
   if (buying) {
     return <BuyCard tile={buying} me={me} onBuy={() => act("mono:buy")} onPass={() => act("mono:decline_buy")} />;
@@ -834,6 +886,30 @@ function BankruptPickCard({ pending, board, players, mySeat, act }) {
       <button type="button" className="app-arcade-btn" onClick={() => act("mono:bankrupt_pick", { index: null })}>
         Don't take any
       </button>
+    </div>
+  );
+}
+
+// Shown right after a roll, while the token is still hopping across the
+// board (or hasn't held the screen for 5s yet — see GameView's moveInfo).
+// Reads the dice, then the tile you moved from and the tile you landed
+// on, with an animated arrow between them so it's obvious something is
+// still in motion — no buy/rent decision shows until this clears.
+function MovingCard({ dice, fromTile, toTile }) {
+  return (
+    <div className="app-mono-panel-msg app-mono-moving">
+      <span className="app-mono-panel-msg-kind">🎲</span>
+      {(dice !== null && dice !== undefined) && (
+        <>
+          <DiceRow value={dice} />
+          <p className="app-mono-panel-note">Rolled a {dice}</p>
+        </>
+      )}
+      <div className="app-mono-move-path">
+        <span className="app-mono-move-tile">{fromTile?.name || "—"}</span>
+        <span className="app-mono-move-arrow" aria-hidden="true">➜</span>
+        <span className="app-mono-move-tile is-dest">{toTile?.name || "—"}</span>
+      </div>
     </div>
   );
 }

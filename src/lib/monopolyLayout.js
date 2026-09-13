@@ -213,3 +213,31 @@ export function tokenOffset(slot, total, side) {
   }
   return { dx: along, dy: 0 };
 }
+
+// A whole hop-across-the-board animation aims for about this long, however
+// many tiles it has to cross — few tiles (a normal dice roll) means a slow,
+// readable hop per tile; many tiles (a long card move) speeds up so it
+// never drags. Never faster than HOP_MIN_MS or slower than HOP_MAX_MS per
+// tile. Shared between the board's own token animation (MonopolyBoard.jsx)
+// and the centre panel's "still moving" gate (MonopolyPage.jsx) so both
+// agree on timing instead of drifting apart.
+export const HOP_TOTAL_MS = 3400;
+export const HOP_MIN_MS = 220;
+export const HOP_MAX_MS = 600;
+
+// Works out how a token hops from tile `from` to tile `to` on a board of
+// `total` tiles: which direction (forward, or backward for a short "go
+// back N spaces" card), how many tile-to-tile hops that takes, how long
+// each hop lasts, and the animation's total duration.
+export function planTokenHop(from, to, total) {
+  const fwd = (to - from + total) % total;
+  const back = (from - to + total) % total;
+  // Walk the shorter way around — except a short backward hop always
+  // animates backward even when the long way forward would technically be
+  // shorter to wrap into.
+  const goBack = back <= 5 && back < fwd;
+  const steps = Math.max(1, goBack ? back : fwd);
+  const dir = goBack ? -1 : 1;
+  const hopMs = Math.max(HOP_MIN_MS, Math.min(HOP_MAX_MS, Math.round(HOP_TOTAL_MS / steps)));
+  return { steps, dir, hopMs, totalMs: steps * hopMs };
+}
