@@ -6,6 +6,8 @@ import PostText from "./PostText.jsx";
 import RichTextEditor from "./RichTextEditor.jsx";
 import ImageCarousel from "./ImageCarousel.jsx";
 import PostAnalyticsModal from "./PostAnalyticsModal.jsx";
+import PostTemplateCard from "./PostTemplateCard.jsx";
+import LinkPreviewCard from "./LinkPreviewCard.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 import { api } from "../lib/api.js";
 import { relativeTime, fullDateTime } from "../lib/formatTime.js";
@@ -181,6 +183,12 @@ export default function FeedCard({ post, onDeleted, initiallyExpanded = false })
   const [contentHtml, setContentHtml] = useState(post.contentHtml || null);
   const [images, setImages] = useState(initialImages);
   const [videoUrl, setVideoUrl] = useState(post.videoUrl || null);
+  // Rich link-embed preview — re-scraped server-side whenever the
+  // caption changes (see post.controller.js's updatePost), so this needs
+  // its own state to pick up a fresh/cleared preview after an edit.
+  // templateType/templateData aren't editable from this inline form, so
+  // those are read straight off `post` below instead of mirrored here.
+  const [linkPreview, setLinkPreview] = useState(post.linkPreview || null);
   const [isEditing, setIsEditing] = useState(false);
   const [editDraft, setEditDraft] = useState(post.content);
   const [editDraftHtml, setEditDraftHtml] = useState(post.contentHtml || null);
@@ -401,6 +409,7 @@ export default function FeedCard({ post, onDeleted, initiallyExpanded = false })
       setContentHtml(updated.contentHtml || null);
       setImages(updated.images?.length ? updated.images : updated.imageUrl ? [updated.imageUrl] : []);
       setVideoUrl(updated.videoUrl || null);
+      setLinkPreview(updated.linkPreview || null);
       setIsEditing(false);
     } catch (err) {
       alert(err.message || "Couldn't save changes");
@@ -716,7 +725,11 @@ export default function FeedCard({ post, onDeleted, initiallyExpanded = false })
         </div>
 
         <div className="app-card-content-box">
+          <PostTemplateCard templateType={post.templateType} templateData={post.templateData} />
           <PostText text={text} html={contentHtml} />
+          {!images.length && !videoUrl && (
+            <LinkPreviewCard preview={linkPreview} onClick={stop} />
+          )}
           {images.length > 1 ? (
             <ImageCarousel images={images} onClick={stop} />
           ) : (

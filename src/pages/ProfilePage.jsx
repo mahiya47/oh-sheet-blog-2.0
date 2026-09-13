@@ -243,6 +243,7 @@ export default function ProfilePage() {
         <h2 className="app-profile-username">
           {profile.name}
           <VerifiedBadge user={profile} />
+          {profile.level != null && <span className="app-level-badge">Lvl {profile.level}</span>}
           {profile.pronouns && <span className="app-profile-pronouns">{profile.pronouns}</span>}
         </h2>
         <p className="app-profile-handle">

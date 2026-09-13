@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import NavIcon from "../components/NavIcons.jsx";
 import RichTextEditor from "../components/RichTextEditor.jsx";
 import TagPeoplePicker from "../components/TagPeoplePicker.jsx";
+import PostTemplateFields from "../components/PostTemplateFields.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 import { api } from "../lib/api.js";
 import { extractHashtags } from "../lib/hashtags.js";
@@ -28,6 +29,10 @@ export default function CreatePage() {
   const [posting, setPosting] = useState(false);
   const [error, setError] = useState("");
   const [taggedPeople, setTaggedPeople] = useState([]); // selected user objects
+  // Post templates (Recipe / Travel log) — see PostTemplateFields.jsx.
+  // templateType stays null for a normal freeform sheet, the default.
+  const [templateType, setTemplateType] = useState(null);
+  const [templateData, setTemplateData] = useState(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -122,6 +127,10 @@ export default function CreatePage() {
       const tags = extractHashtags(draft);
       if (tags.length) payload.tags = tags;
       if (taggedPeople.length) payload.taggedUserIds = taggedPeople.map((u) => u.id);
+      if (templateType) {
+        payload.templateType = templateType;
+        payload.templateData = templateData;
+      }
       await api.createPost(payload);
       navigate("/");
     } catch (err) {
@@ -133,7 +142,14 @@ export default function CreatePage() {
 
   if (!user) return null;
 
-  const canPost = (draft.trim() || images.length || video) && !posting && !uploading;
+  // A template (Recipe/Travel log) can carry the whole post on its own —
+  // ingredients + steps with no caption is a perfectly fine sheet — so
+  // posting isn't gated on caption/media alone when one is filled in.
+  const templateHasContent =
+    !!templateType &&
+    !!templateData &&
+    Object.values(templateData).some((v) => (Array.isArray(v) ? v.some((s) => s.trim()) : !!v && v.trim?.()));
+  const canPost = (draft.trim() || images.length || video || templateHasContent) && !posting && !uploading;
   const attachDisabled = uploading || !!video || images.length >= MAX_IMAGES;
   const fileAccept = images.length ? "image/*" : "image/*,video/*";
 
@@ -162,6 +178,13 @@ export default function CreatePage() {
           }}
           placeholder={`Share a sheet, ${user.username}... (try a #hashtag)`}
           autoFocus
+        />
+
+        <PostTemplateFields
+          templateType={templateType}
+          setTemplateType={setTemplateType}
+          templateData={templateData}
+          setTemplateData={setTemplateData}
         />
 
         {uploading && <p className="app-composer-uploading">Uploading...</p>}

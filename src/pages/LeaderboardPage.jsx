@@ -40,6 +40,7 @@ export default function LeaderboardPage() {
                 {u.name || u.username}
                 <span className="app-leaderboard-handle">@{u.username}</span>
               </Link>
+              <span className="app-leaderboard-level">Lvl {u.level}</span>
               <span className="app-leaderboard-score">{u.score} pts</span>
             </li>
           ))}
