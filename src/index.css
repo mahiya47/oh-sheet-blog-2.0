@@ -2129,6 +2129,7 @@ ul {
   border: 2px solid var(--app-border);
   cursor: pointer;
   font-weight: 800;
+  font-size: 19px;
   font-family: var(--app-font-display);
   color: var(--app-ink);
 }
@@ -2138,6 +2139,35 @@ ul {
   border-radius: var(--app-radius-sm);
   border: 2px solid var(--app-border);
   cursor: pointer;
+}
+.app-onboarding-preset-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 4px 0 8px;
+}
+.app-onboarding-preset-header .app-settings-preset-label {
+  margin: 0;
+}
+.app-onboarding-surprise-btn {
+  padding: 4px 10px;
+  border-radius: var(--app-radius-sm);
+  border: var(--app-border-w) solid var(--app-border);
+  background: var(--app-surface);
+  font-weight: 700;
+  font-size: 0.78rem;
+  color: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.app-onboarding-surprise-btn:hover {
+  background: var(--app-accent);
+}
+.app-onboarding-preset-note {
+  margin: -6px 0 14px;
+  font-size: 0.78rem;
+  color: var(--app-muted);
 }
 
 .app-settings-danger {
@@ -5337,11 +5367,11 @@ a.app-auth-logo-badge:hover {
 }
 .app-mono-token circle {
   stroke: var(--app-border);
-  stroke-width: 3;
+  stroke-width: 4;
 }
 .app-mono-token.is-me circle {
   stroke: var(--app-accent);
-  stroke-width: 5;
+  stroke-width: 7;
 }
 .app-mono-token.is-away {
   opacity: 0.4;
@@ -5349,7 +5379,7 @@ a.app-auth-logo-badge:hover {
 .app-mono-token-label {
   fill: #fff;
   font-family: var(--app-font-display), sans-serif;
-  font-size: 17px;
+  font-size: 30px;
   font-weight: 700;
 }
 /* Font size steps down at narrower board sizes instead of disappearing
@@ -5482,6 +5512,15 @@ body.app-body-mono-dark {
   font-weight: 700;
   color: var(--app-ink-soft, var(--app-ink));
   opacity: 0.75;
+}
+.app-mono-jail-bribe {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--app-border);
 }
 .app-mono-panel-note {
   margin: 0;

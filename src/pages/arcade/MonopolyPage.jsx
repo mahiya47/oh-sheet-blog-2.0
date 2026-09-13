@@ -12,7 +12,10 @@ const GAME = getGameMeta("monopoly");
 const MIN_PLAYERS = 2;
 const MAX_PLAYERS = 4;
 // Turns you sit out in Azkaban before walking free (matches the server).
-const JAIL_TURNS = 4;
+const JAIL_TURNS = 3;
+// What it costs to bribe one voter's recorded jail vote to flip, either
+// way (matches JAIL_BRIBE_AMOUNT on the server).
+const JAIL_BRIBE_AMOUNT = 50;
 // Seat order matches the 4 HUD corners: top-left, top-right, bottom-left,
 // bottom-right — same order the server assigns TOKEN_COLORS in.
 const TOKEN_COLORS = ["#2f6fed", "#e5484d", "#43a047", "#f5c945"]; // blue, red, green, yellow
@@ -354,7 +357,9 @@ function CenterPanel({
   useEffect(() => {
     if (!lastLogText) return;
     setFlash(lastLogText);
-    const t = setTimeout(() => setFlash(null), 3200);
+    // Was 3.2s — the game was moving too fast to actually read a roll or
+    // an event before it vanished, so this now sits on screen much longer.
+    const t = setTimeout(() => setFlash(null), 5500);
     return () => clearTimeout(t);
   }, [lastLogText]);
 
@@ -394,10 +399,10 @@ function CenterPanel({
         <span className="app-mono-panel-msg-kind">
           {game.card.deck === "chance" ? "❓ Chance" : "🎁 Community Chest"}
         </span>
-        {game.dice && (
+        {(game.dice !== null && game.dice !== undefined) && (
           <>
-            <DiceRow dice={game.dice} />
-            <p className="app-mono-panel-note">Rolled {game.dice[0]} + {game.dice[1]} = {game.dice[0] + game.dice[1]}</p>
+            <DiceRow value={game.dice} />
+            <p className="app-mono-panel-note">Rolled a {game.dice}</p>
           </>
         )}
         <p className="app-mono-panel-note">{isDrawer ? "You drew:" : `${drawerName} drew:`}</p>
@@ -424,6 +429,15 @@ function CenterPanel({
     return <TradeOfferCard game={game} mySeat={mySeat} board={board} players={players} act={act} />;
   }
 
+  // A bankruptcy just happened and the creditor still has to pick one
+  // property from the estate — pauses the whole table the same way a
+  // trade response does, regardless of whose turn it technically is.
+  if (game.phase === "bankrupt_pick" && game.pending?.type === "bankrupt_pick") {
+    return (
+      <BankruptPickCard pending={game.pending} board={board} players={players} mySeat={mySeat} act={act} />
+    );
+  }
+
   if (debt) {
     return (
       <div className="app-mono-panel-msg is-urgent">
@@ -444,10 +458,11 @@ function CenterPanel({
   }
 
   if (flash) {
-    const icon = /rolled|doubles/i.test(flash) ? "🎲" : /wins|won|House Cup/i.test(flash) ? "🏆" : "🏦";
+    const icon = /rolled|six/i.test(flash) ? "🎲" : /wins|won|House Cup/i.test(flash) ? "🏆" : "🏦";
     return (
       <div className="app-mono-panel-msg is-flash">
         <span className="app-mono-panel-msg-kind">{icon}</span>
+        {(game.dice !== null && game.dice !== undefined) && <DiceRow value={game.dice} />}
         <p>{flash}</p>
       </div>
     );
@@ -496,19 +511,37 @@ function DefaultCard({ game, me, myTurn, mySeat, players, act, currentName, curr
   // time for you and skips your turns. All you get is the countdown (and
   // a Get Out of Jail Free card, if you're holding one).
   if (me && me.jailTurns >= 0) {
-    return <JailedCard me={me} jv={jv} mySeat={mySeat} act={act} />;
+    return (
+      <JailedCard
+        me={me}
+        jv={jv}
+        jailBribes={game.jailBribes}
+        players={players}
+        mySeat={mySeat}
+        act={act}
+      />
+    );
   }
+
+  // A jail bribe war can run for several turns — anyone still playing
+  // gets a shot at flipping a vote for a flat fee, without it blocking
+  // their own turn, so this is appended below the normal idle actions
+  // rather than taking the panel over.
+  const openBribes = game.jailBribes && game.jailBribes.seat !== mySeat
+    ? <JailBribeInline jailBribes={game.jailBribes} players={players} mySeat={mySeat} me={me} act={act} />
+    : null;
 
   if (!myTurn) {
     return (
       <div className="app-mono-panel-idle">
-        {dice && <DiceRow dice={dice} />}
+        {dice && <DiceRow value={dice} />}
         <p className="app-mono-panel-prompt">Waiting for {currentName}…</p>
         {!currentConnected && (
           <button type="button" className="app-arcade-btn" onClick={() => act("mono:force_skip")}>
             Skip disconnected player
           </button>
         )}
+        {openBribes}
       </div>
     );
   }
@@ -516,24 +549,24 @@ function DefaultCard({ game, me, myTurn, mySeat, players, act, currentName, curr
   if (game.phase === "roll") {
     return (
       <div className="app-mono-panel-idle">
-        {dice && <DiceRow dice={dice} />}
+        {dice && <DiceRow value={dice} />}
         <p className="app-mono-panel-prompt">Your turn!</p>
         <button type="button" className="app-arcade-btn app-mono-primary app-mono-roll-btn" onClick={() => act("mono:roll")}>
           🎲 Roll
         </button>
+        {openBribes}
       </div>
     );
   }
 
   // phase === "action" — debt is handled by CenterPanel before this ever
-  // renders. Doubles means you got the same number on both dice, so you
-  // roll again; the button rolls right away in one tap instead of just
-  // handing back the plain roll button.
+  // renders. Rolling a 6 means you roll again; the button rolls right
+  // away in one tap instead of just handing back the plain roll button.
   return (
     <div className="app-mono-panel-idle">
-      {dice && <DiceRow dice={dice} />}
+      {dice && <DiceRow value={dice} />}
       <p className="app-mono-panel-prompt">
-        {game.doubles > 0 ? "You rolled the same number on both dice — one more turn!" : "Tap a property to manage it."}
+        {game.doubles > 0 ? "You rolled a 6 — roll again!" : "Tap a property to manage it."}
       </p>
       {game.doubles > 0 ? (
         <button type="button" className="app-arcade-btn app-mono-primary app-mono-roll-btn" onClick={() => act("mono:roll")}>
@@ -544,6 +577,46 @@ function DefaultCard({ game, me, myTurn, mySeat, players, act, currentName, curr
           End turn
         </button>
       )}
+      {openBribes}
+    </div>
+  );
+}
+
+// Anyone still in the game (except the jailed player and whoever cast a
+// given vote) can pay JAIL_BRIBE_AMOUNT to flip that voter's recorded
+// choice — "keep" to "free" to help the jailed player out, or "free" to
+// "keep" to work against them. Shared between the jailed player's own
+// card and everyone else's idle panel.
+function JailBribeInline({ jailBribes, players, mySeat, me, act }) {
+  const jailedName = firstName(
+    players[jailBribes.seat]?.name || players[jailBribes.seat]?.username || `Seat ${jailBribes.seat + 1}`,
+  );
+  const entries = Object.entries(jailBribes.votes).filter(([seatStr]) => Number(seatStr) !== mySeat);
+  if (entries.length === 0) return null;
+
+  return (
+    <div className="app-mono-jail-bribe">
+      <p className="app-mono-panel-note">
+        {jailedName}'s jail vote is still open to bribes — ${JAIL_BRIBE_AMOUNT} flips a vote.
+      </p>
+      <div className="app-mono-trade-list">
+        {entries.map(([seatStr, choice]) => {
+          const s = Number(seatStr);
+          const name = firstName(players[s]?.name || players[s]?.username || `Seat ${s + 1}`);
+          const flipTo = choice === "keep" ? "free" : "keep";
+          return (
+            <button
+              key={s}
+              type="button"
+              className="app-arcade-btn"
+              disabled={!me || me.cash < JAIL_BRIBE_AMOUNT}
+              onClick={() => act("mono:jail_bribe", { targetSeat: s, direction: flipTo })}
+            >
+              {name} voted {choice === "free" ? "🔓 free" : "🔒 keep"} — bribe to flip (${JAIL_BRIBE_AMOUNT})
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -553,12 +626,13 @@ function DefaultCard({ game, me, myTurn, mySeat, players, act, currentName, curr
 // so there's no roll and no End turn here by design — you're out when the
 // table votes you free, when you play a Get Out of Jail Free card, or
 // when your time is up.
-function JailedCard({ me, jv, mySeat, act }) {
+function JailedCard({ me, jv, jailBribes, players, mySeat, act }) {
   const served = Math.min(me.jailTurns, JAIL_TURNS);
   const left = Math.max(0, JAIL_TURNS - served);
   const votedOnMe = jv && jv.seat === mySeat;
   const freeCount = votedOnMe ? Object.values(jv.votes).filter((v) => v === "free").length : 0;
   const keepCount = votedOnMe ? Object.values(jv.votes).filter((v) => v === "keep").length : 0;
+  const myBribes = jailBribes && jailBribes.seat === mySeat ? jailBribes : null;
 
   return (
     <div className="app-mono-panel-idle">
@@ -572,6 +646,9 @@ function JailedCard({ me, jv, mySeat, act }) {
           <p className="app-mono-panel-note">The table is voting on freeing you.</p>
           <p className="app-mono-jail-tally">🔓 {freeCount} to free · 🔒 {keepCount} to keep</p>
         </>
+      )}
+      {myBribes && (
+        <JailBribeInline jailBribes={myBribes} players={players} mySeat={mySeat} me={me} act={act} />
       )}
       {me.getOut > 0 && (
         <button type="button" className="app-arcade-btn app-mono-primary" onClick={() => act("mono:jail_card")}>
@@ -596,7 +673,7 @@ function JailVoteCard({ jv, players, mySeat, act, dice }) {
 
   return (
     <div className="app-mono-panel-idle">
-      {dice && <DiceRow dice={dice} />}
+      {dice && <DiceRow value={dice} />}
       <p className="app-mono-panel-prompt">
         {isJailed ? "The table is voting on whether to free you from Azkaban." : `Free ${jailedName} from Azkaban?`}
       </p>
@@ -718,6 +795,49 @@ function TradeResponseCard({ trade, board, players, mySeat, act }) {
   );
 }
 
+// After a bankruptcy, the creditor gets to keep exactly one property from
+// the estate — everything else already went back to the open market.
+// Everyone else just watches until they've picked (or skipped).
+function BankruptPickCard({ pending, board, players, mySeat, act }) {
+  const { seat, creditor, properties } = pending;
+  const isCreditor = mySeat === creditor;
+  const bankruptName = firstName(players[seat]?.name || players[seat]?.username || `Seat ${seat + 1}`);
+  const creditorName = firstName(players[creditor]?.name || players[creditor]?.username || `Seat ${creditor + 1}`);
+
+  if (!isCreditor) {
+    return (
+      <div className="app-mono-panel-idle">
+        <p className="app-mono-panel-prompt">
+          {creditorName} is picking one property from {bankruptName}'s estate.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="app-mono-panel-idle">
+      <p className="app-mono-panel-prompt">
+        {bankruptName} went bankrupt — pick one property to keep for yourself. The rest go back on the market.
+      </p>
+      <div className="app-mono-trade-list">
+        {properties.map((idx) => (
+          <button
+            key={idx}
+            type="button"
+            className="app-arcade-btn"
+            onClick={() => act("mono:bankrupt_pick", { index: idx })}
+          >
+            {board[idx].name}
+          </button>
+        ))}
+      </div>
+      <button type="button" className="app-arcade-btn" onClick={() => act("mono:bankrupt_pick", { index: null })}>
+        Don't take any
+      </button>
+    </div>
+  );
+}
+
 const PIPS = {
   1: [[0, 0]],
   2: [[-1, -1], [1, 1]],
@@ -727,18 +847,16 @@ const PIPS = {
   6: [[-1, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [1, 1]],
 };
 
-// A small plain-HTML pair of dice — sits inside the centre panel now,
-// instead of drawn in the board's SVG.
-function DiceRow({ dice }) {
+// A small plain-HTML die — sits inside the centre panel now, instead of
+// drawn in the board's SVG. Just one die now (see the roll handler).
+function DiceRow({ value }) {
   return (
     <div className="app-mono-dice-row">
-      {dice.map((v, k) => (
-        <div key={k} className="app-mono-die-html">
-          {(PIPS[v] || []).map(([px, py], i) => (
-            <span key={i} className="app-mono-pip-html" style={{ left: `${50 + px * 26}%`, top: `${50 + py * 26}%` }} />
-          ))}
-        </div>
-      ))}
+      <div className="app-mono-die-html">
+        {(PIPS[value] || []).map(([px, py], i) => (
+          <span key={i} className="app-mono-pip-html" style={{ left: `${50 + px * 26}%`, top: `${50 + py * 26}%` }} />
+        ))}
+      </div>
     </div>
   );
 }
@@ -751,7 +869,9 @@ function BuyCard({ tile, me, onBuy, onPass }) {
   // BACKGROUND — used as text on the white card it was nearly invisible,
   // so those fall back to the normal ink colour instead.
   const titleColor = tile.group ? GROUP_COLORS[tile.group] : "var(--app-ink)";
-  const rentText = tile.type === "utility" ? "4× dice" : tile.rent ? `$${tile.rent[0]}` : "—";
+  // Utilities carry a fixed rent table now too (same shape as a street),
+  // so the base (1-owned) tier just reads off tile.rent like anything else.
+  const rentText = tile.rent ? `$${tile.rent[0]}` : "—";
   const sellPrice = Math.floor((tile.price || 0) / 2);
 
   return (
@@ -829,10 +949,16 @@ function TileCard({ tile, st, players, game, board, mySeat, act, canManage, onCl
           </table>
         )}
 
-        {tile.type === "utility" && (
-          <p className="app-mono-deed-note">
-            A Hogwarts House. Rent is 4× the dice roll with one House owned, 10× if you own all 4.
-          </p>
+        {tile.type === "utility" && tile.rent && (
+          <table className="app-mono-deed-rents">
+            <tbody>
+              <tr><td>Rent (1 House owned)</td><td>${tile.rent[0]}</td></tr>
+              <tr><td>Rent (2 Houses owned)</td><td>${tile.rent[1]}</td></tr>
+              <tr><td>Rent (3 Houses owned)</td><td>${tile.rent[2]}</td></tr>
+              <tr><td>Rent (all 4 owned)</td><td>${tile.rent[3]}</td></tr>
+              <tr className="app-mono-deed-sep"><td>Mortgage value</td><td>${Math.floor(tile.price / 2)}</td></tr>
+            </tbody>
+          </table>
         )}
 
         {tile.type === "chance" && <p className="app-mono-deed-note">Draw a Chance card.</p>}
@@ -859,7 +985,7 @@ function TileCard({ tile, st, players, game, board, mySeat, act, canManage, onCl
             )}
             {canDowngrade && (
               <button type="button" className="app-arcade-btn" onClick={() => act("mono:sell_house", { index: tile.i })}>
-                Downgrade
+                Downgrade (+${Math.floor(tile.build[st.houses - 1] * 0.65)})
               </button>
             )}
             {canMortgage && (

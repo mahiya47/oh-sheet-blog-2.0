@@ -16,9 +16,9 @@ const MAX_LEVEL = 3;
 // many tiles it has to cross — few tiles (a normal dice roll) means a slow,
 // readable hop per tile; many tiles (a long card move) speeds up so it
 // never drags. Never faster than MIN_HOP_MS or slower than MAX_HOP_MS.
-const TOTAL_HOP_MS = 1950;
-const MIN_HOP_MS = 120;
-const MAX_HOP_MS = 340;
+const TOTAL_HOP_MS = 3400;
+const MIN_HOP_MS = 220;
+const MAX_HOP_MS = 600;
 
 // Lighten a hex colour toward white — used for the unowned price band, a
 // paler tint of the tile's group colour.
@@ -133,7 +133,22 @@ export default function MonopolyBoard({ board, game, mySeat, onTileClick, select
           ? HOUSE_COLORS[tile.name]
           : null;
         const level = st?.houses || 0;
-        const rentNow = tile.rent ? tile.rent[level] : null;
+        // Utilities have no upgrade levels — `houses` stays 0 — so their
+        // rent tier comes from how many of the 4 Hogwarts Houses this
+        // owner holds instead of from `level`.
+        let rentNow = null;
+        if (tile.rent) {
+          if (tile.type === "utility") {
+            if (owned) {
+              const ownedCount = board.filter(
+                (b) => b.type === "utility" && game.tiles[b.i]?.owner === owner,
+              ).length;
+              rentNow = tile.rent[Math.min(ownedCount, tile.rent.length) - 1];
+            }
+          } else {
+            rentNow = tile.rent[level];
+          }
+        }
 
         // Every tile is a two-tone card: a price/rent band on top (tinted
         // group colour while unowned, the owning player's own colour once
@@ -209,8 +224,8 @@ export default function MonopolyBoard({ board, game, mySeat, onTileClick, select
               className={"app-mono-token" + (p.seat === mySeat ? " is-me" : "") + (p.connected ? "" : " is-away")}
               transform={`translate(${anchor.x + dx} ${anchor.y + dy})`}
             >
-              <circle r="22" fill={p.color} />
-              <text textAnchor="middle" y="6" className="app-mono-token-label">
+              <circle r="44" fill={p.color} />
+              <text textAnchor="middle" y="10" className="app-mono-token-label">
                 {p.seat + 1}
               </text>
             </g>

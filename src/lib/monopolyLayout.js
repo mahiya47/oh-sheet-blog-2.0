@@ -192,19 +192,12 @@ export const HOUSE_COLORS = {
   "Slytherin Dungeon": HOUSE_COLOR,
 };
 
-// Tokens sit over the colour band at the inner edge of a tile rather
-// than dead centre, so they don't cover the name and price.
+// Tokens sit dead centre on their tile now — simplest to spot at a
+// glance, even on a tile with several players stacked on it. (Bigger
+// tokens now cover more of the name/price underneath — a deliberate
+// trade-off in favour of always being able to find your piece.)
 export function tokenAnchor(t) {
-  switch (t.side) {
-    case "bottom": return { x: t.cx, y: t.y + BAND / 2 + 2 };
-    case "top": return { x: t.cx, y: t.y + t.h - BAND / 2 - 2 };
-    case "left": return { x: t.x + t.w - BAND / 2 - 2, y: t.cy };
-    case "right": return { x: t.x + BAND / 2 + 2, y: t.cy };
-    // On a corner the icon and label take the top two-thirds, so tokens
-    // sit in the space below them. Kept as a fraction of the corner's own
-    // height so it still lands correctly now corners are taller.
-    default: return { x: t.cx, y: t.y + t.h * 0.79 };
-  }
+  return { x: t.cx, y: t.cy };
 }
 
 // Up to 4 tokens can share a tile — spread them along the tile's long
@@ -213,10 +206,10 @@ export function tokenOffset(slot, total, side) {
   const perRow = Math.max(total, 1);
   // Bigger tokens (see MonopolyBoard.jsx) need more room between them —
   // some overlap onto the name is fine, they're the point of the board.
-  const along = (slot - (perRow - 1) / 2) * 30;
+  const along = (slot - (perRow - 1) / 2) * 50;
   const vertical = side === "left" || side === "right";
   if (vertical) {
-    return { dx: side === "left" ? -12 : 12, dy: along };
+    return { dx: 0, dy: along };
   }
-  return { dx: along, dy: side === "top" ? 12 : -12 };
+  return { dx: along, dy: 0 };
 }

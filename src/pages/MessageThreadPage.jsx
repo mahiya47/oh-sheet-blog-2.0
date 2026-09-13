@@ -248,8 +248,14 @@ export default function MessageThreadPage() {
 
         {otherUser && (
           <div className="app-card-tab-right">
-            <button type="button" className="app-card-follow" onClick={handleToggleFollow}>
-              {following ? "Following" : "Follow"}
+            <button
+              type="button"
+              className={"app-card-follow" + (following ? " is-following" : "")}
+              aria-label={following ? "Following" : "Follow"}
+              title={following ? "Following" : "Follow"}
+              onClick={handleToggleFollow}
+            >
+              <NavIcon name={following ? "user-check" : "user-plus"} />
             </button>
             <div className="app-card-more-wrap" ref={menuRef}>
               <button

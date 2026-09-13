@@ -11,9 +11,15 @@ import { GoogleIcon, GitHubIcon } from "../components/OAuthIcons.jsx";
 import NavIcon from "../components/NavIcons.jsx";
 import {
   AVATAR_PRESET_COLORS,
+  AVATAR_PRESET_ICONS,
   COVER_PRESET_GRADIENTS,
+  COVER_PRESET_PATTERNS,
   buildAvatarDataUri,
+  buildIconAvatarDataUri,
   buildCoverDataUri,
+  buildPatternCoverDataUri,
+  pickRandomAvatarUrl,
+  pickRandomCoverUrl,
 } from "../lib/presetAssets.js";
 
 const TABS = ["Profile", "About", "Social Links", "Privacy & Safety", "Account", "Appearance"];
@@ -765,7 +771,16 @@ export default function SettingsPage() {
                 <input ref={avatarInputRef} type="file" accept="image/*" hidden onChange={handleAvatarPick} />
               </div>
 
-              <p className="app-settings-preset-label">Or choose an avatar</p>
+              <div className="app-onboarding-preset-header">
+                <p className="app-settings-preset-label">Or choose an avatar</p>
+                <button
+                  type="button"
+                  className="app-onboarding-surprise-btn"
+                  onClick={() => setAvatarUrl(pickRandomAvatarUrl(name || username))}
+                >
+                  🎲 Surprise me
+                </button>
+              </div>
               <div className="app-settings-swatch-row">
                 {AVATAR_PRESET_COLORS.map((color) => (
                   <button
@@ -779,9 +794,30 @@ export default function SettingsPage() {
                     {(name || username || "?").charAt(0).toUpperCase()}
                   </button>
                 ))}
+                {AVATAR_PRESET_ICONS.map(({ icon, bg }) => (
+                  <button
+                    key={icon}
+                    type="button"
+                    className="app-settings-avatar-swatch"
+                    style={{ background: bg }}
+                    aria-label={`Use ${icon} avatar`}
+                    onClick={() => setAvatarUrl(buildIconAvatarDataUri(bg, icon))}
+                  >
+                    {icon}
+                  </button>
+                ))}
               </div>
 
-              <p className="app-settings-preset-label">Profile cover</p>
+              <div className="app-onboarding-preset-header">
+                <p className="app-settings-preset-label">Profile cover</p>
+                <button
+                  type="button"
+                  className="app-onboarding-surprise-btn"
+                  onClick={() => setCoverUrl(pickRandomCoverUrl())}
+                >
+                  🎲 Surprise me
+                </button>
+              </div>
               <div className="app-settings-swatch-row">
                 {COVER_PRESET_GRADIENTS.map(([from, to]) => (
                   <button
@@ -791,6 +827,16 @@ export default function SettingsPage() {
                     style={{ background: `linear-gradient(135deg, ${from}, ${to})` }}
                     aria-label="Use this cover"
                     onClick={() => setCoverUrl(buildCoverDataUri([from, to]))}
+                  />
+                ))}
+                {COVER_PRESET_PATTERNS.map((preset, i) => (
+                  <button
+                    key={preset.pattern + preset.bg + i}
+                    type="button"
+                    className="app-settings-cover-swatch"
+                    style={{ background: preset.bg }}
+                    aria-label={`Use ${preset.pattern} cover`}
+                    onClick={() => setCoverUrl(buildPatternCoverDataUri(preset))}
                   />
                 ))}
               </div>

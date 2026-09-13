@@ -8,9 +8,15 @@ import { pickRandomCardColor } from "../lib/randomCardColor.js";
 import OhSheetLogo from "../components/OhSheetLogo.jsx";
 import {
   AVATAR_PRESET_COLORS,
+  AVATAR_PRESET_ICONS,
   COVER_PRESET_GRADIENTS,
+  COVER_PRESET_PATTERNS,
   buildAvatarDataUri,
+  buildIconAvatarDataUri,
   buildCoverDataUri,
+  buildPatternCoverDataUri,
+  pickRandomAvatarUrl,
+  pickRandomCoverUrl,
 } from "../lib/presetAssets.js";
 
 const GENDER_OPTIONS = [
@@ -132,11 +138,15 @@ export default function OnboardingPage() {
 
     setSaving(true);
     setError("");
+    // Avatar/cover are optional — if they skipped picking one, assign a
+    // random preset now rather than saving a blank profile.
+    const finalAvatarUrl = avatarUrl || pickRandomAvatarUrl(username);
+    const finalCoverUrl = coverUrl || pickRandomCoverUrl();
     try {
       const updated = await api.updateProfile({
         username: username.trim(),
-        avatarUrl,
-        coverUrl,
+        avatarUrl: finalAvatarUrl,
+        coverUrl: finalCoverUrl,
         bio,
         currentCity,
         birthday: birthday || null,
@@ -204,7 +214,7 @@ export default function OnboardingPage() {
         </label>
 
         <div className="app-settings-group app-onboarding-group">
-          <p className="app-settings-hint">Profile photo</p>
+          <p className="app-settings-hint">Profile photo (optional)</p>
           <div className="app-settings-avatar-row">
             <div className="app-settings-avatar-picker" onClick={() => avatarInputRef.current?.click()}>
               {avatarUrl ? (
@@ -223,7 +233,16 @@ export default function OnboardingPage() {
             </button>
             <input ref={avatarInputRef} type="file" accept="image/*" hidden onChange={handleAvatarPick} />
           </div>
-          <p className="app-settings-preset-label">Or choose an avatar</p>
+          <div className="app-onboarding-preset-header">
+            <p className="app-settings-preset-label">Or pick one</p>
+            <button
+              type="button"
+              className="app-onboarding-surprise-btn"
+              onClick={() => setAvatarUrl(pickRandomAvatarUrl(username))}
+            >
+              🎲 Surprise me
+            </button>
+          </div>
           <div className="app-settings-swatch-row">
             {AVATAR_PRESET_COLORS.map((color) => (
               <button
@@ -237,17 +256,41 @@ export default function OnboardingPage() {
                 {(username || "?").charAt(0).toUpperCase()}
               </button>
             ))}
+            {AVATAR_PRESET_ICONS.map(({ icon, bg }) => (
+              <button
+                key={icon}
+                type="button"
+                className="app-settings-avatar-swatch"
+                style={{ background: bg }}
+                aria-label={`Use ${icon} avatar`}
+                onClick={() => setAvatarUrl(buildIconAvatarDataUri(bg, icon))}
+              >
+                {icon}
+              </button>
+            ))}
           </div>
+          <p className="app-onboarding-preset-note">
+            Skip this and we'll pick one for you automatically when you continue.
+          </p>
         </div>
 
         <div className="app-settings-group app-onboarding-group">
-          <p className="app-settings-hint">Cover photo</p>
+          <p className="app-settings-hint">Cover photo (optional)</p>
           <div className="app-settings-cover-picker" onClick={() => coverInputRef.current?.click()}>
             {coverUrl ? <img src={coverUrl} alt="Cover" /> : <span>Add a cover photo</span>}
             {uploadingCover && <span className="app-settings-uploading-badge">Uploading...</span>}
           </div>
           <input ref={coverInputRef} type="file" accept="image/*" hidden onChange={handleCoverPick} />
-          <p className="app-settings-preset-label">Or choose a cover</p>
+          <div className="app-onboarding-preset-header">
+            <p className="app-settings-preset-label">Or pick one</p>
+            <button
+              type="button"
+              className="app-onboarding-surprise-btn"
+              onClick={() => setCoverUrl(pickRandomCoverUrl())}
+            >
+              🎲 Surprise me
+            </button>
+          </div>
           <div className="app-settings-swatch-row">
             {COVER_PRESET_GRADIENTS.map(([from, to]) => (
               <button
@@ -259,7 +302,20 @@ export default function OnboardingPage() {
                 onClick={() => setCoverUrl(buildCoverDataUri([from, to]))}
               />
             ))}
+            {COVER_PRESET_PATTERNS.map((preset, i) => (
+              <button
+                key={preset.pattern + preset.bg + i}
+                type="button"
+                className="app-settings-cover-swatch"
+                style={{ background: preset.bg }}
+                aria-label={`Use ${preset.pattern} cover`}
+                onClick={() => setCoverUrl(buildPatternCoverDataUri(preset))}
+              />
+            ))}
           </div>
+          <p className="app-onboarding-preset-note">
+            Skip this and we'll pick one for you automatically when you continue.
+          </p>
         </div>
 
         <label className="app-auth-field">
