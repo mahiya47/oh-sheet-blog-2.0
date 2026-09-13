@@ -21,6 +21,12 @@ const JAIL_BRIBE_AMOUNT = 50;
 const TOKEN_COLORS = ["#2f6fed", "#e5484d", "#43a047", "#f5c945"]; // blue, red, green, yellow
 const CORNER_CLASS = ["is-tl", "is-tr", "is-bl", "is-br"];
 const MAX_LEVEL = 3;
+// Matches the exact log line the server writes when a landing charges
+// salary (see `say` in resolveLanding, monopoly.js) — "Seat 2 paid $44
+// salary for Neville Longbottom." — so the frontend can show its own
+// dedicated salary-paid beat instead of relying on the generic flash
+// message. Keep this in sync with that exact string.
+const RENT_MSG_RE = /^Seat (\d+) paid \$(\d+) salary for /;
 
 // Black or white, whichever actually reads on a given token colour — the
 // turn bar wears the current player's colour, and yellow needs dark text
@@ -76,9 +82,9 @@ function MenuView({ room }) {
       <MultiplayerHeader title={GAME.label} emoji={GAME.emoji} subtitle="2-4 players · online" />
       <div className="app-mono-menu">
         <p className="app-mono-menu-blurb">
-          Buy up the wizarding world, charge rent, and bankrupt everyone
-          else. 2 to 4 players a game. Start a room and share the code,
-          or join a friend's.
+          Recruit the wizarding world onto your team, charge salary, and
+          bankrupt everyone else. 2 to 4 players a game. Start a room and
+          share the code, or join a friend's.
         </p>
 
         {!room.connected && (
@@ -208,10 +214,16 @@ function GameView({ room }) {
   // at least 5s, or however long the token's own hop animation on the
   // board actually takes (see planTokenHop — same formula MonopolyBoard.jsx
   // uses for the token itself, so the two stay roughly in sync) if that's
-  // longer, e.g. a big card-driven move across the board.
+  // longer, e.g. a big card-driven move across the board. If that same
+  // landing charged rent (see RENT_MSG_RE — matches the exact log line the
+  // server writes in resolveLanding), `rentInfo` then takes over for a
+  // further, fixed 2s right after — its own beat, not squeezed into or
+  // racing the move panel's own timer.
   const [moveInfo, setMoveInfo] = useState(null);
+  const [rentInfo, setRentInfo] = useState(null);
   const prevPosRef = useRef(game.players.map((p) => p.pos));
   const moveTimerRef = useRef(null);
+  const rentTimerRef = useRef(null);
   const posKey = game.players.map((p) => p.pos).join(",");
 
   useEffect(() => {
@@ -225,9 +237,24 @@ function GameView({ room }) {
       const toIdx = game.players[movedSeat].pos;
       const { totalMs } = planTokenHop(fromIdx, toIdx, total);
       if (moveTimerRef.current) clearTimeout(moveTimerRef.current);
+      if (rentTimerRef.current) clearTimeout(rentTimerRef.current);
+      setRentInfo(null);
       setMoveInfo({ seat: movedSeat, fromIdx, toIdx, dice: game.dice });
+
+      const lastText = game.log[game.log.length - 1]?.text;
+      const rentMatch = lastText && RENT_MSG_RE.exec(lastText);
+      const pendingRent = rentMatch
+        ? { payerSeat: Number(rentMatch[1]) - 1, amount: Number(rentMatch[2]), tileIdx: toIdx }
+        : null;
+
       const showMs = Math.max(5000, totalMs);
-      moveTimerRef.current = setTimeout(() => setMoveInfo(null), showMs);
+      moveTimerRef.current = setTimeout(() => {
+        setMoveInfo(null);
+        if (pendingRent) {
+          setRentInfo(pendingRent);
+          rentTimerRef.current = setTimeout(() => setRentInfo(null), 2000);
+        }
+      }, showMs);
     }
     prevPosRef.current = game.players.map((p) => p.pos);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -236,6 +263,7 @@ function GameView({ room }) {
   useEffect(
     () => () => {
       if (moveTimerRef.current) clearTimeout(moveTimerRef.current);
+      if (rentTimerRef.current) clearTimeout(rentTimerRef.current);
     },
     []
   );
@@ -319,6 +347,7 @@ function GameView({ room }) {
               buying={buying}
               debt={debt}
               moveInfo={moveInfo}
+              rentInfo={rentInfo}
               currentName={currentName}
               currentConnected={current?.connected !== false}
             />
@@ -387,7 +416,7 @@ function PlayerCorner({ seat, player, info, netWorth, isMe, isTurn, cornerClass 
 function CenterPanel({
   game, me, myTurn, players, board, mySeat, act,
   selected, onCloseSelected,
-  buying, debt, moveInfo,
+  buying, debt, moveInfo, rentInfo,
   currentName, currentConnected,
 }) {
   const [flash, setFlash] = useState(null);
@@ -415,7 +444,39 @@ function CenterPanel({
     );
   }
 
+  // Right after the move panel above, if that landing charged rent, hold
+  // everyone on a quick "who paid what to whom" beat before anything else
+  // (a buy prompt never applies here — the tile's already owned — but a
+  // debt prompt might follow immediately after, if the rent wasn't
+  // affordable).
+  if (rentInfo) {
+    const tile = board[rentInfo.tileIdx];
+    const ownerSeat = game.tiles[rentInfo.tileIdx]?.owner;
+    const payerName = firstName(
+      players[rentInfo.payerSeat]?.name || players[rentInfo.payerSeat]?.username || `Seat ${rentInfo.payerSeat + 1}`
+    );
+    const ownerName =
+      ownerSeat !== null && ownerSeat !== undefined
+        ? firstName(players[ownerSeat]?.name || players[ownerSeat]?.username || `Seat ${ownerSeat + 1}`)
+        : null;
+    return (
+      <div className="app-mono-panel-msg app-mono-rent">
+        <span className="app-mono-panel-msg-kind">💸</span>
+        <p>
+          {payerName} paid <strong>${rentInfo.amount}</strong> salary for {tile?.name || "this tile"}
+          {ownerName ? ` to ${ownerName}` : ""}.
+        </p>
+      </div>
+    );
+  }
+
   if (buying) {
+    // Can't actually afford it — showing the normal Buy/Pass card here is
+    // pointless (Buy is just disabled and greyed out) and a bit deflating.
+    // A quick joke instead, with just an OK — same effect as passing.
+    if (me && me.cash < buying.price) {
+      return <BrokeCard tile={buying} cash={me.cash} onOk={() => act("mono:decline_buy")} />;
+    }
     return <BuyCard tile={buying} me={me} onBuy={() => act("mono:buy")} onPass={() => act("mono:decline_buy")} />;
   }
 
@@ -493,7 +554,7 @@ function CenterPanel({
   if (debt) {
     return (
       <div className="app-mono-panel-msg is-urgent">
-        <p className="app-mono-panel-prompt">You owe ${debt.amount}. Downgrade or mortgage to cover it.</p>
+        <p className="app-mono-panel-prompt">You owe ${debt.amount}. Downgrade or release someone to cover it.</p>
         <button
           type="button"
           className="app-arcade-btn app-mono-primary"
@@ -618,7 +679,7 @@ function DefaultCard({ game, me, myTurn, mySeat, players, act, currentName, curr
     <div className="app-mono-panel-idle">
       {dice && <DiceRow value={dice} />}
       <p className="app-mono-panel-prompt">
-        {game.doubles > 0 ? "You rolled a 6 — roll again!" : "Tap a property to manage it."}
+        {game.doubles > 0 ? "You rolled a 6 — roll again!" : "Tap a person to manage them."}
       </p>
       {game.doubles > 0 ? (
         <button type="button" className="app-arcade-btn app-mono-primary app-mono-roll-btn" onClick={() => act("mono:roll")}>
@@ -764,7 +825,7 @@ function TradeOfferCard({ game, mySeat, board, players, act }) {
   if (offerIndex === null) {
     return (
       <div className="app-mono-panel-idle">
-        <p className="app-mono-panel-prompt">Diagon Alley — pick one of your properties to offer in trade.</p>
+        <p className="app-mono-panel-prompt">Diagon Alley — pick one of your people to offer in trade.</p>
         <div className="app-mono-trade-list">
           {myProps.map((idx) => (
             <button key={idx} type="button" className="app-arcade-btn" onClick={() => setOfferIndex(idx)}>
@@ -786,7 +847,7 @@ function TradeOfferCard({ game, mySeat, board, players, act }) {
 
   return (
     <div className="app-mono-panel-idle">
-      <p className="app-mono-panel-prompt">Offering {board[offerIndex].name} — pick a property you want for it.</p>
+      <p className="app-mono-panel-prompt">Offering {board[offerIndex].name} — pick a person you want for it.</p>
       <div className="app-mono-trade-list">
         {others.map((o) => (
           <div key={o.seat} className="app-mono-trade-group">
@@ -860,7 +921,7 @@ function BankruptPickCard({ pending, board, players, mySeat, act }) {
     return (
       <div className="app-mono-panel-idle">
         <p className="app-mono-panel-prompt">
-          {creditorName} is picking one property from {bankruptName}'s estate.
+          {creditorName} is picking one person from {bankruptName}'s roster.
         </p>
       </div>
     );
@@ -869,7 +930,7 @@ function BankruptPickCard({ pending, board, players, mySeat, act }) {
   return (
     <div className="app-mono-panel-idle">
       <p className="app-mono-panel-prompt">
-        {bankruptName} went bankrupt — pick one property to keep for yourself. The rest go back on the market.
+        {bankruptName} went bankrupt — pick one person to keep on your team. The rest become free agents.
       </p>
       <div className="app-mono-trade-list">
         {properties.map((idx) => (
@@ -939,6 +1000,36 @@ function DiceRow({ value }) {
 
 // The unowned-property decision — buy it, or pass and leave it on the
 // market.
+// A little roast instead of a straight decline — landing on a property
+// you can't possibly afford doesn't need a real decision, just a laugh.
+// Picked once per landing (lazy useState init), not re-rolled on every
+// state push while this card is up.
+const BROKE_LINES = [
+  "Even Gringotts wouldn't give you a loan for this one.",
+  "Your vault is looking a lot like Azkaban right now — empty and cold.",
+  "You checked your pockets twice. Still just lint and regret.",
+  "The goblins took one look at your balance and laughed.",
+  "Your wallet just cast a Vanishing Spell on itself.",
+  "Not even a Time-Turner fixes this kind of broke.",
+];
+
+function BrokeCard({ tile, cash, onOk }) {
+  const [line] = useState(() => BROKE_LINES[Math.floor(Math.random() * BROKE_LINES.length)]);
+  const short = Math.max(0, (tile.price || 0) - (cash || 0));
+  return (
+    <div className="app-mono-panel-msg app-mono-broke">
+      <span className="app-mono-broke-emoji" aria-hidden="true">🥴💸</span>
+      <h4 className="app-mono-broke-title">You're broke!</h4>
+      <p>
+        Recruiting {tile.name} costs ${tile.price} and you've only got ${cash}
+        {short > 0 ? ` — $${short} short.` : "."}
+      </p>
+      <p className="app-mono-panel-note">{line}</p>
+      <button type="button" className="app-arcade-btn app-mono-primary" onClick={onOk}>OK</button>
+    </div>
+  );
+}
+
 function BuyCard({ tile, me, onBuy, onPass }) {
   // Street groups are strong colours that read fine as text. The Hogwarts
   // Houses all share an off-white band colour, which is meant to be a
@@ -956,12 +1047,12 @@ function BuyCard({ tile, me, onBuy, onPass }) {
       <div className="app-mono-buy-icon">{buyIcon(tile)}</div>
       <div className="app-mono-buy-grid">
         <div><span>Price</span><strong>${tile.price}</strong></div>
-        <div><span>Rent</span><strong>{rentText}</strong></div>
-        <div><span>Sell</span><strong>${sellPrice}</strong></div>
+        <div><span>Salary</span><strong>{rentText}</strong></div>
+        <div><span>Release</span><strong>${sellPrice}</strong></div>
       </div>
       <div className="app-mono-buy-btns">
         <button type="button" className="app-mono-buy-pass" onClick={onPass}>PASS</button>
-        <button type="button" className="app-mono-buy-buy" disabled={!me || me.cash < tile.price} onClick={onBuy}>BUY</button>
+        <button type="button" className="app-mono-buy-buy" disabled={!me || me.cash < tile.price} onClick={onBuy}>RECRUIT</button>
       </div>
     </div>
   );
@@ -1015,12 +1106,12 @@ function TileCard({ tile, st, players, game, board, mySeat, act, canManage, onCl
         {isStreet && (
           <table className="app-mono-deed-rents">
             <tbody>
-              <tr><td>Rent</td><td>${tile.rent[0]}</td></tr>
+              <tr><td>Salary</td><td>${tile.rent[0]}</td></tr>
               <tr><td>With colour set</td><td>${tile.rent[0] * 2}</td></tr>
               <tr><td>Level 1 (${tile.build[0]} to build)</td><td>${tile.rent[1]}</td></tr>
               <tr><td>Level 2 (${tile.build[1]} to build)</td><td>${tile.rent[2]}</td></tr>
               <tr><td>Level 3 (${tile.build[2]} to build, max)</td><td>${tile.rent[3]}</td></tr>
-              <tr className="app-mono-deed-sep"><td>Mortgage value</td><td>${Math.floor(tile.price / 2)}</td></tr>
+              <tr className="app-mono-deed-sep"><td>Release value</td><td>${Math.floor(tile.price / 2)}</td></tr>
             </tbody>
           </table>
         )}
@@ -1028,11 +1119,11 @@ function TileCard({ tile, st, players, game, board, mySeat, act, canManage, onCl
         {tile.type === "utility" && tile.rent && (
           <table className="app-mono-deed-rents">
             <tbody>
-              <tr><td>Rent (1 House owned)</td><td>${tile.rent[0]}</td></tr>
-              <tr><td>Rent (2 Houses owned)</td><td>${tile.rent[1]}</td></tr>
-              <tr><td>Rent (3 Houses owned)</td><td>${tile.rent[2]}</td></tr>
-              <tr><td>Rent (all 4 owned)</td><td>${tile.rent[3]}</td></tr>
-              <tr className="app-mono-deed-sep"><td>Mortgage value</td><td>${Math.floor(tile.price / 2)}</td></tr>
+              <tr><td>Salary (1 House owned)</td><td>${tile.rent[0]}</td></tr>
+              <tr><td>Salary (2 Houses owned)</td><td>${tile.rent[1]}</td></tr>
+              <tr><td>Salary (3 Houses owned)</td><td>${tile.rent[2]}</td></tr>
+              <tr><td>Salary (all 4 owned)</td><td>${tile.rent[3]}</td></tr>
+              <tr className="app-mono-deed-sep"><td>Release value</td><td>${Math.floor(tile.price / 2)}</td></tr>
             </tbody>
           </table>
         )}
@@ -1045,11 +1136,11 @@ function TileCard({ tile, st, players, game, board, mySeat, act, canManage, onCl
 
         <p className="app-mono-deed-owner">
           {owner !== null ? (
-            <>Owned by <strong style={{ color: game.players[owner]?.color }}>{ownerName}</strong>
+            <>Recruited by <strong style={{ color: game.players[owner]?.color }}>{ownerName}</strong>
               {isStreet && st.houses > 0 && ` · Level ${st.houses}${st.houses === MAX_LEVEL ? " (max)" : ""}`}
-              {st.mortgaged && " · mortgaged"}
+              {st.mortgaged && " · released"}
             </>
-          ) : tile.price ? "Unowned" : ""}
+          ) : tile.price ? "Free agent" : ""}
         </p>
 
         {(canUpgrade || canDowngrade || canMortgage || canUnmortgage) && (
@@ -1066,12 +1157,12 @@ function TileCard({ tile, st, players, game, board, mySeat, act, canManage, onCl
             )}
             {canMortgage && (
               <button type="button" className="app-arcade-btn" onClick={() => act("mono:mortgage", { index: tile.i })}>
-                Mortgage (+${Math.floor(tile.price / 2)})
+                Release (+${Math.floor(tile.price / 2)})
               </button>
             )}
             {canUnmortgage && (
               <button type="button" className="app-arcade-btn" onClick={() => act("mono:unmortgage", { index: tile.i })}>
-                Unmortgage (−${Math.ceil((tile.price / 2) * 1.1)})
+                Re-recruit (−${Math.ceil((tile.price / 2) * 1.1)})
               </button>
             )}
           </div>

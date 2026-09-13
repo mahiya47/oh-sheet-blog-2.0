@@ -5394,6 +5394,31 @@ a.app-auth-logo-badge:hover {
   .app-mono-tile-icon {
     font-size: 29px;
   }
+  /* The from/to move path is a horizontal row on wider screens, but that
+     leaves no room for a right-pointing arrow to make visual sense once
+     it wraps to two lines here — stack it top to bottom instead, with a
+     down-pointing arrow between two full-width, centred tile names. */
+  .app-mono-move-path {
+    flex-direction: column;
+  }
+  .app-mono-move-tile {
+    width: 100%;
+    text-align: center;
+  }
+  .app-mono-move-arrow {
+    transform: rotate(90deg);
+    animation-name: app-mono-move-arrow-slide-v;
+  }
+}
+@keyframes app-mono-move-arrow-slide-v {
+  0%, 100% {
+    transform: rotate(90deg) translateX(0);
+    opacity: 0.55;
+  }
+  50% {
+    transform: rotate(90deg) translateX(6px);
+    opacity: 1;
+  }
 }
 
 /* ---- Centre panel — sits over the empty middle of the board (see
@@ -5597,6 +5622,39 @@ body.app-body-mono-dark {
 }
 :root[data-theme="dark"] .app-mono-panel-msg.is-urgent {
   background: #3a1f1f;
+}
+/* ---- Can't-afford-it card — a joke instead of a disabled Buy button ---- */
+.app-mono-broke-emoji {
+  display: inline-block;
+  font-size: 44px;
+  line-height: 1;
+  animation: app-mono-broke-wobble 0.7s ease-in-out infinite;
+}
+@keyframes app-mono-broke-wobble {
+  0%, 100% {
+    transform: rotate(0deg) scale(1);
+  }
+  20% {
+    transform: rotate(-14deg) scale(1.08);
+  }
+  40% {
+    transform: rotate(11deg) scale(0.94);
+  }
+  60% {
+    transform: rotate(-7deg) scale(1.05);
+  }
+  80% {
+    transform: rotate(4deg) scale(1);
+  }
+}
+.app-mono-broke-title {
+  margin: 0;
+  font-family: var(--app-font-display);
+  font-size: 1.15rem;
+  color: #c0392b;
+}
+:root[data-theme="dark"] .app-mono-broke-title {
+  color: #e5847a;
 }
 
 /* ---- Dark mode: the handful of spots that don't come from a token ---- */
