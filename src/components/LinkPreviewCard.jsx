@@ -1,7 +1,4 @@
-// Rich link-embed preview — a small card for the Open Graph data the
-// backend scraped from the first link in a post's content (see
-// lib/linkPreview.js server-side). Renders nothing when the post has no
-// preview (no link, or the scrape failed/timed out — see formatPost).
+// Small card for the Open Graph preview scraped from a post's link.
 export default function LinkPreviewCard({ preview, onClick }) {
   if (!preview || !preview.url) return null;
 

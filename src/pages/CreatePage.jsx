@@ -29,8 +29,6 @@ export default function CreatePage() {
   const [posting, setPosting] = useState(false);
   const [error, setError] = useState("");
   const [taggedPeople, setTaggedPeople] = useState([]); // selected user objects
-  // Post templates (Recipe / Travel log) — see PostTemplateFields.jsx.
-  // templateType stays null for a normal freeform sheet, the default.
   const [templateType, setTemplateType] = useState(null);
   const [templateData, setTemplateData] = useState(null);
 
@@ -142,9 +140,6 @@ export default function CreatePage() {
 
   if (!user) return null;
 
-  // A template (Recipe/Travel log) can carry the whole post on its own —
-  // ingredients + steps with no caption is a perfectly fine sheet — so
-  // posting isn't gated on caption/media alone when one is filled in.
   const templateHasContent =
     !!templateType &&
     !!templateData &&

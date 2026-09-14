@@ -1,27 +1,25 @@
-// Structured extra fields for a post template (Recipe / Travel log),
-// shown in the composer (CreatePage.jsx) underneath the normal caption
-// editor. Purely additive — the caption stays the actual post content;
-// this is the templateData JSON that rides along with it (see the
-// backend's lib/postTemplates.js for the matching normalizer, and
-// PostTemplateCard.jsx for how it's rendered back in the feed).
+// Composer fields for a post template (Recipe / Travel log). See
+// backend's lib/postTemplates.js for the matching shape, and
+// PostTemplateCard.jsx for how it renders back in the feed.
 
 const TEMPLATE_OPTIONS = [
   { type: null, label: "No template" },
   { type: "recipe", label: "Recipe" },
   { type: "travel", label: "Travel log" },
+  { type: "code", label: "Code snippet" },
 ];
 
 const EMPTY_RECIPE = { servings: "", prepTime: "", cookTime: "", ingredients: [""], steps: [""] };
 const EMPTY_TRAVEL = { place: "", startDate: "", endDate: "", highlights: [""] };
+const EMPTY_CODE = { language: "", filename: "", code: "" };
 
 export function emptyTemplateData(type) {
   if (type === "recipe") return { ...EMPTY_RECIPE, ingredients: [""], steps: [""] };
   if (type === "travel") return { ...EMPTY_TRAVEL, highlights: [""] };
+  if (type === "code") return { ...EMPTY_CODE };
   return null;
 }
 
-// A simple "one text input per item, plus a trailing Add row" list
-// editor shared by ingredients/steps/highlights.
 function ListField({ label, placeholder, items, onChange }) {
   function updateItem(i, value) {
     const next = [...items];
@@ -147,6 +145,31 @@ export default function PostTemplateFields({ templateType, setTemplateType, temp
             placeholder="A moment worth remembering..."
             items={templateData.highlights}
             onChange={(highlights) => patch({ highlights })}
+          />
+        </div>
+      )}
+
+      {templateType === "code" && templateData && (
+        <div className="app-template-fields">
+          <div className="app-template-field-row">
+            <input
+              value={templateData.language}
+              placeholder="Language (e.g. JavaScript)"
+              onChange={(e) => patch({ language: e.target.value })}
+            />
+            <input
+              value={templateData.filename}
+              placeholder="Filename (optional)"
+              onChange={(e) => patch({ filename: e.target.value })}
+            />
+          </div>
+          <textarea
+            className="app-template-code-input"
+            value={templateData.code}
+            placeholder="Paste your code here..."
+            spellCheck={false}
+            rows={10}
+            onChange={(e) => patch({ code: e.target.value })}
           />
         </div>
       )}

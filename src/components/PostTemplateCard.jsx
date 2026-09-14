@@ -1,7 +1,26 @@
-// Renders a post's structured template data (Recipe / Travel log) as its
-// own card above the caption — see PostTemplateFields.jsx for the
-// composer side and the backend's lib/postTemplates.js for the shape.
-// Renders nothing for a normal freeform post (templateType null).
+import { useState } from "react";
+
+function CopyButton({ text }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      type="button"
+      className="app-template-code-copy"
+      onClick={(e) => {
+        e.stopPropagation();
+        if (navigator.clipboard) navigator.clipboard.writeText(text).catch(() => {});
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+      }}
+    >
+      {copied ? "Copied" : "Copy"}
+    </button>
+  );
+}
+
+// Renders a post's template data (Recipe / Travel log / Code snippet) as
+// a card above the caption. See PostTemplateFields.jsx for the composer
+// side.
 export default function PostTemplateCard({ templateType, templateData }) {
   if (!templateType || !templateData) return null;
 
@@ -62,6 +81,24 @@ export default function PostTemplateCard({ templateType, templateData }) {
               ))}
             </ul>
           </div>
+        )}
+      </div>
+    );
+  }
+
+  if (templateType === "code") {
+    const { language, filename, code } = templateData;
+    return (
+      <div className="app-template-card app-template-card-code" onClick={(e) => e.stopPropagation()}>
+        <div className="app-template-code-head">
+          <p className="app-template-card-kind">💻 Code{language ? ` · ${language}` : ""}</p>
+          {code && <CopyButton text={code} />}
+        </div>
+        {filename && <p className="app-template-code-filename">{filename}</p>}
+        {code && (
+          <pre className="app-template-code-block">
+            <code>{code}</code>
+          </pre>
         )}
       </div>
     );

@@ -4067,6 +4067,20 @@ a.app-auth-logo-badge:hover {
   cursor: pointer;
   padding: 2px 0;
 }
+.app-template-code-input {
+  width: 100%;
+  border: 2px solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  padding: 10px 12px;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  background: var(--app-bg);
+  color: var(--app-ink);
+  resize: vertical;
+  white-space: pre;
+  overflow-x: auto;
+}
 
 /* ---- Post templates — rendered card in the feed/post view ---- */
 .app-template-card {
@@ -4114,6 +4128,44 @@ a.app-auth-logo-badge:hover {
   flex-direction: column;
   gap: 4px;
   font-size: 0.92rem;
+}
+
+.app-template-code-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.app-template-code-copy {
+  border: 2px solid var(--app-border);
+  border-radius: 999px;
+  padding: 3px 12px;
+  background: var(--app-surface);
+  font-weight: 700;
+  font-size: 0.74rem;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.app-template-code-filename {
+  margin: 0;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.78rem;
+  color: var(--app-muted);
+}
+.app-template-code-block {
+  margin: 0;
+  padding: 12px 14px;
+  border: 2px solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  background: var(--app-bg-deep, var(--app-bg));
+  color: var(--app-ink);
+  overflow-x: auto;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+.app-template-code-block code {
+  white-space: pre;
 }
 
 /* ---- Rich link-embed preview card ---- */
@@ -5885,7 +5937,7 @@ body.app-body-mono-dark {
    collapse to one grey here — so it gets its own gradient instead of a
    flat block. */
 :root[data-theme="dark"] .app-profile-cover {
-  background: linear-gradient(135deg, #23262b, #34393f);
+  background-image: linear-gradient(135deg, #23262b, #34393f);
 }
 /* The stat box's label is a child element with its own colour, so the
    blanket accent rule at the foot of this file doesn't reach it. */
